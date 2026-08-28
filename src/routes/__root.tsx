@@ -128,14 +128,15 @@ function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           <Link to="/how-it-works" className="hover:underline">
-            How It Works
+            How it works
           </Link>
-          <Link to="/history" className="hover:underline">
-            History
+          <Link to="/about" className="hover:underline">
+            About
           </Link>
           <Link to="/creator" className="hover:underline">
-            List Your Bio
+            List your bio
           </Link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>
