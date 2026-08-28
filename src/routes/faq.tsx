@@ -46,21 +46,22 @@ function FAQPage() {
           ["3. Get outbid", "Someone pays more, they take over, and you get an email with the new price."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
-            <div className="text-lg font-extrabold">{t}</div>
+            <div className="text-lg font-semibold">{t}</div>
             <p className="mt-2 text-sm text-muted-foreground">{d}</p>
           </div>
         ))}
       </div>
 
-      <h2 className="mt-16 text-2xl font-extrabold">Questions</h2>
+      <h2 className="mt-16 text-2xl font-semibold">Questions</h2>
       <div className="panel mt-4 divide-y-2 divide-border">
         {faqs.map(([q, a]) => (
-          <details key={q} className="group px-5 py-4">
-            <summary className="cursor-pointer font-bold">{q}</summary>
+          <div key={q} className="px-5 py-4">
+            <h3 className="font-semibold">{q}</h3>
             <p className="mt-2 text-sm text-muted-foreground">{a}</p>
-          </details>
+          </div>
         ))}
       </div>
+
 
       <Link to="/" className="btn-ink btn-ink-hover mt-12">
         See the current price
