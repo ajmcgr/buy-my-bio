@@ -137,5 +137,12 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     props: { amount_cents: payment.amount_cents },
   });
 
-  return { status: "owned", ownershipId, paymentId: payment.id };
+  return {
+    status: "owned",
+    ownershipId,
+    paymentId: payment.id,
+    companyName: payment.company_name,
+    amountCents: payment.amount_cents,
+    slug,
+  };
 }
