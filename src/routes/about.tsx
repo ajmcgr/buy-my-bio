@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import alexAsset from "../assets/alex.png.asset.json";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -55,7 +56,12 @@ function About() {
         </p>
       </div>
 
-      <div className="mt-12 border-t-2 border-border pt-8">
+      <div className="mt-12 pt-8">
+        <img
+          src={alexAsset.url}
+          alt="Alex MacGregor"
+          className="mb-4 h-16 w-16 rounded-full object-cover"
+        />
         <p className="font-semibold">Alex MacGregor</p>
         <p className="text-sm text-muted-foreground">Founder, Buy My Bio</p>
         <a
@@ -67,10 +73,6 @@ function About() {
           Follow me on X
         </a>
       </div>
-
-      <Link to="/" className="btn-ink btn-ink-hover mt-12">
-        Buy the bio
-      </Link>
     </div>
   );
 }
