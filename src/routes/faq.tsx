@@ -7,12 +7,12 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "Buy the link in a creator's bio. Pay more than the current owner, own the redirect, and get outbid when someone pays more.",
+          "Buy the sponsored slot in a creator's X bio. Pay more than the current owner, own the message and tracked link, and get outbid when someone pays more.",
       },
       { property: "og:title", content: "Buy My Bio FAQ" },
       {
         property: "og:description",
-        content: "Pay more than the current owner and the bio link is yours. No deadline.",
+        content: "Pay more than the current owner and the X bio slot is yours. No deadline.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
@@ -22,12 +22,13 @@ export const Route = createFileRoute("/faq")({
 });
 
 const faqs: [string, string][] = [
-  ["What am I actually buying?", "The destination of the link in the creator's social bio. It points to your URL until someone pays more."],
+  ["What am I actually buying?", "You're buying a sponsored message + tracked link inside this creator's X bio. You are not buying the X account, username, profile photo, banner, posts or access to the account."],
+  ["Which platforms are supported?", "X bios only for now."],
   ["How long do I own it?", "Until you're outbid. There is no deadline and no expiry."],
   ["What if I'm outbid one minute later?", "It can happen. You keep the clicks you got, and we email you the price to take it back."],
   ["Do I get a refund if I'm outbid?", "No — you paid for ownership from the moment you bought it. If two payments race, the loser is refunded in full automatically."],
   ["Can I change my destination URL?", "Contact us and we'll update it, subject to moderation."],
-  ["What links are not allowed?", "Adult content, illegal goods, malware, scams, hate speech, or anything that would get the creator's account banned."],
+  ["What links are not allowed?", "Adult content, illegal goods, malware, scams, hate speech, or anything that would get the creator's X account banned."],
   ["How does the creator get paid?", "Payouts are sent after each takeover, minus the platform fee."],
 ];
 
@@ -40,8 +41,8 @@ function FAQPage() {
 
       <div className="mt-10 grid gap-6 sm:grid-cols-3">
         {[
-          ["1. BUY", "Pay more than the current owner. The price is set by the last sale plus a minimum increase."],
-          ["2. OWN", "The bio link redirects to your site. Track the clicks you get."],
+          ["1. Buy", "Pay more than the current owner. The price is set by the last sale plus a minimum increase."],
+          ["2. Own", "Your message + tracked link sits in the creator's X bio. Track the clicks you get."],
           ["3. Get outbid", "Someone pays more, they take over, and you get an email with the new price."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
