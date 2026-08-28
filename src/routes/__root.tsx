@@ -8,7 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -155,6 +155,56 @@ function ThemeToggle() {
   );
 }
 
+function HamburgerMenu() {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = () => setOpen(false);
+    window.addEventListener("click", close);
+    return () => window.removeEventListener("click", close);
+  }, [open]);
+
+  return (
+    <div className="relative" onClick={(e) => e.stopPropagation()}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-label="Open menu"
+        aria-expanded={open}
+        className="inline-flex items-center justify-center p-1 hover:opacity-70"
+      >
+        <Menu size={20} />
+      </button>
+      {open ? (
+        <div className="absolute right-0 z-50 mt-2 w-40 rounded-xl border border-border bg-card p-2 shadow-lg">
+          <Link
+            to="/faq"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+          >
+            FAQ
+          </Link>
+          <Link
+            to="/terms"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+          >
+            Terms
+          </Link>
+          <Link
+            to="/privacy"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+          >
+            Privacy
+          </Link>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function SiteHeader() {
   return (
     <header>
@@ -174,9 +224,6 @@ function SiteHeader() {
           </>
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
-          <Link to="/faq" className="hover:underline">
-            FAQ
-          </Link>
           <Link to="/about" className="hover:underline">
             About
           </Link>
@@ -184,6 +231,7 @@ function SiteHeader() {
             Sell your X bio
           </Link>
           <ThemeToggle />
+          <HamburgerMenu />
         </nav>
       </div>
     </header>
@@ -205,14 +253,6 @@ function SiteFooter() {
             Alex
           </a>
         </span>
-        <div className="flex gap-4">
-          <Link to="/terms" className="hover:underline">
-            Terms
-          </Link>
-          <Link to="/privacy" className="hover:underline">
-            Privacy
-          </Link>
-        </div>
       </div>
     </footer>
   );
