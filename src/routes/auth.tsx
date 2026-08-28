@@ -74,7 +74,7 @@ function Auth() {
         </div>
         {msg && <p className="text-sm font-medium text-destructive">{msg}</p>}
         <button disabled={busy} className="btn-ink btn-ink-hover w-full disabled:opacity-40">
-          {busy ? "…" : mode === "in" ? "SIGN IN" : "SIGN UP"}
+          {busy ? "…" : mode === "in" ? "Sign in" : "Sign up"}
         </button>
       </form>
       <button

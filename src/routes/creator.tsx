@@ -80,7 +80,7 @@ function CreatorPage() {
   return (
     <div className="mx-auto max-w-2xl px-5 py-14">
       <h1 className="text-[clamp(2rem,7vw,3.25rem)] leading-[0.9] font-black tracking-[-0.05em]">
-        LIST YOUR BIO
+        List your bio
       </h1>
       <p className="mt-4 text-muted-foreground">
         Two steps. Connect your real X account, then put the BuyMyBio placement in your profile.
@@ -101,7 +101,7 @@ function CreatorPage() {
             We use X sign-in to confirm you own the account. Buyers never need an account.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
-            CONNECT X ACCOUNT
+            Connect X account
           </a>
         </div>
       ) : (
@@ -146,7 +146,7 @@ function CreatorPage() {
               disabled={busy || session.bioVerified}
               className="btn-ink btn-ink-hover mt-6 disabled:opacity-50"
             >
-              {session.bioVerified ? "BIO VERIFIED" : busy ? "CHECKING…" : "VERIFY MY BIO"}
+              {session.bioVerified ? "Bio verified" : busy ? "Checking…" : "Verify my bio"}
             </button>
           </div>
 

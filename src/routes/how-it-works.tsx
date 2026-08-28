@@ -35,14 +35,14 @@ function HowItWorks() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-14">
       <h1 className="text-[clamp(2.5rem,9vw,4.5rem)] leading-[0.88] font-black tracking-[-0.05em]">
-        HOW IT WORKS
+        How it works
       </h1>
 
       <div className="mt-10 grid gap-6 sm:grid-cols-3">
         {[
           ["1. BUY", "Pay more than the current owner. The price is set by the last sale plus a minimum increase."],
           ["2. OWN", "The bio link redirects to your site. Track the clicks you get."],
-          ["3. GET OUTBID", "Someone pays more, they take over, and you get an email with the new price."],
+          ["3. Get outbid", "Someone pays more, they take over, and you get an email with the new price."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
             <div className="text-lg font-extrabold">{t}</div>
@@ -62,7 +62,7 @@ function HowItWorks() {
       </div>
 
       <Link to="/" className="btn-ink btn-ink-hover mt-12">
-        SEE THE CURRENT PRICE
+        See the current price
       </Link>
     </div>
   );

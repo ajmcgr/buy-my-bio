@@ -42,7 +42,7 @@ function Success() {
     return (
       <div className="mx-auto max-w-xl px-5 py-24 text-center">
         <h1 className="text-4xl font-black tracking-tight">
-          {stale ? "SOMEONE BEAT YOU TO IT" : "PAYMENT PENDING"}
+          {stale ? "Someone beat you to it" : "Payment pending"}
         </h1>
         <p className="mt-3 text-muted-foreground">
           {stale
@@ -50,7 +50,7 @@ function Success() {
             : "We're still confirming your payment. This page updates within a minute."}
         </p>
         <Link to="/" className="btn-ink btn-ink-hover mt-8">
-          BACK TO THE LISTING
+          Back to the listing
         </Link>
       </div>
     );
@@ -60,7 +60,7 @@ function Success() {
     <div className="mx-auto max-w-2xl px-5 py-16">
       <p className="label-xs">Confirmed</p>
       <h1 className="mt-2 text-[clamp(2.5rem,10vw,4.5rem)] leading-[0.88] font-black tracking-[-0.05em]">
-        YOU OWN THE BIO
+        You own the bio
       </h1>
       <div className="panel mt-8 divide-y-2 divide-border">
         <div className="px-5 py-4">
@@ -88,7 +88,7 @@ function Success() {
           rel="noreferrer"
           className="btn-ink btn-ink-hover"
         >
-          SHARE ON X
+          Share on X
         </a>
         <Link to="/u/$username" params={{ username: result.slug }} className="btn-outline-ink">
           View the listing

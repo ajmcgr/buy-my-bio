@@ -34,7 +34,7 @@ function History() {
   return (
     <div className="mx-auto max-w-4xl px-5 py-14">
       <h1 className="text-[clamp(2.25rem,8vw,4rem)] leading-[0.9] font-black tracking-[-0.05em]">
-        OWNERSHIP HISTORY
+        Ownership history
       </h1>
       <p className="mt-4 text-muted-foreground">
         {rows.length} owner{rows.length === 1 ? "" : "s"} · {money(total)} total volume
@@ -69,7 +69,7 @@ function History() {
       )}
 
       <Link to="/" className="btn-ink btn-ink-hover mt-12">
-        TAKE IT OVER
+        Take it over
       </Link>
     </div>
   );

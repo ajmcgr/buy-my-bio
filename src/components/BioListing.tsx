@@ -59,11 +59,11 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
     <div className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
       {heading ? (
         <h1 className="text-[clamp(2.75rem,11vw,6.5rem)] leading-[0.85] font-black tracking-[-0.05em]">
-          BUY MY BIO
+          Buy my bio
         </h1>
       ) : (
         <h1 className="text-[clamp(2rem,7vw,3.5rem)] leading-[0.9] font-black tracking-[-0.05em]">
-          BUY @{view.creator.social_handle}'S BIO
+          Buy @{view.creator.social_handle}'s bio
         </h1>
       )}
 
@@ -122,7 +122,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               onClick={() => setOpen(true)}
               className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-black tracking-tight"
             >
-              {owner ? "TAKE MY BIO" : "BUY MY BIO"} — {money(price)}
+              {owner ? "Take my bio" : "Buy my bio"} — {money(price)}
             </button>
             <p className="mt-3 text-center text-sm text-muted-foreground">
               Pay more. Take the link. Keep it until someone outbids you.
@@ -168,9 +168,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
       <section className="mt-20 grid gap-6 sm:grid-cols-3">
         {[
-          ["1. BUY", "Pay more than the current owner."],
-          ["2. OWN", "Your website becomes the destination of the bio link."],
-          ["3. GET OUTBID", "Someone pays more and takes it."],
+          ["1. Buy", "Pay more than the current owner."],
+          ["2. Own", "Your website becomes the destination of the bio link."],
+          ["3. Get outbid", "Someone pays more and takes it."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
             <div className="text-lg font-extrabold">{t}</div>
