@@ -125,7 +125,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           <div className="panel px-5 py-6 text-center">
             <p className="font-bold">This bio isn't accepting buyers right now.</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {view.creator.verification_status !== "verified"
+              {!view.creator.x_bio_verified
                 ? "The creator hasn't been verified yet."
                 : "The listing is paused."}
             </p>

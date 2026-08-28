@@ -121,10 +121,10 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function SiteHeader() {
   return (
-    <header className="border-b-2 border-border">
+    <header>
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
         <Link to="/" className="flex items-center">
-          <img src={logoAsset.url} alt="Buy My Bio" className="h-7 w-auto" />
+          <img src={logoAsset.url} alt="Buy My Bio" className="h-11 w-auto sm:h-12" />
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           <Link to="/how-it-works" className="hover:underline">
@@ -133,8 +133,8 @@ function SiteHeader() {
           <Link to="/history" className="hover:underline">
             History
           </Link>
-          <Link to="/sell" className="hover:underline">
-            Sell Your Bio
+          <Link to="/creator" className="hover:underline">
+            List Your Bio
           </Link>
         </nav>
       </div>
@@ -144,8 +144,8 @@ function SiteHeader() {
 
 function SiteFooter() {
   return (
-    <footer className="mt-24 border-t-2 border-border">
-      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-muted-foreground">
+    <footer className="mt-24">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-5 py-6 text-center text-xs text-muted-foreground">
         <span>
           © {new Date().getFullYear()} Buy My Bio · Built with 🫶🏻 by{" "}
           <a

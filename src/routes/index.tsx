@@ -41,8 +41,8 @@ function Home() {
         <p className="mt-3 text-muted-foreground">
           The first listing is being set up. Check back shortly.
         </p>
-        <Link to="/sell" className="btn-ink btn-ink-hover mt-8">
-          SELL YOUR BIO
+        <Link to="/creator" className="btn-ink btn-ink-hover mt-8">
+          LIST YOUR BIO
         </Link>
       </div>
     );
