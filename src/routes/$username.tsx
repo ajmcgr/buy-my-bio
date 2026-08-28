@@ -37,12 +37,12 @@ function NoOwner() {
   const { username } = Route.useLoaderData();
   return (
     <div className="mx-auto max-w-xl px-5 py-24 text-center">
-      <h1 className="text-4xl font-black tracking-tight">NOBODY OWNS THIS LINK</h1>
+      <h1 className="text-4xl font-black tracking-tight">Nobody owns this link</h1>
       <p className="mt-3 text-muted-foreground">
         buymybio.com/{username} is unclaimed right now.
       </p>
       <Link to="/u/$username" params={{ username }} className="btn-ink btn-ink-hover mt-8">
-        BUY IT
+        Buy it
       </Link>
     </div>
   );

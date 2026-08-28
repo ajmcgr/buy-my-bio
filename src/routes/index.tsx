@@ -37,12 +37,12 @@ function Home() {
   if (!view) {
     return (
       <div className="mx-auto max-w-xl px-5 py-24 text-center">
-        <h1 className="text-4xl font-black tracking-tight">BUY MY BIO</h1>
+        <h1 className="text-4xl font-black tracking-tight">Buy my bio</h1>
         <p className="mt-3 text-muted-foreground">
           The first listing is being set up. Check back shortly.
         </p>
         <Link to="/creator" className="btn-ink btn-ink-hover mt-8">
-          LIST YOUR BIO
+          List your bio
         </Link>
       </div>
     );

@@ -22,7 +22,7 @@ function NotFoundComponent() {
         <h1 className="text-6xl font-extrabold">404</h1>
         <p className="mt-3 text-muted-foreground">Nothing here. Nobody owns this.</p>
         <Link to="/" className="btn-ink btn-ink-hover mt-8">
-          GO HOME
+          Go home
         </Link>
       </div>
     </div>
@@ -49,7 +49,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="btn-ink btn-ink-hover"
           >
-            TRY AGAIN
+            Try again
           </button>
           <a href="/" className="btn-outline-ink">
             Go home
@@ -147,7 +147,7 @@ function SiteFooter() {
     <footer className="mt-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-5 py-6 text-center text-xs text-muted-foreground">
         <span>
-          © {new Date().getFullYear()} Buy My Bio · Built with 🫶🏻 by{" "}
+          Built with 🫶🏻 by{" "}
           <a
             href="https://x.com/alexmacgregor__"
             target="_blank"
