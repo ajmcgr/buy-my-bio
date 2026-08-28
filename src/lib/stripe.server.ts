@@ -1,0 +1,96 @@
+const STRIPE_API = "https://api.stripe.com/v1";
+
+function form(params: Record<string, string | number | undefined>): string {
+  const body = new URLSearchParams();
+  for (const [k, v] of Object.entries(params)) {
+    if (v !== undefined && v !== null && v !== "") body.append(k, String(v));
+  }
+  return body.toString();
+}
+
+async function stripe(path: string, body?: string, method = "POST") {
+  const res = await fetch(`${STRIPE_API}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${process.env["STRIPE_SECRET_KEY"]!}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: body ?? null,
+  });
+  const json = (await res.json()) as Record<string, unknown>;
+  if (!res.ok) {
+    const err = json["error"] as { message?: string } | undefined;
+    throw new Error(err?.message || `Stripe error ${res.status}`);
+  }
+  return json;
+}
+
+export async function createCheckoutSession(opts: {
+  amountCents: number;
+  email: string;
+  companyName: string;
+  creatorHandle: string;
+  paymentId: string;
+  successUrl: string;
+  cancelUrl: string;
+}) {
+  return stripe(
+    "/checkout/sessions",
+    form({
+      mode: "payment",
+      "line_items[0][quantity]": 1,
+      "line_items[0][price_data][currency]": "usd",
+      "line_items[0][price_data][unit_amount]": opts.amountCents,
+      "line_items[0][price_data][product_data][name]": `Ownership of @${opts.creatorHandle}'s bio link`,
+      "line_items[0][price_data][product_data][description]":
+        "You own the destination of the BuyMyBio link until someone pays more.",
+      customer_email: opts.email,
+      "metadata[payment_id]": opts.paymentId,
+      "payment_intent_data[metadata][payment_id]": opts.paymentId,
+      success_url: opts.successUrl,
+      cancel_url: opts.cancelUrl,
+    }),
+  );
+}
+
+export async function retrieveSession(id: string) {
+  return stripe(`/checkout/sessions/${id}`, undefined, "GET");
+}
+
+export async function refundPaymentIntent(paymentIntent: string) {
+  return stripe("/refunds", form({ payment_intent: paymentIntent }));
+}
+
+/** Verifies a Stripe webhook signature using Web Crypto (Workers-safe). */
+export async function verifyStripeSignature(payload: string, header: string | null) {
+  const secret = process.env["STRIPE_WEBHOOK_SECRET"];
+  if (!secret || !header) return false;
+  const parts = Object.fromEntries(
+    header.split(",").map((p) => {
+      const i = p.indexOf("=");
+      return [p.slice(0, i), p.slice(i + 1)];
+    }),
+  ) as Record<string, string>;
+  const t = parts["t"];
+  const v1 = parts["v1"];
+  if (!t || !v1) return false;
+
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"],
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`${t}.${payload}`));
+  const expected = [...new Uint8Array(sig)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  if (expected.length !== v1.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ v1.charCodeAt(i);
+  if (diff !== 0) return false;
+  // reject events older than 5 minutes
+  return Math.abs(Date.now() / 1000 - Number(t)) < 300;
+}
