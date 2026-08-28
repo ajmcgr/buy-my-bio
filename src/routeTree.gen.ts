@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsernameRouteImport } from './routes/$username'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as SellRouteImport } from './routes/sell'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -37,6 +38,11 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
   path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SellRoute = SellRouteImport.update({
+  id: '/sell',
+  path: '/sell',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SuccessRoute = SuccessRouteImport.update({
   id: '/success',
   path: '/success',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/$username': typeof UsernameRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/$username': typeof UsernameRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/$username': typeof UsernameRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/history'
     | '/how-it-works'
+    | '/sell'
     | '/success'
     | '/u/$username'
     | '/api/public/stripe-webhook'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/history'
     | '/how-it-works'
+    | '/sell'
     | '/success'
     | '/u/$username'
     | '/api/public/stripe-webhook'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/history'
     | '/how-it-works'
+    | '/sell'
     | '/success'
     | '/u/$username'
     | '/api/public/stripe-webhook'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   UsernameRoute: typeof UsernameRoute
   HistoryRoute: typeof HistoryRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  SellRoute: typeof SellRoute
   SuccessRoute: typeof SuccessRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sell': {
+      id: '/sell'
+      path: '/sell'
+      fullPath: '/sell'
+      preLoaderRoute: typeof SellRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/success': {
       id: '/success'
       path: '/success'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsernameRoute: UsernameRoute,
   HistoryRoute: HistoryRoute,
   HowItWorksRoute: HowItWorksRoute,
+  SellRoute: SellRoute,
   SuccessRoute: SuccessRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
