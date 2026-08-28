@@ -1,0 +1,172 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState, useCallback } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { getAdminData, adminAction } from "@/lib/admin.functions";
+import { getSupabase } from "@/integrations/supabase/browser";
+import { money, hostOf } from "@/lib/format";
+
+export const Route = createFileRoute("/admin")({
+  ssr: false,
+  head: () => ({
+    meta: [
+      { title: "Admin — Buy My Bio" },
+      { name: "description", content: "Internal dashboard for Buy My Bio." },
+      { property: "og:title", content: "Admin — Buy My Bio" },
+      { property: "og:description", content: "Internal dashboard." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: Admin,
+});
+
+type Data = Awaited<ReturnType<typeof getAdminData>>;
+
+function Admin() {
+  const load = useServerFn(getAdminData);
+  const act = useServerFn(adminAction);
+  const [token, setToken] = useState<string | null>(null);
+  const [data, setData] = useState<Data | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const refresh = useCallback(
+    async (t: string) => {
+      const res = await load({ data: { token: t } });
+      if ("error" in res) setError(res.error);
+      else {
+        setError(null);
+        setData(res);
+      }
+    },
+    [load],
+  );
+
+  useEffect(() => {
+    const sb = getSupabase();
+    if (!sb) {
+      setError("Auth is not configured.");
+      return;
+    }
+    sb.auth.getSession().then(({ data: s }) => {
+      const t = s.session?.access_token ?? null;
+      setToken(t);
+      if (!t) setError("Sign in at /auth first.");
+      else void refresh(t);
+    });
+  }, [refresh]);
+
+  async function run(action: string, id: string) {
+    if (!token) return;
+    await act({ data: { token, action: action as never, id } });
+    await refresh(token);
+  }
+
+  if (error) return <p className="p-16 text-center font-bold">{error}</p>;
+  if (!data || "error" in data) return <p className="p-16 text-center">Loading…</p>;
+
+  return (
+    <div className="mx-auto max-w-5xl px-5 py-12">
+      <h1 className="text-3xl font-extrabold">Admin</h1>
+
+      <div className="panel mt-6 grid grid-cols-2 sm:grid-cols-4">
+        {[
+          ["GMV", money(data.gmvCents)],
+          ["Creators", String(data.creators.length)],
+          ["Active owners", String(data.active.length)],
+          ["Payments", String(data.payments.length)],
+        ].map(([l, v]) => (
+          <div key={l} className="border-border px-5 py-4 not-last:border-r-2">
+            <div className="label-xs">{l}</div>
+            <div className="text-xl font-extrabold">{v}</div>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mt-10 text-lg font-extrabold">Creators</h2>
+      <div className="panel mt-3 divide-y-2 divide-border">
+        {data.creators.map((c) => {
+          const listing = data.listings.find((l) => l.creator_id === c.id);
+          return (
+            <div key={c.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+              <span className="font-bold">{c.display_name}</span>
+              <span className="font-mono text-muted-foreground">@{c.social_handle}</span>
+              <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase">
+                {c.verification_status}
+              </span>
+              {c.banned && (
+                <span className="bg-destructive px-1.5 py-0.5 font-mono text-[10px] text-destructive-foreground">
+                  BANNED
+                </span>
+              )}
+              <div className="ml-auto flex flex-wrap gap-2">
+                <button
+                  onClick={() =>
+                    run(
+                      c.verification_status === "verified" ? "unverify_creator" : "verify_creator",
+                      c.id,
+                    )
+                  }
+                  className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
+                >
+                  {c.verification_status === "verified" ? "Unverify" : "Verify"}
+                </button>
+                <button
+                  onClick={() => run(c.banned ? "unban_creator" : "ban_creator", c.id)}
+                  className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
+                >
+                  {c.banned ? "Unban" : "Ban"}
+                </button>
+                {listing && (
+                  <button
+                    onClick={() =>
+                      run(listing.status === "active" ? "pause_listing" : "activate_listing", listing.id)
+                    }
+                    className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
+                  >
+                    {listing.status === "active" ? "Pause listing" : "Activate listing"}
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <h2 className="mt-10 text-lg font-extrabold">Active owners</h2>
+      <div className="panel mt-3 divide-y-2 divide-border">
+        {data.active.map((o) => (
+          <div key={o.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
+            <span className="font-bold">{o.company_name}</span>
+            <span className="text-muted-foreground">{hostOf(o.destination_url)}</span>
+            <span>{money(o.amount_cents)}</span>
+            <span className="text-muted-foreground">{o.click_count} clicks</span>
+            <button
+              onClick={() =>
+                run(o.destination_disabled ? "enable_destination" : "disable_destination", o.id)
+              }
+              className="ml-auto border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
+            >
+              {o.destination_disabled ? "Enable link" : "Disable link"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <h2 className="mt-10 text-lg font-extrabold">Recent payments</h2>
+      <div className="panel mt-3 divide-y-2 divide-border">
+        {data.payments.map((p) => (
+          <div key={p.id} className="grid grid-cols-4 gap-2 px-4 py-3 text-sm">
+            <span className="truncate font-bold">{p.company_name}</span>
+            <span className="truncate text-muted-foreground">{p.email}</span>
+            <span>{money(p.amount_cents)}</span>
+            <span className="text-right font-mono text-xs uppercase">
+              {p.flagged ? "flagged · " : ""}
+              {p.status}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
