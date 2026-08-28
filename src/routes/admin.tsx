@@ -92,7 +92,10 @@ function Admin() {
               <span className="font-bold">{c.display_name}</span>
               <span className="font-mono text-muted-foreground">@{c.social_handle}</span>
               <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase">
-                {c.verification_status}
+                {c.x_account_verified ? "account verified" : "account unverified"}
+              </span>
+              <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase">
+                {c.x_bio_verified ? `bio verified (${c.x_bio_verified_method ?? "api"})` : "bio unverified"}
               </span>
               {c.banned && (
                 <span className="bg-destructive px-1.5 py-0.5 font-mono text-[10px] text-destructive-foreground">
@@ -110,6 +113,12 @@ function Admin() {
                   className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
                 >
                   {c.verification_status === "verified" ? "Unverify" : "Verify"}
+                </button>
+                <button
+                  onClick={() => run(c.x_bio_verified ? "unverify_bio" : "verify_bio", c.id)}
+                  className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
+                >
+                  {c.x_bio_verified ? "Unverify bio" : "Verify bio"}
                 </button>
                 <button
                   onClick={() => run(c.banned ? "unban_creator" : "ban_creator", c.id)}
