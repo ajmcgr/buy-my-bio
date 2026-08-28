@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsernameRouteImport } from './routes/$username'
+import { Route as HistoryRouteImport } from './routes/history'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const UsernameRoute = UsernameRouteImport.update({
   id: '/$username',
   path: '/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HistoryRoute = HistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -50,6 +56,7 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$username'
+    | '/history'
     | '/how-it-works'
     | '/success'
     | '/u/$username'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$username'
+    | '/history'
     | '/how-it-works'
     | '/success'
     | '/u/$username'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$username'
+    | '/history'
     | '/how-it-works'
     | '/success'
     | '/u/$username'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UsernameRoute: typeof UsernameRoute
+  HistoryRoute: typeof HistoryRoute
   HowItWorksRoute: typeof HowItWorksRoute
   SuccessRoute: typeof SuccessRoute
   UUsernameRoute: typeof UUsernameRoute
@@ -122,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/$username'
       fullPath: '/$username'
       preLoaderRoute: typeof UsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/history': {
+      id: '/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UsernameRoute: UsernameRoute,
+  HistoryRoute: HistoryRoute,
   HowItWorksRoute: HowItWorksRoute,
   SuccessRoute: SuccessRoute,
   UUsernameRoute: UUsernameRoute,
