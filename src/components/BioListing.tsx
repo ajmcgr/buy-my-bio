@@ -78,7 +78,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
     <div className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
       {heading ? (
         <h1 className="text-[clamp(2.75rem,11vw,6.5rem)] leading-[0.85] font-semibold tracking-[-0.05em]">
-          Buy my bio
+          Sell your X bio
         </h1>
       ) : (
         <h1 className="text-[clamp(2rem,7vw,3.5rem)] leading-[0.9] font-semibold tracking-[-0.05em]">

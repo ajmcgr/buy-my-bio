@@ -6,13 +6,13 @@ export const Route = createFileRoute("/")({
   loader: async () => await getListing({ data: { username: "amacg" } }),
   head: () => ({
     meta: [
-      { title: "Buy My Bio — Own the Sponsored Slot in an X Bio" },
+      { title: "Buy My Bio — Sell your X bio" },
       {
         name: "description",
         content:
           "Buy the sponsored slot in someone's X bio. Highest bidder owns the message + link until they're outbid. No deadline, no expiry.",
       },
-      { property: "og:title", content: "Buy My Bio — Own the Sponsored Slot in an X Bio" },
+      { property: "og:title", content: "Buy My Bio — Sell your X bio" },
       {
         property: "og:description",
         content: "Buy the sponsored slot in someone's X bio. Highest bidder owns the message + link until they're outbid.",
@@ -37,7 +37,7 @@ function Home() {
   if (!view) {
     return (
       <div className="mx-auto max-w-xl px-5 py-24 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">Buy my bio</h1>
+        <h1 className="text-4xl font-semibold tracking-tight">Sell your X bio</h1>
         <p className="mt-3 text-muted-foreground">
           The first X bio listing is being set up. Check back shortly.
         </p>

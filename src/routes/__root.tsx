@@ -68,7 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Buy My Bio — Buy the Link in Someone's Bio" },
+      { title: "Buy My Bio — Sell your X bio" },
       {
         name: "description",
         content:
