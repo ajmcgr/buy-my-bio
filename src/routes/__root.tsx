@@ -162,8 +162,8 @@ function SiteHeader() {
           <img src={logoAsset.url} alt="Buy My Bio" className="h-11 w-auto sm:h-12" />
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
-          <Link to="/how-it-works" className="hover:underline">
-            How it works
+          <Link to="/faq" className="hover:underline">
+            FAQ
           </Link>
           <Link to="/about" className="hover:underline">
             About

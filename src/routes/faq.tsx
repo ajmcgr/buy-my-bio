@@ -1,15 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/how-it-works")({
+export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "How It Works — Buy My Bio" },
+      { title: "FAQ — Buy My Bio" },
       {
         name: "description",
         content:
           "Buy the link in a creator's bio. Pay more than the current owner, own the redirect, and get outbid when someone pays more.",
       },
-      { property: "og:title", content: "How Buy My Bio Works" },
+      { property: "og:title", content: "Buy My Bio FAQ" },
       {
         property: "og:description",
         content: "Pay more than the current owner and the bio link is yours. No deadline.",
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/how-it-works")({
       { name: "twitter:card", content: "summary" },
     ],
   }),
-  component: HowItWorks,
+  component: FAQPage,
 });
 
 const faqs: [string, string][] = [
@@ -31,11 +31,11 @@ const faqs: [string, string][] = [
   ["How does the creator get paid?", "Payouts are sent after each takeover, minus the platform fee."],
 ];
 
-function HowItWorks() {
+function FAQPage() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-14">
       <h1 className="text-[clamp(2.5rem,9vw,4.5rem)] leading-[0.88] font-semibold tracking-[-0.05em]">
-        How it works
+        FAQ
       </h1>
 
       <div className="mt-10 grid gap-6 sm:grid-cols-3">
