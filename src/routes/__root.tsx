@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicConfig } from "../lib/public-config.functions";
 import { initSupabase } from "../integrations/supabase/browser";
+import logoAsset from "../assets/logo-trans.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -81,9 +82,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap",
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
+    ],
+    scripts: [
+      { src: "https://www.googletagmanager.com/gtag/js?id=G-3848F2705Y", async: true },
+      {
+        children:
+          "window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-3848F2705Y');",
+      },
+      {
+        src: "https://analytics.ahrefs.com/analytics.js",
+        "data-key": "N8DF+07OZVFCpj/L6EQilg",
+        async: true,
+      },
     ],
   }),
   shellComponent: RootShell,
@@ -110,8 +123,8 @@ function SiteHeader() {
   return (
     <header className="border-b-2 border-border">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
-        <Link to="/" className="text-lg font-extrabold tracking-tight">
-          Buy My Bio
+        <Link to="/" className="flex items-center">
+          <img src={logoAsset.url} alt="Buy My Bio" className="h-7 w-auto" />
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           <Link to="/how-it-works" className="hover:underline">
@@ -133,7 +146,17 @@ function SiteFooter() {
   return (
     <footer className="mt-24 border-t-2 border-border">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-muted-foreground">
-        <span>© {new Date().getFullYear()} Buy My Bio</span>
+        <span>
+          © {new Date().getFullYear()} Buy My Bio · Built with 🫶🏻 by{" "}
+          <a
+            href="https://x.com/alexmacgregor__"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline"
+          >
+            Alex
+          </a>
+        </span>
         <div className="flex gap-4">
           <Link to="/terms" className="hover:underline">
             Terms
