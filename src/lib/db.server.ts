@@ -1,7 +1,12 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+export function projectUrl(): string {
+  const raw = (process.env["SB_URL"] ?? "").trim().replace(/\/$/, "");
+  return /^https?:\/\//.test(raw) ? raw : `https://${raw}`;
+}
+
 function makeClient(key: string): SupabaseClient {
-  const url = process.env["SB_URL"]!;
+  const url = projectUrl();
   return createClient(url, key, {
     auth: { persistSession: false, autoRefreshToken: false, storage: undefined },
     global: {
