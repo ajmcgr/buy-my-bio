@@ -26,6 +26,9 @@ export type ListingView = {
     verification_status: string;
     x_account_verified?: boolean | null;
     x_bio_verified?: boolean | null;
+    x_username?: string | null;
+    x_profile_url?: string | null;
+    x_follower_count?: number | null;
   };
   listing: {
     id: string;
@@ -52,7 +55,7 @@ export const getListing = createServerFn({ method: "GET" })
     const { data: creator } = await db
       .from("creators")
       .select(
-        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status, x_account_verified, x_bio_verified",
+        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status, x_account_verified, x_bio_verified, x_username, x_profile_url, x_follower_count",
       )
       .eq("username", data.username.toLowerCase())
       .maybeSingle();

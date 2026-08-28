@@ -54,7 +54,7 @@ export function BuyDialog({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/60 p-4 sm:p-8">
       <div className="panel mx-auto w-full max-w-lg">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
-          <span className="label-xs">Take the bio</span>
+          <span className="label-xs">Take this X bio</span>
           <button onClick={onClose} className="text-xl leading-none font-bold" aria-label="Close">
             ×
           </button>
@@ -71,6 +71,16 @@ export function BuyDialog({
               {view.owner ? money(view.owner.amount_cents) : "—"}
             </div>
           </div>
+        </div>
+
+        <div className="border-b-2 border-border px-5 py-4 text-sm">
+          <p>
+            You're buying a sponsored message + tracked link inside this creator's X bio.
+          </p>
+          <p className="mt-2 text-muted-foreground">
+            You are not buying the X account, username, profile photo, banner, posts or access to
+            the account.
+          </p>
         </div>
 
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
@@ -145,7 +155,7 @@ export function BuyDialog({
             }}
             className="btn-ink btn-ink-hover w-full text-base disabled:opacity-40"
           >
-            {busy ? "Opening checkout…" : `Take the bio — ${money(price)}`}
+            {busy ? "Opening checkout…" : `Take this X bio — ${money(price)}`}
           </button>
         </form>
       </div>

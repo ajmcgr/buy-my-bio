@@ -5,13 +5,13 @@ import { getCreatorSession, verifyMyBio, type CreatorSession } from "@/lib/creat
 export const Route = createFileRoute("/creator")({
   head: () => ({
     meta: [
-      { title: "List Your Bio — Buy My Bio" },
+      { title: "Sell Your X Bio — Buy My Bio" },
       {
         name: "description",
         content:
           "Connect your X account, add the BuyMyBio placement to your profile, and open your bio to bids.",
       },
-      { property: "og:title", content: "List Your Bio — Buy My Bio" },
+      { property: "og:title", content: "Sell Your X Bio — Buy My Bio" },
       {
         property: "og:description",
         content: "Verify your X account and bio placement to start earning from your bio link.",
@@ -80,10 +80,10 @@ function CreatorPage() {
   return (
     <div className="mx-auto max-w-2xl px-5 py-14">
       <h1 className="text-[clamp(2rem,7vw,3.25rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
-        List your bio
+        Sell your X bio
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Two steps. Connect your real X account, then put the BuyMyBio placement in your profile.
+        Two steps. Connect your real X account, then put the BuyMyBio placement in your X profile.
         Both must be verified before anyone can bid.
       </p>
 
@@ -101,7 +101,7 @@ function CreatorPage() {
             We use X sign-in to confirm you own the account. Buyers never need an account.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
-            Connect X account
+            Connect X
           </a>
         </div>
       ) : (
@@ -127,8 +127,8 @@ function CreatorPage() {
           </div>
 
           <div className="mt-4 flex flex-wrap gap-3">
-            <Badge on={session.accountVerified} label="Account verified" />
-            <Badge on={session.bioVerified} label="Bio verified" />
+            <Badge on={session.accountVerified} label="X account verified" />
+            <Badge on={session.bioVerified} label="X bio verified" />
           </div>
 
           <div className="panel mt-8 p-6">
@@ -146,7 +146,7 @@ function CreatorPage() {
               disabled={busy || session.bioVerified}
               className="btn-ink btn-ink-hover mt-6 disabled:opacity-50"
             >
-              {session.bioVerified ? "Bio verified" : busy ? "Checking…" : "Verify my bio"}
+              {session.bioVerified ? "X bio verified" : busy ? "Checking…" : "Verify your X bio"}
             </button>
           </div>
 

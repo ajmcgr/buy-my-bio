@@ -6,16 +6,16 @@ export const Route = createFileRoute("/")({
   loader: async () => await getListing({ data: { username: "amacg" } }),
   head: () => ({
     meta: [
-      { title: "Buy My Bio — Own the Link in My Bio" },
+      { title: "Buy My Bio — Own the Sponsored Slot in an X Bio" },
       {
         name: "description",
         content:
-          "Pay more than the current owner and the link in my bio points to your startup. No deadline, no expiry — highest bidder owns it.",
+          "Buy the sponsored slot in someone's X bio. Highest bidder owns the message + link until they're outbid. No deadline, no expiry.",
       },
-      { property: "og:title", content: "Buy My Bio — Own the Link in My Bio" },
+      { property: "og:title", content: "Buy My Bio — Own the Sponsored Slot in an X Bio" },
       {
         property: "og:description",
-        content: "Buy the link in my bio. Highest bidder owns it until they're outbid.",
+        content: "Buy the sponsored slot in someone's X bio. Highest bidder owns the message + link until they're outbid.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -39,10 +39,10 @@ function Home() {
       <div className="mx-auto max-w-xl px-5 py-24 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">Buy my bio</h1>
         <p className="mt-3 text-muted-foreground">
-          The first listing is being set up. Check back shortly.
+          The first X bio listing is being set up. Check back shortly.
         </p>
         <Link to="/creator" className="btn-ink btn-ink-hover mt-8">
-          List your bio
+          List your X bio
         </Link>
       </div>
     );
