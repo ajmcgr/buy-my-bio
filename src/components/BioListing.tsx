@@ -3,6 +3,7 @@ import { money, duration, hostOf } from "@/lib/format";
 import type { ListingView } from "@/lib/listing.functions";
 import { trackEvent } from "@/lib/listing.functions";
 import { BuyDialog } from "./BuyDialog";
+import { XIcon } from "./XIcon";
 
 function ProfileCard({ view }: { view: ListingView }) {
   const c = view.creator;
@@ -16,18 +17,36 @@ function ProfileCard({ view }: { view: ListingView }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
             {c.x_bio_verified ? (
-              <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-accent-foreground">
-                ✓ Verified
+      <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-accent-foreground">
+                ✓ X bio verified
               </span>
             ) : null}
           </div>
-          <div className="font-mono text-sm text-muted-foreground">@{c.social_handle}</div>
+          <div className="flex flex-wrap items-center gap-2 font-mono text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <XIcon className="size-3.5" />
+              <span>X · @{c.x_username ?? c.social_handle}</span>
+            </span>
+            {c.x_follower_count ? (
+              <span>· {c.x_follower_count.toLocaleString()} followers</span>
+            ) : null}
+          </div>
+          {c.x_username || c.social_profile_url ? (
+            <a
+              href={c.x_profile_url ?? c.social_profile_url ?? `https://x.com/${c.x_username}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 inline-flex items-center gap-1.5 text-sm font-medium underline"
+            >
+              <XIcon className="size-3.5" /> View on X
+            </a>
+          ) : null}
           <p className="mt-3 text-sm">{c.bio}</p>
           <div className="mt-4">
             <div className="inline-block border-2 border-border bg-accent px-3 py-1.5 font-mono text-sm font-bold">
               buymybio.com/{c.username}
             </div>
-            <div className="label-xs mt-2">↑ This is what you're buying</div>
+            <div className="label-xs mt-2">↑ The tracked link in this X bio</div>
           </div>
         </div>
       </div>
@@ -63,13 +82,15 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
         </h1>
       ) : (
         <h1 className="text-[clamp(2rem,7vw,3.5rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
-          Buy @{view.creator.social_handle}'s bio
+          Buy @{view.creator.x_username ?? view.creator.social_handle}'s X bio
         </h1>
       )}
 
-      <p className="mt-5 text-2xl font-bold sm:text-3xl">Buy the link in my bio.</p>
+      <p className="mt-5 text-2xl font-bold sm:text-3xl">
+        Buy the sponsored slot in someone's X bio.
+      </p>
       <p className="mt-1 text-base text-muted-foreground sm:text-lg">
-        Highest bidder owns it until they're outbid.
+        Highest bidder owns the message + link until they're outbid.
       </p>
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
@@ -122,18 +143,26 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               onClick={() => setOpen(true)}
               className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-semibold tracking-tight"
             >
-              {owner ? "Take my bio" : "Buy my bio"} — {money(price)}
+              {owner ? "Take this X bio" : "Buy this X bio"} — {money(price)}
             </button>
-            <p className="mt-3 text-center text-sm text-muted-foreground">
-              Pay more. Take the link. Keep it until someone outbids you.
-            </p>
+            <div className="panel mt-6 px-5 py-5 text-sm">
+              <p>
+                <span className="font-bold">What you get:</span> you're buying a sponsored message
+                + tracked link inside this creator's X bio.
+              </p>
+              <p className="mt-2 text-muted-foreground">
+                <span className="font-bold text-foreground">What you don't get:</span> you are not
+                buying the X account, username, profile photo, banner, posts or access to the
+                account.
+              </p>
+            </div>
           </>
         ) : (
           <div className="panel px-5 py-6 text-center">
             <p className="font-bold">This bio isn't accepting buyers right now.</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {!view.creator.x_bio_verified
-                ? "The creator hasn't been verified yet."
+                ? "This creator's X bio hasn't been verified yet."
                 : "The listing is paused."}
             </p>
           </div>
@@ -169,7 +198,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
       <section className="mt-20 grid gap-6 sm:grid-cols-3">
         {[
           ["1. Buy", "Pay more than the current owner."],
-          ["2. Own", "Your website becomes the destination of the bio link."],
+          ["2. Own", "Your message + link sits in the creator's X bio and points at your site."],
           ["3. Get outbid", "Someone pays more and takes it."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
