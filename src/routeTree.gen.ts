@@ -20,6 +20,7 @@ import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as ApiPublicXCallbackRouteImport } from './routes/api/public/x-callback'
 import { Route as ApiPublicXStartRouteImport } from './routes/api/public/x-start'
 
 const IndexRoute = IndexRouteImport.update({
@@ -77,6 +78,11 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicXCallbackRoute = ApiPublicXCallbackRouteImport.update({
+  id: '/api/public/x-callback',
+  path: '/api/public/x-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicXStartRoute = ApiPublicXStartRouteImport.update({
   id: '/api/public/x-start',
   path: '/api/public/x-start',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/api/public/x-callback': typeof ApiPublicXCallbackRoute
   '/api/public/x-start': typeof ApiPublicXStartRoute
 }
 export interface FileRoutesByTo {
@@ -109,6 +116,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/api/public/x-callback': typeof ApiPublicXCallbackRoute
   '/api/public/x-start': typeof ApiPublicXStartRoute
 }
 export interface FileRoutesById {
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/api/public/x-callback': typeof ApiPublicXCallbackRoute
   '/api/public/x-start': typeof ApiPublicXStartRoute
 }
 export interface FileRouteTypes {
@@ -140,6 +149,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/u/$username'
     | '/api/public/stripe-webhook'
+    | '/api/public/x-callback'
     | '/api/public/x-start'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -154,6 +164,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/u/$username'
     | '/api/public/stripe-webhook'
+    | '/api/public/x-callback'
     | '/api/public/x-start'
   id:
     | '__root__'
@@ -168,6 +179,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/u/$username'
     | '/api/public/stripe-webhook'
+    | '/api/public/x-callback'
     | '/api/public/x-start'
   fileRoutesById: FileRoutesById
 }
@@ -183,6 +195,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
+  ApiPublicXCallbackRoute: typeof ApiPublicXCallbackRoute
   ApiPublicXStartRoute: typeof ApiPublicXStartRoute
 }
 
@@ -265,6 +278,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/x-callback': {
+      id: '/api/public/x-callback'
+      path: '/api/public/x-callback'
+      fullPath: '/api/public/x-callback'
+      preLoaderRoute: typeof ApiPublicXCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/x-start': {
       id: '/api/public/x-start'
       path: '/api/public/x-start'
@@ -287,6 +307,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
+  ApiPublicXCallbackRoute: ApiPublicXCallbackRoute,
   ApiPublicXStartRoute: ApiPublicXStartRoute,
 }
 export const routeTree = rootRouteImport
