@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicConfig } from "../lib/public-config.functions";
 import { initSupabase } from "../integrations/supabase/browser";
+import logoAsset from "../assets/logo-trans.png.asset.json";
 
 function NotFoundComponent() {
   return (
