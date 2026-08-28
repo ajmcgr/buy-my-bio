@@ -181,7 +181,7 @@ function SiteHeader() {
             About
           </Link>
           <Link to="/creator" className="hover:underline">
-            List your bio
+            Sell your X bio
           </Link>
           <ThemeToggle />
         </nav>
