@@ -79,7 +79,7 @@ function CreatorPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-14">
-      <h1 className="text-[clamp(2rem,7vw,3.25rem)] leading-[0.9] font-black tracking-[-0.05em]">
+      <h1 className="text-[clamp(2rem,7vw,3.25rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
         List your bio
       </h1>
       <p className="mt-4 text-muted-foreground">

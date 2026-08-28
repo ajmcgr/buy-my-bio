@@ -7,7 +7,8 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Moon, Sun } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -87,6 +88,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.png", type: "image/png" },
     ],
     scripts: [
+      {
+        children:
+          "try{var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.classList.add('dark')}catch(e){}",
+      },
       { src: "https://www.googletagmanager.com/gtag/js?id=G-3848F2705Y", async: true },
       {
         children:
@@ -119,6 +124,36 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+function ThemeToggle() {
+  const [dark, setDark] = useState(false);
+
+  useEffect(() => {
+    setDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggle = () => {
+    const next = !document.documentElement.classList.contains("dark");
+    document.documentElement.classList.toggle("dark", next);
+    try {
+      localStorage.setItem("theme", next ? "dark" : "light");
+    } catch {
+      /* ignore */
+    }
+    setDark(next);
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={toggle}
+      aria-label={dark ? "Switch to light mode" : "Switch to dark mode"}
+      className="inline-flex items-center justify-center p-1 hover:opacity-70"
+    >
+      {dark ? <Sun size={18} /> : <Moon size={18} />}
+    </button>
+  );
+}
+
 function SiteHeader() {
   return (
     <header>
@@ -128,14 +163,15 @@ function SiteHeader() {
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           <Link to="/how-it-works" className="hover:underline">
-            How It Works
+            How it works
           </Link>
-          <Link to="/history" className="hover:underline">
-            History
+          <Link to="/about" className="hover:underline">
+            About
           </Link>
           <Link to="/creator" className="hover:underline">
-            List Your Bio
+            List your bio
           </Link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>

@@ -41,7 +41,7 @@ function Success() {
     const stale = result.status === "stale";
     return (
       <div className="mx-auto max-w-xl px-5 py-24 text-center">
-        <h1 className="text-4xl font-black tracking-tight">
+        <h1 className="text-4xl font-semibold tracking-tight">
           {stale ? "Someone beat you to it" : "Payment pending"}
         </h1>
         <p className="mt-3 text-muted-foreground">
@@ -59,7 +59,7 @@ function Success() {
   return (
     <div className="mx-auto max-w-2xl px-5 py-16">
       <p className="label-xs">Confirmed</p>
-      <h1 className="mt-2 text-[clamp(2.5rem,10vw,4.5rem)] leading-[0.88] font-black tracking-[-0.05em]">
+      <h1 className="mt-2 text-[clamp(2.5rem,10vw,4.5rem)] leading-[0.88] font-semibold tracking-[-0.05em]">
         You own the bio
       </h1>
       <div className="panel mt-8 divide-y-2 divide-border">

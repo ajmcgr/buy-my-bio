@@ -11,10 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsernameRouteImport } from './routes/$username'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreatorRouteImport } from './routes/creator'
-import { Route as HistoryRouteImport } from './routes/history'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SuccessRouteImport } from './routes/success'
@@ -34,6 +34,11 @@ const UsernameRoute = UsernameRouteImport.update({
   path: '/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -47,11 +52,6 @@ const AuthRoute = AuthRouteImport.update({
 const CreatorRoute = CreatorRouteImport.update({
   id: '/creator',
   path: '/creator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HistoryRoute = HistoryRouteImport.update({
-  id: '/history',
-  path: '/history',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HowItWorksRoute = HowItWorksRouteImport.update({
@@ -98,10 +98,10 @@ const ApiPublicXStartRoute = ApiPublicXStartRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
-  '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
@@ -114,10 +114,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
-  '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
@@ -131,10 +131,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
-  '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
@@ -149,10 +149,10 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$username'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/creator'
-    | '/history'
     | '/how-it-works'
     | '/privacy'
     | '/success'
@@ -165,10 +165,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$username'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/creator'
-    | '/history'
     | '/how-it-works'
     | '/privacy'
     | '/success'
@@ -181,10 +181,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$username'
+    | '/about'
     | '/admin'
     | '/auth'
     | '/creator'
-    | '/history'
     | '/how-it-works'
     | '/privacy'
     | '/success'
@@ -198,10 +198,10 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UsernameRoute: typeof UsernameRoute
+  AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CreatorRoute: typeof CreatorRoute
-  HistoryRoute: typeof HistoryRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PrivacyRoute: typeof PrivacyRoute
   SuccessRoute: typeof SuccessRoute
@@ -228,6 +228,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin': {
       id: '/admin'
       path: '/admin'
@@ -247,13 +254,6 @@ declare module '@tanstack/react-router' {
       path: '/creator'
       fullPath: '/creator'
       preLoaderRoute: typeof CreatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/history': {
-      id: '/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof HistoryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/how-it-works': {
@@ -318,10 +318,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UsernameRoute: UsernameRoute,
+  AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CreatorRoute: CreatorRoute,
-  HistoryRoute: HistoryRoute,
   HowItWorksRoute: HowItWorksRoute,
   PrivacyRoute: PrivacyRoute,
   SuccessRoute: SuccessRoute,
