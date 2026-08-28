@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsernameRouteImport } from './routes/$username'
+import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
@@ -23,6 +24,11 @@ const IndexRoute = IndexRouteImport.update({
 const UsernameRoute = UsernameRouteImport.update({
   id: '/$username',
   path: '/$username',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowItWorksRoute = HowItWorksRouteImport.update({
+  id: '/how-it-works',
+  path: '/how-it-works',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuccessRoute = SuccessRouteImport.update({
@@ -44,6 +50,7 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -51,6 +58,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -59,6 +67,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
+  '/how-it-works': typeof HowItWorksRoute
   '/success': typeof SuccessRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
@@ -68,6 +77,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$username'
+    | '/how-it-works'
     | '/success'
     | '/u/$username'
     | '/api/public/stripe-webhook'
@@ -75,6 +85,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$username'
+    | '/how-it-works'
     | '/success'
     | '/u/$username'
     | '/api/public/stripe-webhook'
@@ -82,6 +93,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$username'
+    | '/how-it-works'
     | '/success'
     | '/u/$username'
     | '/api/public/stripe-webhook'
@@ -90,6 +102,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UsernameRoute: typeof UsernameRoute
+  HowItWorksRoute: typeof HowItWorksRoute
   SuccessRoute: typeof SuccessRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
@@ -109,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/$username'
       fullPath: '/$username'
       preLoaderRoute: typeof UsernameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-it-works': {
+      id: '/how-it-works'
+      path: '/how-it-works'
+      fullPath: '/how-it-works'
+      preLoaderRoute: typeof HowItWorksRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/success': {
@@ -138,6 +158,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UsernameRoute: UsernameRoute,
+  HowItWorksRoute: HowItWorksRoute,
   SuccessRoute: SuccessRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
