@@ -58,11 +58,11 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
       {heading ? (
-        <h1 className="text-[clamp(2.75rem,11vw,6.5rem)] leading-[0.85] font-black tracking-[-0.05em]">
+        <h1 className="text-[clamp(2.75rem,11vw,6.5rem)] leading-[0.85] font-semibold tracking-[-0.05em]">
           Buy my bio
         </h1>
       ) : (
-        <h1 className="text-[clamp(2rem,7vw,3.5rem)] leading-[0.9] font-black tracking-[-0.05em]">
+        <h1 className="text-[clamp(2rem,7vw,3.5rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
           Buy @{view.creator.social_handle}'s bio
         </h1>
       )}
@@ -95,7 +95,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
           <div className="px-5 py-6">
             <div className="label-xs">{owner ? "Current price" : "Starting price"}</div>
-            <div className="text-[clamp(3rem,14vw,5.5rem)] leading-[0.85] font-black tracking-[-0.05em]">
+            <div className="text-[clamp(3rem,14vw,5.5rem)] leading-[0.85] font-semibold tracking-[-0.05em]">
               {money(owner ? owner.amount_cents : view.listing.starting_price_cents)}
             </div>
           </div>
@@ -120,7 +120,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           <>
             <button
               onClick={() => setOpen(true)}
-              className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-black tracking-tight"
+              className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-semibold tracking-tight"
             >
               {owner ? "Take my bio" : "Buy my bio"} — {money(price)}
             </button>

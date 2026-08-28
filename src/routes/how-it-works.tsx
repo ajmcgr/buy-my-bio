@@ -34,7 +34,7 @@ const faqs: [string, string][] = [
 function HowItWorks() {
   return (
     <div className="mx-auto max-w-3xl px-5 py-14">
-      <h1 className="text-[clamp(2.5rem,9vw,4.5rem)] leading-[0.88] font-black tracking-[-0.05em]">
+      <h1 className="text-[clamp(2.5rem,9vw,4.5rem)] leading-[0.88] font-semibold tracking-[-0.05em]">
         How it works
       </h1>
 
