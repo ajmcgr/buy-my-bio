@@ -27,11 +27,11 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     const { data: creator } = await db
       .from("creators")
-      .select("id, username, social_handle, verification_status, banned")
+      .select("id, username, social_handle, x_account_verified, x_bio_verified, banned")
       .eq("username", data.username.toLowerCase())
       .maybeSingle();
     if (!creator || creator.banned) return { error: "Listing unavailable." };
-    if (creator.verification_status !== "verified")
+    if (!creator.x_account_verified || !creator.x_bio_verified)
       return { error: "This listing is not verified yet." };
 
     const { data: listing } = await db

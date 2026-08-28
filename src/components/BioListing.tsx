@@ -13,7 +13,14 @@ function ProfileCard({ view }: { view: ListingView }) {
           {c.display_name.slice(0, 1)}
         </div>
         <div className="min-w-0">
-          <div className="text-lg leading-tight font-extrabold">{c.display_name}</div>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
+            {c.x_bio_verified ? (
+              <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-accent-foreground">
+                ✓ Verified
+              </span>
+            ) : null}
+          </div>
           <div className="font-mono text-sm text-muted-foreground">@{c.social_handle}</div>
           <p className="mt-3 text-sm">{c.bio}</p>
           <div className="mt-4">
@@ -125,7 +132,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           <div className="panel px-5 py-6 text-center">
             <p className="font-bold">This bio isn't accepting buyers right now.</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {view.creator.verification_status !== "verified"
+              {!view.creator.x_bio_verified
                 ? "The creator hasn't been verified yet."
                 : "The listing is paused."}
             </p>

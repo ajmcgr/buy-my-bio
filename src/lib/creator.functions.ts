@@ -1,54 +1,111 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const schema = z.object({
-  displayName: z.string().min(1).max(80),
-  email: z.string().email().max(160),
-  socialPlatform: z.string().min(1).max(20),
-  socialHandle: z.string().min(1).max(40),
-  followers: z.number().int().min(0).max(1_000_000_000).optional(),
-  startingPrice: z.number().min(1).max(1_000_000),
-});
+const tokenIn = z.object({ token: z.string().min(10).max(200) });
 
-export const applyAsCreator = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => schema.parse(input))
-  .handler(async ({ data }) => {
+export type CreatorSession = {
+  username: string;
+  displayName: string;
+  handle: string | null;
+  profileImageUrl: string | null;
+  profileUrl: string | null;
+  followers: number;
+  accountVerified: boolean;
+  bioVerified: boolean;
+  bioVerifiedMethod: string | null;
+  listingStatus: string | null;
+  requiredPlacement: string;
+  banned: boolean;
+};
+
+export const getCreatorSession = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .handler(async ({ data }): Promise<CreatorSession | null> => {
     const { admin } = await import("./db.server");
+    const { requiredPlacement } = await import("./x.server");
     const db = admin();
 
-    const handle = data.socialHandle.replace(/^@/, "").trim().toLowerCase();
-    const username = handle.replace(/[^a-z0-9_-]/g, "");
-    if (!username) return { error: "That handle isn't valid." } as const;
-
-    const { data: existing } = await db
+    const { data: c } = await db
       .from("creators")
-      .select("id")
-      .eq("username", username)
+      .select(
+        "id, username, display_name, x_username, x_profile_image_url, x_profile_url, x_follower_count, x_account_verified, x_bio_verified, x_bio_verified_method, banned",
+      )
+      .eq("session_token", data.token)
       .maybeSingle();
-    if (existing) return { error: "That handle is already applied or listed." } as const;
+    if (!c) return null;
 
-    const { data: creator, error } = await db
+    const { data: listing } = await db
+      .from("listings")
+      .select("status")
+      .eq("creator_id", c.id)
+      .maybeSingle();
+
+    return {
+      username: c.username,
+      displayName: c.display_name,
+      handle: c.x_username ?? null,
+      profileImageUrl: c.x_profile_image_url ?? null,
+      profileUrl: c.x_profile_url ?? null,
+      followers: Number(c.x_follower_count ?? 0),
+      accountVerified: Boolean(c.x_account_verified),
+      bioVerified: Boolean(c.x_bio_verified),
+      bioVerifiedMethod: c.x_bio_verified_method ?? null,
+      listingStatus: listing?.status ?? null,
+      requiredPlacement: requiredPlacement(c.username),
+      banned: Boolean(c.banned),
+    };
+  });
+
+/**
+ * Re-reads the creator's live X profile and only flips BIO VERIFIED when the
+ * required placement is actually present right now.
+ */
+export const verifyMyBio = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .handler(async ({ data }) => {
+    const { admin } = await import("./db.server");
+    const { xConfigured } = await import("./x.server");
+    const db = admin();
+
+    const { data: c } = await db
       .from("creators")
-      .insert({
-        display_name: data.displayName.trim(),
-        username,
-        email: data.email.trim().toLowerCase(),
-        social_platform: data.socialPlatform,
-        social_handle: handle,
-        follower_count: data.followers ?? 0,
-        verification_status: "pending",
+      .select("id, username, x_user_id, banned")
+      .eq("session_token", data.token)
+      .maybeSingle();
+    if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
+    if (!c.x_user_id) return { error: "Connect your X account first." } as const;
+    if (!xConfigured()) return { error: "X verification isn't configured yet." } as const;
+
+    const { lookupPublicProfile, placementPresent } = await import("./x-app.server");
+    let profile;
+    try {
+      profile = await lookupPublicProfile(String(c.x_user_id));
+    } catch (e) {
+      console.error("bio verify lookup failed", e);
+      return {
+        error:
+          "We couldn't read your X profile automatically. An admin will review it shortly.",
+      } as const;
+    }
+
+    const present = placementPresent(profile, c.username);
+    const now = new Date().toISOString();
+    await db
+      .from("creators")
+      .update({
+        x_bio_snapshot: profile.description,
+        x_follower_count: profile.followers,
+        ...(present
+          ? { x_bio_verified: true, x_bio_verified_at: now, x_bio_verified_method: "api" }
+          : {}),
       })
-      .select("id")
-      .single();
-    if (error || !creator) return { error: "Could not submit your application." } as const;
+      .eq("id", c.id);
 
-    await db.from("listings").insert({
-      creator_id: creator.id,
-      slug: username,
-      status: "draft",
-      starting_price_cents: Math.round(data.startingPrice * 100),
-    });
-
-    await db.from("analytics_events").insert({ name: "creator_applied", props: { username } });
-    return { ok: true } as const;
+    if (present) {
+      await db.from("listings").update({ status: "active" }).eq("creator_id", c.id);
+      return { ok: true } as const;
+    }
+    return {
+      error: `We couldn't find "buymybio.com/${c.username}" in your X profile yet. Add it, save, then try again.`,
+    } as const;
   });

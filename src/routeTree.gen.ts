@@ -13,14 +13,16 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsernameRouteImport } from './routes/$username'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as CreatorRouteImport } from './routes/creator'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as SellRouteImport } from './routes/sell'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
+import { Route as ApiPublicXCallbackRouteImport } from './routes/api/public/x-callback'
+import { Route as ApiPublicXStartRouteImport } from './routes/api/public/x-start'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -42,6 +44,11 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CreatorRoute = CreatorRouteImport.update({
+  id: '/creator',
+  path: '/creator',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HistoryRoute = HistoryRouteImport.update({
   id: '/history',
   path: '/history',
@@ -55,11 +62,6 @@ const HowItWorksRoute = HowItWorksRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SellRoute = SellRouteImport.update({
-  id: '/sell',
-  path: '/sell',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SuccessRoute = SuccessRouteImport.update({
@@ -82,34 +84,48 @@ const ApiPublicStripeWebhookRoute = ApiPublicStripeWebhookRouteImport.update({
   path: '/api/public/stripe-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicXCallbackRoute = ApiPublicXCallbackRouteImport.update({
+  id: '/api/public/x-callback',
+  path: '/api/public/x-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicXStartRoute = ApiPublicXStartRouteImport.update({
+  id: '/api/public/x-start',
+  path: '/api/public/x-start',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/creator': typeof CreatorRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
-  '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/api/public/x-callback': typeof ApiPublicXCallbackRoute
+  '/api/public/x-start': typeof ApiPublicXStartRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$username': typeof UsernameRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/creator': typeof CreatorRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
-  '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/api/public/x-callback': typeof ApiPublicXCallbackRoute
+  '/api/public/x-start': typeof ApiPublicXStartRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -117,14 +133,16 @@ export interface FileRoutesById {
   '/$username': typeof UsernameRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/creator': typeof CreatorRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/privacy': typeof PrivacyRoute
-  '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
+  '/api/public/x-callback': typeof ApiPublicXCallbackRoute
+  '/api/public/x-start': typeof ApiPublicXStartRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -133,42 +151,48 @@ export interface FileRouteTypes {
     | '/$username'
     | '/admin'
     | '/auth'
+    | '/creator'
     | '/history'
     | '/how-it-works'
     | '/privacy'
-    | '/sell'
     | '/success'
     | '/terms'
     | '/u/$username'
     | '/api/public/stripe-webhook'
+    | '/api/public/x-callback'
+    | '/api/public/x-start'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/$username'
     | '/admin'
     | '/auth'
+    | '/creator'
     | '/history'
     | '/how-it-works'
     | '/privacy'
-    | '/sell'
     | '/success'
     | '/terms'
     | '/u/$username'
     | '/api/public/stripe-webhook'
+    | '/api/public/x-callback'
+    | '/api/public/x-start'
   id:
     | '__root__'
     | '/'
     | '/$username'
     | '/admin'
     | '/auth'
+    | '/creator'
     | '/history'
     | '/how-it-works'
     | '/privacy'
-    | '/sell'
     | '/success'
     | '/terms'
     | '/u/$username'
     | '/api/public/stripe-webhook'
+    | '/api/public/x-callback'
+    | '/api/public/x-start'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,14 +200,16 @@ export interface RootRouteChildren {
   UsernameRoute: typeof UsernameRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  CreatorRoute: typeof CreatorRoute
   HistoryRoute: typeof HistoryRoute
   HowItWorksRoute: typeof HowItWorksRoute
   PrivacyRoute: typeof PrivacyRoute
-  SellRoute: typeof SellRoute
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
   UUsernameRoute: typeof UUsernameRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
+  ApiPublicXCallbackRoute: typeof ApiPublicXCallbackRoute
+  ApiPublicXStartRoute: typeof ApiPublicXStartRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -216,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/creator': {
+      id: '/creator'
+      path: '/creator'
+      fullPath: '/creator'
+      preLoaderRoute: typeof CreatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/history': {
       id: '/history'
       path: '/history'
@@ -235,13 +268,6 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sell': {
-      id: '/sell'
-      path: '/sell'
-      fullPath: '/sell'
-      preLoaderRoute: typeof SellRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/success': {
@@ -272,6 +298,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicStripeWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/x-callback': {
+      id: '/api/public/x-callback'
+      path: '/api/public/x-callback'
+      fullPath: '/api/public/x-callback'
+      preLoaderRoute: typeof ApiPublicXCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/x-start': {
+      id: '/api/public/x-start'
+      path: '/api/public/x-start'
+      fullPath: '/api/public/x-start'
+      preLoaderRoute: typeof ApiPublicXStartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -280,14 +320,16 @@ const rootRouteChildren: RootRouteChildren = {
   UsernameRoute: UsernameRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  CreatorRoute: CreatorRoute,
   HistoryRoute: HistoryRoute,
   HowItWorksRoute: HowItWorksRoute,
   PrivacyRoute: PrivacyRoute,
-  SellRoute: SellRoute,
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,
   UUsernameRoute: UUsernameRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
+  ApiPublicXCallbackRoute: ApiPublicXCallbackRoute,
+  ApiPublicXStartRoute: ApiPublicXStartRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -24,6 +24,8 @@ export type ListingView = {
     social_handle: string | null;
     social_profile_url: string | null;
     verification_status: string;
+    x_account_verified?: boolean | null;
+    x_bio_verified?: boolean | null;
   };
   listing: {
     id: string;
@@ -50,7 +52,7 @@ export const getListing = createServerFn({ method: "GET" })
     const { data: creator } = await db
       .from("creators")
       .select(
-        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status",
+        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status, x_account_verified, x_bio_verified",
       )
       .eq("username", data.username.toLowerCase())
       .maybeSingle();
@@ -87,7 +89,10 @@ export const getListing = createServerFn({ method: "GET" })
       owner,
       history,
       requiredPriceCents,
-      canBuy: listing.status === "active" && creator.verification_status === "verified",
+      canBuy:
+        listing.status === "active" &&
+        Boolean(creator.x_account_verified) &&
+        Boolean(creator.x_bio_verified),
     } as ListingView;
   });
 

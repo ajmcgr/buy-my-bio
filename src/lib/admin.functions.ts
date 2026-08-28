@@ -15,7 +15,7 @@ export const getAdminData = createServerFn({ method: "POST" })
     const [creators, listings, payments, ownerships] = await Promise.all([
       db
         .from("creators")
-        .select("id, display_name, username, social_handle, verification_status, banned, created_at")
+        .select("id, display_name, username, social_handle, verification_status, x_account_verified, x_bio_verified, x_bio_verified_method, banned, created_at")
         .order("created_at", { ascending: false })
         .limit(100),
       db.from("listings").select("id, creator_id, slug, status, starting_price_cents").limit(200),
@@ -48,6 +48,8 @@ export const adminAction = createServerFn({ method: "POST" })
         action: z.enum([
           "verify_creator",
           "unverify_creator",
+          "verify_bio",
+          "unverify_bio",
           "ban_creator",
           "unban_creator",
           "pause_listing",
@@ -72,6 +74,26 @@ export const adminAction = createServerFn({ method: "POST" })
         break;
       case "unverify_creator":
         await db.from("creators").update({ verification_status: "pending" }).eq("id", data.id);
+        break;
+      case "verify_bio":
+        // Manual fallback: only used when an admin has actually confirmed the
+        // placement is present on the creator's live X profile.
+        await db
+          .from("creators")
+          .update({
+            x_bio_verified: true,
+            x_bio_verified_at: new Date().toISOString(),
+            x_bio_verified_method: "admin",
+          })
+          .eq("id", data.id);
+        await db.from("listings").update({ status: "active" }).eq("creator_id", data.id);
+        break;
+      case "unverify_bio":
+        await db
+          .from("creators")
+          .update({ x_bio_verified: false, x_bio_verified_at: null, x_bio_verified_method: null })
+          .eq("id", data.id);
+        await db.from("listings").update({ status: "draft" }).eq("creator_id", data.id);
         break;
       case "ban_creator":
         await db.from("creators").update({ banned: true }).eq("id", data.id);
