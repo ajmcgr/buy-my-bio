@@ -15,6 +15,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicConfig } from "../lib/public-config.functions";
 import { initSupabase } from "../integrations/supabase/browser";
 import logoAsset from "../assets/logo-trans.png.asset.json";
+import logoWhiteAsset from "../assets/logo-white.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -159,7 +160,18 @@ function SiteHeader() {
     <header>
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
         <Link to="/" className="flex items-center">
-          <img src={logoAsset.url} alt="Buy My Bio" className="h-11 w-auto sm:h-12" />
+          <>
+            <img
+              src={logoAsset.url}
+              alt="Buy My Bio"
+              className="h-11 w-auto sm:h-12 dark:hidden"
+            />
+            <img
+              src={logoWhiteAsset.url}
+              alt="Buy My Bio"
+              className="hidden h-11 w-auto sm:h-12 dark:block"
+            />
+          </>
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           <Link to="/faq" className="hover:underline">
