@@ -145,7 +145,17 @@ function SiteFooter() {
   return (
     <footer className="mt-24 border-t-2 border-border">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-5 py-6 text-xs text-muted-foreground">
-        <span>© {new Date().getFullYear()} Buy My Bio</span>
+        <span>
+          © {new Date().getFullYear()} Buy My Bio · Built with 🫶🏻 by{" "}
+          <a
+            href="https://x.com/alexmacgregor__"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline"
+          >
+            Alex
+          </a>
+        </span>
         <div className="flex gap-4">
           <Link to="/terms" className="hover:underline">
             Terms
