@@ -18,16 +18,51 @@ async function send(to: string, subject: string, html: string) {
 
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 === 0 ? 0 : 2)}`;
 
-function shell(body: string) {
-  return `<div style="font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Helvetica,Arial;max-width:520px;margin:0 auto;padding:32px;color:#111">
-  <div style="font-weight:800;letter-spacing:-0.03em;font-size:20px;margin-bottom:24px">BUY MY BIO</div>
-  ${body}
-  <div style="margin-top:40px;font-size:12px;color:#777">buymybio.com — highest bidder owns it until they're outbid.</div>
+const LOGO = "https://buymybio.com/__l5e/assets-v1/e89eede8-c031-4ffa-987e-8e62a2749c4d/email-logo.png";
+
+function shell(body: string, footNote = "You received this because you bid on a bio at Buy My Bio.") {
+  return `<div style="background:#f6f7f9;padding:40px 16px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e6e8eb;border-radius:4px">
+    <tr><td align="center" style="padding:36px 32px;border-bottom:1px solid #e6e8eb">
+      <img src="${LOGO}" alt="Buy My Bio" width="180" style="display:block;width:180px;max-width:60%;height:auto" />
+    </td></tr>
+    <tr><td style="padding:40px 40px 44px;color:#1c1f23;font-size:17px;line-height:1.6">
+      ${body}
+    </td></tr>
+    <tr><td align="center" style="padding:24px 32px;border-top:1px solid #e6e8eb;color:#8b9096;font-size:14px">
+      ${footNote}
+    </td></tr>
+  </table>
 </div>`;
 }
 
+function h1(text: string) {
+  return `<h1 style="font-size:30px;line-height:1.2;font-weight:600;letter-spacing:-0.02em;margin:0 0 20px;color:#111418">${text}</h1>`;
+}
+
+function p(text: string) {
+  return `<p style="margin:0 0 20px;color:#3c4149;font-size:17px;line-height:1.6">${text}</p>`;
+}
+
+function facts(rows: Array<[string, string]>) {
+  return `<table role="presentation" cellpadding="0" cellspacing="0" style="background:#f6f7f9;border:1px solid #e6e8eb;border-radius:6px;padding:0;margin:0 0 28px;width:100%">
+    <tr><td style="padding:20px 22px">
+      ${rows
+        .map(
+          ([k, v]) =>
+            `<div style="font-size:16px;line-height:2;color:#3c4149"><span style="color:#8b9096">${k}</span> &nbsp;<b style="color:#111418">${v}</b></div>`,
+        )
+        .join("")}
+    </td></tr>
+  </table>`;
+}
+
 function button(href: string, label: string) {
-  return `<a href="${href}" style="display:inline-block;background:#111;color:#fff;text-decoration:none;padding:14px 22px;font-weight:700;border-radius:6px">${label}</a>`;
+  return `<a href="${href}" style="display:inline-block;background:#206dcb;color:#ffffff;text-decoration:none;padding:14px 26px;font-weight:600;font-size:16px;border-radius:6px">${label}</a>`;
+}
+
+function textLink(href: string, label: string) {
+  return `<div style="margin-top:20px"><a href="${href}" style="color:#206dcb;text-decoration:none;font-size:16px">${label}</a></div>`;
 }
 
 export function humanDuration(from: string, to: string) {
@@ -58,16 +93,16 @@ export async function sendWinnerEmail(o: {
     o.to,
     `You own @${o.handle}'s bio.`,
     shell(`
-      <h1 style="font-size:32px;margin:0 0 8px;letter-spacing:-0.03em">YOU OWN IT.</h1>
-      <p style="margin:0 0 24px;color:#555">Until somebody pays more.</p>
-      <table style="font-size:15px;line-height:2;margin-bottom:24px">
-        <tr><td style="color:#777;padding-right:16px">You paid</td><td><b>${money(o.amountCents)}</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">Your startup</td><td><b>${o.company}</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">Destination</td><td><b>${o.destination}</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">Status</td><td><b>Current owner</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">Listing</td><td><a href="${link}">${link.replace("https://", "")}</a></td></tr>
-      </table>
-      ${button(tweet, "SHARE ON X")}
+      ${h1("You own it \u{1F389}")}
+      ${p(`Your bid went through — <b>@${o.handle}</b>'s bio now points to <b>${o.company}</b>, and it stays yours until somebody pays more.`)}
+      ${facts([
+        ["You paid", money(o.amountCents)],
+        ["Your startup", o.company],
+        ["Destination", o.destination],
+        ["Status", "Current owner"],
+      ])}
+      ${button(link, "See your listing \u2192")}
+      ${textLink(tweet, "Share it on X \u2192")}
     `),
   );
 }
@@ -86,15 +121,15 @@ export async function sendOutbidEmail(o: {
     o.to,
     "You've been outbid.",
     shell(`
-      <h1 style="font-size:32px;margin:0 0 8px;letter-spacing:-0.03em">SOMEONE PAID MORE.</h1>
-      <p style="margin:0 0 24px;color:#555">Someone just bought @${o.handle}'s bio from you.</p>
-      <table style="font-size:15px;line-height:2;margin-bottom:24px">
-        <tr><td style="color:#777;padding-right:16px">You paid</td><td><b>${money(o.paidCents)}</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">New price</td><td><b>${money(o.newPriceCents)}</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">You owned it for</td><td><b>${o.duration}</b></td></tr>
-        <tr><td style="color:#777;padding-right:16px">Clicks received</td><td><b>${o.clicks.toLocaleString()}</b></td></tr>
-      </table>
-      ${button(link, `TAKE IT BACK — ${money(o.newPriceCents)}`)}
+      ${h1("Someone paid more")}
+      ${p(`Your spot in <b>@${o.handle}</b>'s bio was just taken. You can take it back at the new price at any time.`)}
+      ${facts([
+        ["You paid", money(o.paidCents)],
+        ["New price", money(o.newPriceCents)],
+        ["You owned it for", o.duration],
+        ["Clicks received", o.clicks.toLocaleString()],
+      ])}
+      ${button(link, `Take it back \u2014 ${money(o.newPriceCents)}`)}
     `),
   );
 }
