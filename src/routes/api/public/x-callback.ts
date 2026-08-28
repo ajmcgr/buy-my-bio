@@ -17,15 +17,23 @@ export const Route = createFileRoute("/api/public/x-callback")({
         const fail = (reason: string) =>
           new Response(null, { status: 302, headers: { Location: `/creator?error=${reason}` } });
 
+        // The user pressed "Cancel" on X's consent screen.
+        const denied = url.searchParams.get("error");
+        if (denied) {
+          return fail(denied === "access_denied" ? "x_denied" : "x_callback_error");
+        }
         if (!code || !state) return fail("missing_code");
 
         const { data: row } = await db
           .from("x_oauth_states")
-          .select("state, code_verifier")
+          .select("state, code_verifier, created_at")
           .eq("state", state)
           .maybeSingle();
         if (!row) return fail("bad_state");
+        // Single-use state, regardless of what happens next.
         await db.from("x_oauth_states").delete().eq("state", state);
+        const age = Date.now() - new Date(row.created_at as string).getTime();
+        if (age > 10 * 60 * 1000) return fail("bad_state");
 
         let xUser;
         try {
@@ -75,10 +83,11 @@ export const Route = createFileRoute("/api/public/x-callback")({
           username = xUser.username.toLowerCase().replace(/[^a-z0-9_-]/g, "");
           const { data: clash } = await db
             .from("creators")
-            .select("id")
+            .select("id, x_user_id")
             .eq("username", username)
             .maybeSingle();
-          if (clash) return fail("handle_taken");
+          // Another BuyMyBio creator already holds this handle / X account.
+          if (clash) return fail(clash.x_user_id ? "x_already_connected" : "handle_taken");
 
           const { data: created, error } = await db
             .from("creators")
@@ -110,7 +119,11 @@ export const Route = createFileRoute("/api/public/x-callback")({
 
         return new Response(null, {
           status: 302,
-          headers: { Location: `/creator?t=${encodeURIComponent(sessionToken)}` },
+          headers: {
+            Location: `/creator?t=${encodeURIComponent(sessionToken)}&connected=${encodeURIComponent(
+              xUser.username,
+            )}`,
+          },
         });
       },
     },
