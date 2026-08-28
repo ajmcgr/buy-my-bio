@@ -48,6 +48,8 @@ function CreatorPage() {
     const params = new URLSearchParams(window.location.search);
     const err = params.get("error");
     if (err) setMessage(errorCopy(err));
+    const connected = params.get("connected");
+    if (connected && !err) setMessage(`X account verified — @${connected}`);
     const fromUrl = params.get("t");
     if (fromUrl) {
       localStorage.setItem(STORAGE_KEY, fromUrl);
@@ -172,7 +174,17 @@ function CreatorPage() {
 function errorCopy(code: string): string {
   switch (code) {
     case "x_not_configured":
-      return "X sign-in isn't configured yet. Try again shortly.";
+      return "X sign-in isn't configured yet — X_CLIENT_ID and X_CLIENT_SECRET are missing.";
+    case "x_denied":
+      return "You cancelled the X authorisation. Nothing was connected.";
+    case "x_callback_error":
+      return "X returned an error during sign-in. Please try again.";
+    case "x_already_connected":
+      return "That X account is already connected to another BuyMyBio creator.";
+    case "missing_code":
+      return "That sign-in didn't complete. Please connect again.";
+    case "creator_create_failed":
+      return "We couldn't create your creator profile. Please try again.";
     case "bad_state":
       return "That sign-in link expired. Please connect again.";
     case "handle_taken":
