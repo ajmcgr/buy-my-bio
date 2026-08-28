@@ -15,7 +15,7 @@ async function stripe(path: string, body?: string, method = "POST") {
       Authorization: `Bearer ${process.env["STRIPE_SECRET_KEY"]!}`,
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body,
+    body: body ?? null,
   });
   const json = (await res.json()) as Record<string, unknown>;
   if (!res.ok) {
