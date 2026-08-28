@@ -15,7 +15,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreatorRouteImport } from './routes/creator'
-import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -54,9 +54,9 @@ const CreatorRoute = CreatorRouteImport.update({
   path: '/creator',
   getParentRoute: () => rootRouteImport,
 } as any)
-const HowItWorksRoute = HowItWorksRouteImport.update({
-  id: '/how-it-works',
-  path: '/how-it-works',
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -102,7 +102,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
-  '/how-it-works': typeof HowItWorksRoute
+  '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -118,7 +118,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
-  '/how-it-works': typeof HowItWorksRoute
+  '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -135,7 +135,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
-  '/how-it-works': typeof HowItWorksRoute
+  '/faq': typeof FaqRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -153,7 +153,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/creator'
-    | '/how-it-works'
+    | '/faq'
     | '/privacy'
     | '/success'
     | '/terms'
@@ -169,7 +169,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/creator'
-    | '/how-it-works'
+    | '/faq'
     | '/privacy'
     | '/success'
     | '/terms'
@@ -185,7 +185,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/creator'
-    | '/how-it-works'
+    | '/faq'
     | '/privacy'
     | '/success'
     | '/terms'
@@ -202,7 +202,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   CreatorRoute: typeof CreatorRoute
-  HowItWorksRoute: typeof HowItWorksRoute
+  FaqRoute: typeof FaqRoute
   PrivacyRoute: typeof PrivacyRoute
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
@@ -256,11 +256,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreatorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/how-it-works': {
-      id: '/how-it-works'
-      path: '/how-it-works'
-      fullPath: '/how-it-works'
-      preLoaderRoute: typeof HowItWorksRouteImport
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -322,7 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   CreatorRoute: CreatorRoute,
-  HowItWorksRoute: HowItWorksRoute,
+  FaqRoute: FaqRoute,
   PrivacyRoute: PrivacyRoute,
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,
