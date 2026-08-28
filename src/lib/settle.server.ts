@@ -59,13 +59,27 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     return { status: "stale", reason: String(r["reason"] ?? "unknown"), paymentId: payment.id };
   }
 
+  const { data: slugRow } = await db
+    .from("listings")
+    .select("slug")
+    .eq("id", payment.listing_id)
+    .maybeSingle();
+  const slug = slugRow?.slug ?? "";
+
   if (r["reason"] === "already_applied") {
     const { data: own } = await db
       .from("ownerships")
       .select("id")
       .eq("payment_id", payment.id)
       .maybeSingle();
-    return { status: "owned", ownershipId: own?.id ?? "", paymentId: payment.id };
+    return {
+      status: "owned",
+      ownershipId: own?.id ?? "",
+      paymentId: payment.id,
+      companyName: payment.company_name,
+      amountCents: payment.amount_cents,
+      slug,
+    };
   }
 
   const ownershipId = String(r["ownership_id"]);
