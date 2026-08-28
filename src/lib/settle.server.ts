@@ -4,7 +4,14 @@ import { sendOutbidEmail, sendWinnerEmail, humanDuration } from "./email.server"
 import { nextPriceCents } from "./format";
 
 export type SettleResult =
-  | { status: "owned"; ownershipId: string; paymentId: string }
+  | {
+      status: "owned";
+      ownershipId: string;
+      paymentId: string;
+      companyName: string;
+      amountCents: number;
+      slug: string;
+    }
   | { status: "stale"; reason: string; paymentId: string }
   | { status: "unpaid" }
   | { status: "unknown" };
