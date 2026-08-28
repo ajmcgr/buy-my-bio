@@ -177,25 +177,25 @@ function HamburgerMenu() {
         <Menu size={20} />
       </button>
       {open ? (
-        <div className="absolute right-0 z-50 mt-2 w-40 rounded-xl border border-border bg-card p-2 shadow-lg">
+        <div className="absolute right-0 z-50 mt-3 w-52 overflow-hidden rounded-2xl bg-card py-2 shadow-[0_10px_40px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
           <Link
             to="/faq"
             onClick={() => setOpen(false)}
-            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+            className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             FAQ
           </Link>
           <Link
             to="/terms"
             onClick={() => setOpen(false)}
-            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+            className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             Terms
           </Link>
           <Link
             to="/privacy"
             onClick={() => setOpen(false)}
-            className="block rounded-lg px-3 py-2 text-sm hover:bg-muted"
+            className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             Privacy
           </Link>
