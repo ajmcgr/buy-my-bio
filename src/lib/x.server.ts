@@ -8,7 +8,12 @@ const TOKEN_URL = "https://api.twitter.com/2/oauth2/token";
 const ME_URL =
   "https://api.twitter.com/2/users/me?user.fields=description,profile_image_url,public_metrics,url,name,username,entities";
 
-export const X_SCOPES = ["tweet.read", "users.read", "offline.access"];
+/**
+ * Minimum scopes for our use case: read the authenticated user's public
+ * profile. No posting, no profile writes, no refresh tokens (we never act on
+ * the creator's behalf after the connect flow).
+ */
+export const X_SCOPES = ["users.read", "tweet.read"];
 
 function b64url(bytes: Uint8Array): string {
   let s = "";
