@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UsernameRouteImport } from './routes/$username'
 import { Route as HistoryRouteImport } from './routes/history'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SellRouteImport } from './routes/sell'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -37,6 +38,11 @@ const HistoryRoute = HistoryRouteImport.update({
 const HowItWorksRoute = HowItWorksRouteImport.update({
   id: '/how-it-works',
   path: '/how-it-works',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SellRoute = SellRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/$username': typeof UsernameRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/privacy': typeof PrivacyRoute
   '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -81,6 +88,7 @@ export interface FileRoutesByTo {
   '/$username': typeof UsernameRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/privacy': typeof PrivacyRoute
   '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -93,6 +101,7 @@ export interface FileRoutesById {
   '/$username': typeof UsernameRoute
   '/history': typeof HistoryRoute
   '/how-it-works': typeof HowItWorksRoute
+  '/privacy': typeof PrivacyRoute
   '/sell': typeof SellRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -106,6 +115,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/history'
     | '/how-it-works'
+    | '/privacy'
     | '/sell'
     | '/success'
     | '/terms'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/history'
     | '/how-it-works'
+    | '/privacy'
     | '/sell'
     | '/success'
     | '/terms'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/$username'
     | '/history'
     | '/how-it-works'
+    | '/privacy'
     | '/sell'
     | '/success'
     | '/terms'
@@ -140,6 +152,7 @@ export interface RootRouteChildren {
   UsernameRoute: typeof UsernameRoute
   HistoryRoute: typeof HistoryRoute
   HowItWorksRoute: typeof HowItWorksRoute
+  PrivacyRoute: typeof PrivacyRoute
   SellRoute: typeof SellRoute
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/how-it-works'
       fullPath: '/how-it-works'
       preLoaderRoute: typeof HowItWorksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sell': {
@@ -220,6 +240,7 @@ const rootRouteChildren: RootRouteChildren = {
   UsernameRoute: UsernameRoute,
   HistoryRoute: HistoryRoute,
   HowItWorksRoute: HowItWorksRoute,
+  PrivacyRoute: PrivacyRoute,
   SellRoute: SellRoute,
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,
