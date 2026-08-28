@@ -122,8 +122,8 @@ function SiteHeader() {
   return (
     <header className="border-b-2 border-border">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
-        <Link to="/" className="text-lg font-extrabold tracking-tight">
-          Buy My Bio
+        <Link to="/" className="flex items-center">
+          <img src={logoAsset.url} alt="Buy My Bio" className="h-7 w-auto" />
         </Link>
         <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
           <Link to="/how-it-works" className="hover:underline">
