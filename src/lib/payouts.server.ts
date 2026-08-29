@@ -11,6 +11,7 @@
  */
 
 import { admin } from "./db.server";
+import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 const DEFAULT_HOLD_DAYS = 7;
 

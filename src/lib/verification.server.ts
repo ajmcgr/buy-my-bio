@@ -10,7 +10,7 @@
 
 import { admin } from "./db.server";
 import type { XUser } from "./x.server";
-import { SPONSOR_PREFIX, normalizeFormat } from "./placement";
+import { SPONSOR_PREFIX, normalizeFormat, WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 export const VERIFY_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
