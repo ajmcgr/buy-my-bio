@@ -315,7 +315,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           <div className="flex flex-col items-center">
             <TrafficCounters />
             <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
-              The most valuable bios on X.
+              The most valuable bios on X
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
               Buy a sponsored slot. Keep it until somebody pays more.
