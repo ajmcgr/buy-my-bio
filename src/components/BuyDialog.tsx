@@ -51,6 +51,8 @@ export function BuyDialog({
           xHandle: String(f.get("xhandle") ?? "") || null,
           logoUrl: String(f.get("logo") ?? "") || null,
           agreed,
+          creatorToken:
+            typeof window === "undefined" ? null : localStorage.getItem("bmb_creator_token"),
         },
       });
       if ("url" in res && res.url) {
