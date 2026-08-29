@@ -16,12 +16,7 @@ import { admin } from "./db.server";
 import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 export const ACTIVATION_WINDOW_MS = 24 * 60 * 60 * 1000;
-const DEFAULT_HOLD_DAYS = 7;
-
-export function holdDays(): number {
-  const raw = Number(process.env["PAYOUT_HOLD_DAYS"]);
-  return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_HOLD_DAYS;
-}
+const PAYOUT_HOLD_DAYS = 7;
 
 export function activationDeadlineFrom(iso: string | Date): string {
   const base = typeof iso === "string" ? new Date(iso) : iso;
@@ -120,7 +115,7 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
   if (!firstVerifiedAt) throw new Error("activation timestamp was not recorded");
 
   const releaseAt = new Date(
-    new Date(firstVerifiedAt).getTime() + holdDays() * 86_400_000,
+    new Date(firstVerifiedAt).getTime() + PAYOUT_HOLD_DAYS * 86_400_000,
   ).toISOString();
 
   const { error: payoutUpdateError } = await db

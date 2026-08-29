@@ -13,12 +13,7 @@
 import { admin } from "./db.server";
 import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
-const DEFAULT_HOLD_DAYS = 7;
-
-function holdDays(): number {
-  const raw = Number(process.env["PAYOUT_HOLD_DAYS"]);
-  return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_HOLD_DAYS;
-}
+const PAYOUT_HOLD_DAYS = 7;
 
 /**
  * Ensures the applied payment has its one creator payout. The database unique
@@ -34,7 +29,7 @@ export async function recordPayout(opts: {
   // `hold_until` is NOT NULL in the base schema. Website-only settlement
   // fulfils the placement immediately, and markActivated below confirms this
   // same hold window before any transfer can become due.
-  const initialHoldUntil = new Date(Date.now() + holdDays() * 86_400_000).toISOString();
+  const initialHoldUntil = new Date(Date.now() + PAYOUT_HOLD_DAYS * 86_400_000).toISOString();
 
   const { data: listing } = await db
     .from("listings")
