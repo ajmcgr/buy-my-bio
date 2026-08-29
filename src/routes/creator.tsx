@@ -4,6 +4,7 @@ import { Share2 } from "lucide-react";
 import {
   getCreatorSession,
   disconnectXAccount,
+  publishListing,
   type CreatorSession,
 } from "@/lib/creator.functions";
 import {
@@ -90,6 +91,20 @@ function CreatorPage() {
       loadPayouts(t);
     }
   }, [loadPayouts]);
+
+  async function onPublish() {
+    if (!token) return;
+    setBusy(true);
+    const res = await publishListing({ data: { token } });
+    setBusy(false);
+    if ("error" in res) {
+      setMessage(res.error);
+      return;
+    }
+    setMessage("Your profile is now listed on Buy My Bio.");
+    const next = await getCreatorSession({ data: { token } });
+    setSession(next);
+  }
 
   async function onDisconnect(deleteData: boolean) {
     if (!token) return;
@@ -182,6 +197,25 @@ function CreatorPage() {
               </div>
             </div>
           </div>
+
+          {session.listingStatus !== "active" ? (
+            <div className="panel mt-6 p-6">
+              <div className="label-xs">Not listed yet</div>
+              <h2 className="mt-1 text-xl font-semibold">List my profile</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Connecting X does not list you publicly. Publish when you're ready — your profile
+                then appears in the marketplace and buyers can sponsor it. This sponsorship appears
+                on BuyMyBio.com only.
+              </p>
+              <button
+                onClick={onPublish}
+                disabled={busy}
+                className="btn-ink btn-ink-hover mt-5 disabled:opacity-50"
+              >
+                {busy ? "Working…" : "List my profile"}
+              </button>
+            </div>
+          ) : null}
 
           <div className="mt-4 flex flex-wrap gap-3">
             <Badge on={session.accountVerified} label="X account connected" />
