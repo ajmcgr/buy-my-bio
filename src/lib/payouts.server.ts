@@ -300,18 +300,22 @@ export async function releaseOne(payoutId: string): Promise<string> {
   }
 
   if (result.outcome === "mismatch") {
-    // Race guard: a newer buyer may have taken over between the two reads.
+    // Race guard: a newer buyer may have taken over between the two reads. That
+    // transition carries its own final verification, so defer to it.
     if (ownership) {
       const { data: fresh } = await db
         .from("ownerships")
-        .select("status, placement_end_reason")
+        .select("status, placement_end_reason, final_verification_status, mismatch_pending_since, mismatch_recheck_at")
         .eq("id", ownership.id)
         .maybeSingle();
       if (fresh && fresh.status !== "active" && fresh.placement_end_reason !== "seller_removed") {
+        if (fresh.final_verification_status !== "verified")
+          return block(payoutId, "awaiting_final_transition_verification");
         await db
           .from("payouts")
           .update({
             bio_verification_status: "verified",
+            final_verification_status: "verified",
             last_verification_attempt_at: now,
             last_verification_error: null,
           })
@@ -325,12 +329,30 @@ export async function releaseOne(payoutId: string): Promise<string> {
           createTransfer,
         );
       }
+
+      // Still the current owner: one confirmed mismatch is not terminal.
+      const { registerActiveMismatch } = await import("./verification.server");
+      const outcome = await registerActiveMismatch(
+        {
+          ownershipId: ownership.id,
+          listingId: "",
+          paymentId: payout.payment_id,
+          creatorId: creator.id,
+          payoutId,
+          payoutStatus: payout.status as string,
+        },
+        result.reason,
+        result.snapshot,
+        "hold",
+        (fresh?.mismatch_pending_since as string | null) ??
+          (ownership.mismatch_pending_since as string | null) ??
+          null,
+        (fresh?.mismatch_recheck_at as string | null) ?? null,
+      );
+      if (outcome === "pending") return block(payoutId, "mismatch_pending_confirmation");
+      return `blocked: verification_failed: ${result.reason}`;
     }
-    if (ownership)
-      await db
-        .from("ownerships")
-        .update({ placement_end_reason: "seller_removed" })
-        .eq("id", ownership.id);
+
     await db
       .from("payouts")
       .update({
@@ -343,36 +365,9 @@ export async function releaseOne(payoutId: string): Promise<string> {
         last_error: `verification_failed: ${result.reason}`,
       })
       .eq("id", payoutId);
-    if (ownership)
-      await db
-        .from("ownerships")
-        .update({
-          bio_verification_status: "failed",
-          verification_failure_at: now,
-          verification_failure_reason: result.reason,
-          last_verification_attempt_at: now,
-        })
-        .eq("id", ownership.id);
-    await db.from("creators").update({ x_bio_verified: false }).eq("id", creator.id);
-    await db
-      .from("listings")
-      .update({
-        status: "suspended",
-        compliance_status: "non_compliant",
-        non_compliant_since: now,
-        non_compliant_reason: result.reason,
-      })
-      .eq("creator_id", creator.id);
-    await db.from("placement_violations").insert({
-      creator_id: creator.id,
-      ownership_id: ownership?.id ?? null,
-      payout_id: payoutId,
-      phase: "hold",
-      reason: result.reason,
-      bio_snapshot: result.snapshot,
-    });
     return `blocked: verification_failed: ${result.reason}`;
   }
+
 
   await db
     .from("payouts")
