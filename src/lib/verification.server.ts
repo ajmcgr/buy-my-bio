@@ -390,7 +390,7 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
   const { data: ownerships } = await db
     .from("ownerships")
     .select(
-      "id, listing_id, payment_id, bio_message, destination_url, last_verification_attempt_at, mismatch_pending_since, mismatch_recheck_at",
+      "id, listing_id, payment_id, bio_message, destination_url, placement_format, last_verification_attempt_at, mismatch_pending_since, mismatch_recheck_at",
     )
     .eq("status", "active")
     .not("first_verified_at", "is", null)
@@ -437,6 +437,7 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
       xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
       message: (o.bio_message as string | null) ?? null,
       url: (o.destination_url as string | null) ?? null,
+      placementFormat: (o.placement_format as string | null) ?? null,
     });
 
     const { data: payout } = await db
@@ -568,7 +569,7 @@ export async function verifyOutgoingBeforeTakeover(
   const db = admin();
   const { data: o } = await db
     .from("ownerships")
-    .select("id, payment_id, bio_message, destination_url, first_verified_at, placement_status")
+    .select("id, payment_id, bio_message, destination_url, placement_format, first_verified_at, placement_status")
     .eq("listing_id", listingId)
     .eq("status", "active")
     .not("first_verified_at", "is", null)
@@ -594,6 +595,7 @@ export async function verifyOutgoingBeforeTakeover(
     xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
     message: (o.bio_message as string | null) ?? null,
     url: (o.destination_url as string | null) ?? null,
+    placementFormat: (o.placement_format as string | null) ?? null,
   });
 
   return {
@@ -729,7 +731,7 @@ export async function resolveUnresolvedFinalVerifications(limit = 25): Promise<R
   const { data: rows } = await db
     .from("ownerships")
     .select(
-      "id, listing_id, payment_id, bio_message, destination_url, final_verification_attempts",
+      "id, listing_id, payment_id, bio_message, destination_url, placement_format, final_verification_attempts",
     )
     .eq("final_verification_status", "unresolved")
     .limit(limit);
@@ -757,6 +759,7 @@ export async function resolveUnresolvedFinalVerifications(limit = 25): Promise<R
       xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
       message: (o.bio_message as string | null) ?? null,
       url: (o.destination_url as string | null) ?? null,
+      placementFormat: (o.placement_format as string | null) ?? null,
     });
 
     if (result.outcome === "match") {

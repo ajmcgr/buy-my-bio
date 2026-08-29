@@ -335,7 +335,7 @@ export const adminTransactionAction = createServerFn({ method: "POST" })
     if (data.action === "retry_verification") {
       const { data: ownership } = await db
         .from("ownerships")
-        .select("id, listing_id, payment_id, bio_message, destination_url, first_verified_at")
+        .select("id, listing_id, payment_id, bio_message, destination_url, placement_format, first_verified_at")
         .eq("payment_id", data.paymentId)
         .maybeSingle();
       if (!ownership) return { error: "ownership_not_found" } as const;
@@ -359,6 +359,7 @@ export const adminTransactionAction = createServerFn({ method: "POST" })
         xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
         message: (ownership.bio_message as string | null) ?? null,
         url: (ownership.destination_url as string | null) ?? null,
+        placementFormat: (ownership.placement_format as string | null) ?? null,
       });
       if (result.outcome === "match" && !ownership.first_verified_at) {
         const { markActivated } = await import("./activation.server");

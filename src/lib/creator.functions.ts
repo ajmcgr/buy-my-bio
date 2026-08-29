@@ -66,7 +66,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       const { data: ownership } = await db
         .from("ownerships")
         .select(
-          "bio_message, destination_url, placement_status, activation_deadline, first_verified_at",
+          "bio_message, destination_url, placement_format, placement_status, activation_deadline, first_verified_at",
         )
         .eq("status", "active")
         .eq("listing_id", listing.id)
