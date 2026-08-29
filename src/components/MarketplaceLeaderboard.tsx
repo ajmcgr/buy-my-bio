@@ -169,7 +169,7 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
           <div className="mt-1 text-[clamp(3.25rem,9vw,6rem)] leading-none font-extrabold tracking-[-0.06em]">
             {money(row.bioValueCents ?? 0)}
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-5 border-t border-background/30 pt-5">
+          <div className="mt-6 grid grid-cols-3 gap-5 border-t border-background/30 pt-5">
             <div>
               <div className="font-mono text-[0.6rem] font-bold text-background/60">Sponsor</div>
               <div className="mt-1 truncate font-extrabold">{row.owner?.company_name}</div>
@@ -177,6 +177,10 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
             <div>
               <div className="font-mono text-[0.6rem] font-bold text-background/60">Next price</div>
               <div className="mt-1 font-extrabold">{money(row.requiredPriceCents)}</div>
+            </div>
+            <div>
+              <div className="font-mono text-[0.6rem] font-bold text-background/60">Page clicks</div>
+              <div className="mt-1 font-extrabold">{row.pageViewCount.toLocaleString()}</div>
             </div>
           </div>
           <div className="mt-6 [&_.btn-ink]:border-accent [&_.btn-ink]:bg-accent [&_.btn-ink]:text-accent-foreground">
@@ -195,7 +199,7 @@ function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: numb
   const owned = row.bioValueCents !== null && row.owner;
   const displayRank = row.globalRank ?? (owned ? position + 1 : null);
   return (
-    <article className="grid gap-4 border-x-2 border-b-2 border-border bg-card p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_auto] sm:items-center sm:gap-5 sm:px-5">
+    <article className="grid gap-4 border-x-2 border-b-2 border-border bg-card p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_0.6fr_auto] sm:items-center sm:gap-5 sm:px-5">
       <div className="font-mono text-2xl font-extrabold">
         {displayRank ? `#${displayRank}` : "—"}
       </div>
@@ -215,6 +219,10 @@ function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: numb
       </div>
       <div className="min-w-0">
         <SponsorDetails row={row} />
+      </div>
+      <div>
+        <div className="label-xs">Page clicks</div>
+        <div className="mt-0.5 text-xl font-extrabold">{row.pageViewCount.toLocaleString()}</div>
       </div>
       <TakeoverButton row={row} />
     </article>
