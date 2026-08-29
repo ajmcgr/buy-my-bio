@@ -11,6 +11,7 @@
  */
 
 import { admin } from "./db.server";
+import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 const DEFAULT_HOLD_DAYS = 7;
 
@@ -204,6 +205,31 @@ export async function releaseOne(payoutId: string): Promise<string> {
     .maybeSingle();
 
   const now = new Date().toISOString();
+
+  // Website-only sponsorships are fulfilled on buymybio.com at purchase time.
+  // Payment, ownership and the live placement are the only conditions, so no
+  // X read gates the money — being outbid later never invalidates this payout.
+  if (WEBSITE_ONLY_SPONSORSHIP) {
+    if (!ownership) return block(payoutId, "ownership_missing");
+    await db
+      .from("payouts")
+      .update({
+        bio_verification_status: "verified",
+        final_verification_status: "verified",
+        last_verification_attempt_at: now,
+        last_verification_error: null,
+      })
+      .eq("id", payoutId);
+    return transferPayout(
+      payoutId,
+      payout,
+      payment,
+      creator,
+      retrievePaymentIntent,
+      createTransfer,
+    );
+  }
+
 
   const endReason = (ownership?.placement_end_reason as string | null) ?? null;
 

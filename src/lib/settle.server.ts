@@ -1,4 +1,6 @@
 import { admin } from "./db.server";
+import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
+
 import { retrieveSession } from "./stripe.server";
 import { sendOutbidEmail, sendWinnerEmail, humanDuration } from "./email.server";
 import { nextPriceCents } from "./format";
@@ -80,19 +82,20 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("pre-takeover rank lookup failed", e);
   }
 
-  // Fresh X read of the OUTGOING owner's placement while they are still the
-  // current owner. Taken before the ownership row flips, persisted only if the
-  // takeover actually lands, so a row turning OUTBID never makes a payout
-  // eligible on its own.
+  // Website-only sponsorships never depend on the outgoing sponsor's X bio, so
+  // no X read happens at a transition. (Legacy path kept for historical rows.)
   let outgoing: Awaited<
     ReturnType<typeof import("./verification.server").verifyOutgoingBeforeTakeover>
   > = null;
-  try {
-    const { verifyOutgoingBeforeTakeover } = await import("./verification.server");
-    outgoing = await verifyOutgoingBeforeTakeover(payment.listing_id);
-  } catch (e) {
-    console.error("outgoing placement verification failed", e);
+  if (!WEBSITE_ONLY_SPONSORSHIP) {
+    try {
+      const { verifyOutgoingBeforeTakeover } = await import("./verification.server");
+      outgoing = await verifyOutgoingBeforeTakeover(payment.listing_id);
+    } catch (e) {
+      console.error("outgoing placement verification failed", e);
+    }
   }
+
 
   const { data: result } = await db.rpc("apply_takeover", { _payment_id: payment.id });
   const r = (result ?? {}) as Record<string, unknown>;
@@ -183,18 +186,20 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     paymentId: payment.id,
     listingId: payment.listing_id,
     ownershipId,
-    detail: { status: "awaiting_activation" },
+    detail: { status: WEBSITE_ONLY_SPONSORSHIP ? "live" : "awaiting_activation" },
   });
 
-  // The buyer paid, but the creator has NOT delivered yet: start the 24-hour
-  // activation window and void any earlier purchase that was never activated.
-  try {
-    const { startActivationWindow, supersedeUnactivated } = await import("./activation.server");
-    await startActivationWindow(ownershipId, new Date().toISOString());
-    await supersedeUnactivated(payment.listing_id, ownershipId);
-  } catch (e) {
-    console.error("activation window setup failed", e);
+  if (!WEBSITE_ONLY_SPONSORSHIP) {
+    // Legacy: the buyer paid, but the creator has NOT delivered yet.
+    try {
+      const { startActivationWindow, supersedeUnactivated } = await import("./activation.server");
+      await startActivationWindow(ownershipId, new Date().toISOString());
+      await supersedeUnactivated(payment.listing_id, ownershipId);
+    } catch (e) {
+      console.error("activation window setup failed", e);
+    }
   }
+
 
   // context for emails
   const { data: listing } = await db
@@ -231,35 +236,38 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     .eq("id", ownershipId)
     .maybeSingle();
 
-  try {
-    const {
-      sendBuyerAwaitingActivationEmail,
-      sendCreatorActionRequiredEmail,
-    } = await import("./email.server");
-    await sendBuyerAwaitingActivationEmail({
-      to: payment.email,
-      handle,
-      amountCents: payment.amount_cents,
-      message: (ownershipRow?.bio_message as string | null) ?? null,
-      destination: payment.destination_url,
-    });
-    if (listing) {
-      const { creatorEmail } = await import("./notify.server");
-      const to = await creatorEmail(listing.creator_id);
-      if (to)
-        await sendCreatorActionRequiredEmail({
-          to,
-          amountCents: payment.amount_cents,
-          message: (ownershipRow?.bio_message as string | null) ?? null,
-          destination: payment.destination_url,
-          deadline:
-            (ownershipRow?.activation_deadline as string | null) ??
-            new Date(Date.now() + 86_400_000).toISOString(),
-        });
+  if (!WEBSITE_ONLY_SPONSORSHIP) {
+    try {
+      const {
+        sendBuyerAwaitingActivationEmail,
+        sendCreatorActionRequiredEmail,
+      } = await import("./email.server");
+      await sendBuyerAwaitingActivationEmail({
+        to: payment.email,
+        handle,
+        amountCents: payment.amount_cents,
+        message: (ownershipRow?.bio_message as string | null) ?? null,
+        destination: payment.destination_url,
+      });
+      if (listing) {
+        const { creatorEmail } = await import("./notify.server");
+        const to = await creatorEmail(listing.creator_id);
+        if (to)
+          await sendCreatorActionRequiredEmail({
+            to,
+            amountCents: payment.amount_cents,
+            message: (ownershipRow?.bio_message as string | null) ?? null,
+            destination: payment.destination_url,
+            deadline:
+              (ownershipRow?.activation_deadline as string | null) ??
+              new Date(Date.now() + 86_400_000).toISOString(),
+          });
+      }
+    } catch (e) {
+      console.error("activation email failure", e);
     }
-  } catch (e) {
-    console.error("activation email failure", e);
   }
+
 
   try {
     await sendWinnerEmail({
@@ -295,8 +303,9 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("email failure", e);
   }
 
-  // Record the creator's held share. It only becomes eligible once the
-  // placement is verified live on X (release_at = first_verified_at + 7 days).
+  // Record the creator's 80% share. The website sponsorship is fulfilled the
+  // moment payment succeeds, ownership is assigned and the placement is live on
+  // buymybio.com, so the 7-day risk hold starts now.
   if (stripeLivemode) {
     try {
       const { recordPayout } = await import("./payouts.server");
@@ -310,6 +319,16 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       console.error("recordPayout failed", e);
     }
   }
+
+  if (WEBSITE_ONLY_SPONSORSHIP) {
+    try {
+      const { markActivated } = await import("./activation.server");
+      await markActivated(ownershipId, payment.id, new Date().toISOString());
+    } catch (e) {
+      console.error("website fulfillment failed", e);
+    }
+  }
+
 
   await db.from("analytics_events").insert({
     name: "checkout_completed",

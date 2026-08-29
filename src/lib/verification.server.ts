@@ -10,7 +10,7 @@
 
 import { admin } from "./db.server";
 import type { XUser } from "./x.server";
-import { SPONSOR_PREFIX, normalizeFormat } from "./placement";
+import { SPONSOR_PREFIX, normalizeFormat, WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 export const VERIFY_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -384,6 +384,8 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
     unavailable: 0,
     skipped: 0,
   };
+  // Website-only sponsorships never depend on the creator's X bio.
+  if (WEBSITE_ONLY_SPONSORSHIP) return summary;
   const cutoff = new Date(Date.now() - VERIFY_INTERVAL_MS).toISOString();
   const nowMs = Date.now();
 
@@ -727,6 +729,7 @@ export type ResolveSummary = { considered: number; verified: number; unresolved:
 export async function resolveUnresolvedFinalVerifications(limit = 25): Promise<ResolveSummary> {
   const db = admin();
   const summary: ResolveSummary = { considered: 0, verified: 0, unresolved: 0 };
+  if (WEBSITE_ONLY_SPONSORSHIP) return summary;
 
   const { data: rows } = await db
     .from("ownerships")

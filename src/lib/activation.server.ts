@@ -13,6 +13,7 @@
  */
 
 import { admin } from "./db.server";
+import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 export const ACTIVATION_WINDOW_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_HOLD_DAYS = 7;
@@ -269,6 +270,8 @@ export async function runActivationSweep(limit = 50): Promise<ActivationSummary>
     failed: 0,
     unavailable: 0,
   };
+  // No X activation exists in website-only mode.
+  if (WEBSITE_ONLY_SPONSORSHIP) return summary;
 
   const { data: pending } = await db
     .from("ownerships")
