@@ -6,8 +6,8 @@ import { MarketplaceLeaderboard } from "@/components/MarketplaceLeaderboard";
 const sortSchema = z.enum(["most-valuable", "trending", "new", "affordable"]);
 
 export const Route = createFileRoute("/")({
-  validateSearch: z.object({ sort: sortSchema.optional().catch("new") }),
-  loaderDeps: ({ search }) => ({ sort: search.sort ?? "new" }),
+  validateSearch: z.object({ sort: sortSchema.optional().catch("trending") }),
+  loaderDeps: ({ search }) => ({ sort: search.sort ?? "trending" }),
   loader: async ({ deps }) => await getMarketplace({ data: { sort: deps.sort } }),
   head: () => ({
     meta: [

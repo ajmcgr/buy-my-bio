@@ -14,10 +14,10 @@ import { BuyDialog } from "./BuyDialog";
 import { XIcon } from "./XIcon";
 
 const sorts: Array<{ value: MarketplaceSort; label: string }> = [
-  { value: "new", label: "New" },
   { value: "trending", label: "Trending" },
-  { value: "affordable", label: "Affordable" },
   { value: "most-valuable", label: "Most valuable" },
+  { value: "new", label: "New" },
+  { value: "affordable", label: "Affordable" },
 ];
 
 function TrafficCounters() {
@@ -179,7 +179,9 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
               <div className="mt-1 font-extrabold">{money(row.requiredPriceCents)}</div>
             </div>
             <div>
-              <div className="font-mono text-[0.6rem] font-bold text-background/60">Sponsor clicks</div>
+              <div className="font-mono text-[0.6rem] font-bold text-background/60">
+                Sponsor clicks
+              </div>
               <div className="mt-1 font-extrabold">{row.sponsorClickCount.toLocaleString()}</div>
             </div>
           </div>
@@ -353,7 +355,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         <div className="flex flex-col gap-4 border-2 border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
             <h2 id="leaderboard-heading" className="text-lg font-extrabold">
-              X rankings
+              Rankings
             </h2>
             <p className="text-xs text-muted-foreground">
               Ranked by successful sponsorship payments. No weighting. No boosting.
@@ -362,7 +364,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           <div className="flex max-w-full gap-1 overflow-x-auto" aria-label="Leaderboard sorting">
             {sorts.map((sort) => {
               const active = market.sort === sort.value;
-              const href = sort.value === "new" ? "/" : `/?sort=${sort.value}`;
+              const href = sort.value === "trending" ? "/" : `/?sort=${sort.value}`;
               return (
                 <a
                   key={sort.value}
@@ -463,9 +465,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
 
       <section className="mt-4 border-2 border-border bg-muted px-5 py-5 text-center">
         <div className="label-xs">Total sponsorships since launch</div>
-        <div className="mt-1 text-2xl font-extrabold">
-          {money(market.totalSponsorshipsCents)}
-        </div>
+        <div className="mt-1 text-2xl font-extrabold">{money(market.totalSponsorshipsCents)}</div>
       </section>
     </div>
   );

@@ -5,7 +5,10 @@ const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 const imageIn = z.object({
-  data: z.string().min(1).max(Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 1024),
+  data: z
+    .string()
+    .min(1)
+    .max(Math.ceil((MAX_IMAGE_BYTES * 4) / 3) + 1024),
   type: z.string(),
 });
 
@@ -22,8 +25,7 @@ function decodeBase64(value: string): Uint8Array | null {
 export const uploadSponsorImage = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => imageIn.parse(input))
   .handler(async ({ data }) => {
-    if (!allowedTypes.has(data.type))
-      return { error: "Use a PNG, JPG, or WebP image." } as const;
+    if (!allowedTypes.has(data.type)) return { error: "Use a PNG, JPG, or WebP image." } as const;
 
     const bytes = decodeBase64(data.data);
     if (!bytes || bytes.byteLength > MAX_IMAGE_BYTES)

@@ -5,6 +5,9 @@ import type { ListingView, OwnerView } from "./listing.functions";
 
 export type MarketplaceSort = "most-valuable" | "trending" | "new" | "affordable";
 
+const TRENDING_ACTIVITY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
+const TRENDING_DISCOVERY_WINDOW_MS = 14 * 24 * 60 * 60 * 1000;
+
 export type MarketplaceRow = ListingView & {
   globalRank: number | null;
   bioValueCents: number | null;
@@ -74,6 +77,26 @@ type OwnershipRow = OwnerView & {
 };
 
 /**
+ * Keeps Trending grounded in paid sponsorships while giving brand-new listings
+ * a modest discovery boost. An active sponsorship always starts above the
+ * maximum unsponsored freshness boost; value and a recent takeover then raise
+ * the sponsored listing further.
+ */
+function trendingScore(row: MarketplaceRow, now: number) {
+  const freshness = (timestamp: string, windowMs: number) =>
+    Math.max(0, 1 - (now - new Date(timestamp).getTime()) / windowMs);
+
+  if (!row.owner || row.bioValueCents === null) {
+    return freshness(row.listedAt, TRENDING_DISCOVERY_WINDOW_MS) * 10;
+  }
+
+  const recentActivity = row.latestTakeoverAt
+    ? freshness(row.latestTakeoverAt, TRENDING_ACTIVITY_WINDOW_MS) * 50
+    : 0;
+  return 100 + row.bioValueCents / 100 + recentActivity;
+}
+
+/**
  * Builds every public market surface from payment-backed facts. Starting prices
  * are discovery metadata only and can never create Bio Value or leaderboard rank.
  */
@@ -127,15 +150,16 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
 
   // If the provenance migration has not been applied yet, this query returns no
   // eligible payments. Failing closed is intentional: unverifiable value is not value.
-  const paymentResult = canVerifyPayments && paymentIds.length
-    ? await db
-        .from("payments")
-        .select("id, status, refund_status, stripe_livemode")
-        .in("id", paymentIds)
-        .eq("status", "applied")
-        .eq("stripe_livemode", true)
-        .neq("refund_status", "refunded")
-    : { data: [] };
+  const paymentResult =
+    canVerifyPayments && paymentIds.length
+      ? await db
+          .from("payments")
+          .select("id, status, refund_status, stripe_livemode")
+          .in("id", paymentIds)
+          .eq("status", "applied")
+          .eq("stripe_livemode", true)
+          .neq("refund_status", "refunded")
+      : { data: [] };
   const eligiblePaymentIds = new Set(
     ((paymentResult.data ?? []) as Array<{ id: string }>).map((p) => p.id),
   );
@@ -219,10 +243,14 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
   let rows: MarketplaceRow[];
   switch (sort) {
     case "trending":
-      rows = [...owned].sort(
-        (a, b) =>
-          new Date(b.latestTakeoverAt ?? 0).getTime() - new Date(a.latestTakeoverAt ?? 0).getTime(),
-      );
+      {
+        const now = Date.now();
+        rows = [...allRows].sort((a, b) => {
+          const scoreDelta = trendingScore(b, now) - trendingScore(a, now);
+          if (scoreDelta !== 0) return scoreDelta;
+          return new Date(b.listedAt).getTime() - new Date(a.listedAt).getTime();
+        });
+      }
       break;
     case "new":
       rows = [...allRows].sort(
@@ -281,6 +309,9 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
     activity,
     ownedCount: owned.length,
     totalMarketValueCents: owned.reduce((sum, row) => sum + (row.bioValueCents ?? 0), 0),
-    totalSponsorshipsCents: genuineOwnerships.reduce((sum, ownership) => sum + ownership.amount_cents, 0),
+    totalSponsorshipsCents: genuineOwnerships.reduce(
+      (sum, ownership) => sum + ownership.amount_cents,
+      0,
+    ),
   };
 }

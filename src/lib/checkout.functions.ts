@@ -39,8 +39,8 @@ export const startCheckout = createServerFn({ method: "POST" })
     // Self-bidding guard. The HttpOnly session cookie is set only by the
     // trusted X OAuth callback; request-body identity fields are never used.
     const { getRequest } = await import("@tanstack/react-start/server");
-    const creatorSession = getRequest().headers
-      .get("cookie")
+    const creatorSession = getRequest()
+      .headers.get("cookie")
       ?.match(/(?:^|;\s*)bmb_creator_session=([^;]+)/)?.[1];
     if (creatorSession) {
       const { data: currentCreator } = await db
