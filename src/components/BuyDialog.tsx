@@ -111,11 +111,12 @@ export function BuyDialog({
         <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
           <p>
             You're buying a <b>sponsored placement</b> — a disclosed advertising message and
-            tracked link inside this creator's X bio.
+            tracked link on this creator's Buy My Bio profile.
           </p>
           <p className="mt-2 text-foreground/75">
             You are not buying the X account, username, profile photo, banner, posts, or any
-            access to the account. The creator keeps full control of their profile at all times.
+            access to the account, and nothing is added to the creator's X profile. The placement
+            appears on buymybio.com only.
           </p>
           <p className="mt-2 text-foreground/75">
             Your placement is always published with a “{SPONSOR_PREFIX}” label so it's clear to
@@ -144,8 +145,8 @@ export function BuyDialog({
             <div className="mt-1 flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
                 {limit < MESSAGE_MAX_CHARS
-                  ? `This creator has ${limit} characters of bio space left.`
-                  : "Your placement stays in this X bio until someone pays more."}
+                  ? `${limit} characters available.`
+                  : "Your placement stays live until someone pays more."}
               </span>
               <span
                 className={overLimit ? "font-semibold text-destructive" : "text-muted-foreground"}
@@ -169,17 +170,16 @@ export function BuyDialog({
               className="field mt-1"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              Your link is counted separately from your message, but it still has to fit inside
-              the creator's 160-character X bio.
+              Your link is shown with your message on the creator's Buy My Bio profile.
             </p>
           </div>
 
           <div className="border-2 border-border bg-muted px-4 py-3">
-            <div className="label-xs">Exactly what goes in the X bio</div>
+            <div className="label-xs">Exactly how your placement appears</div>
             <p className="mt-1 text-sm font-medium break-words text-foreground">{preview}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              We add the “{SPONSOR_PREFIX}” label automatically — it can't be removed, and we
-              verify this exact text is live before releasing any payout.
+              We add the “{SPONSOR_PREFIX}” label automatically — it can't be removed, so your
+              placement is always clearly disclosed as paid advertising.
             </p>
           </div>
 
