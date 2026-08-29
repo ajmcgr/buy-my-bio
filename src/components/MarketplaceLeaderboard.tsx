@@ -321,9 +321,6 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
               Buy your favorite X user's bio. Keep it until somebody pays more.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 font-mono text-[0.65rem] font-bold text-muted-foreground">
-            <Radio className="size-3.5 text-primary" /> Live market · {market.ownedCount} owned
-          </div>
         </div>
 
       </section>
