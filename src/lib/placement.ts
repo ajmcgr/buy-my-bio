@@ -1,19 +1,28 @@
 /**
  * Canonical sponsored placement.
  *
- * Buy My Bio sells SPONSORED PLACEMENT inside a creator's X bio. Every new
- * placement is automatically disclosed as sponsored: the "Sponsored:" prefix is
- * generated here (and re-generated server-side at checkout, activation and
- * verification) so the frontend can never drop it.
+ * Buy My Bio sells the SPONSOR SPOT on a creator's Buy My Bio profile. The
+ * sponsorship is displayed on buymybio.com only — creators are never asked to
+ * edit their X bio or take any action on X. X is used for authentication and
+ * identity/profile data only.
+ *
+ * Legacy X-bio placement helpers below are retained for historical records.
  *
  * Pure module — safe to import from client and server code.
  */
 
+/**
+ * Website-only sponsorship mode. When true, no paid transaction depends on any
+ * X action: no activation window, no bio verification, no bio-length limits.
+ */
+export const WEBSITE_ONLY_SPONSORSHIP = true;
+
 export const SPONSOR_PREFIX = "Sponsored:";
-/** Buyer message allowance, before per-creator bio space is taken into account. */
+/** Buyer message allowance. */
 export const MESSAGE_MAX_CHARS = 100;
-/** X bio limit. */
+/** Legacy X bio limit (historical placements only). */
 export const X_BIO_MAX_CHARS = 160;
+
 
 /** Placement format versions. v1 = legacy (no automatic disclosure). */
 export type PlacementFormat = "v1" | "v2";
