@@ -23,6 +23,6 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(async (
       "VITE_SUPABASE_PUBLISHABLE_KEY",
       "VITE_SUPABASE_ANON_KEY",
     ),
-    baseUrl: (process.env["APP_BASE_URL"] || "https://socialbid.co").replace(/\/$/, ""),
+    baseUrl: "https://socialbid.co",
   };
 });
