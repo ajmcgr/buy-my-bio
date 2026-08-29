@@ -265,132 +265,22 @@ function CreatorPage() {
 
           {session.ownerMessage ? (
             <div className="panel mt-8 p-6">
-              <div className="label-xs">
-                {session.activation?.status === "awaiting_activation"
-                  ? "New bio owner"
-                  : "Sponsor's message"}
-              </div>
-              <h2 className="mt-1 text-xl font-extrabold">
-                {session.activation?.status === "awaiting_activation"
-                  ? "Update your X bio within 24 hours to activate this sponsorship"
-                  : "Keep this in your X bio"}
+              <div className="label-xs">Current sponsor</div>
+              <h2 className="mt-1 text-xl font-semibold">
+                Your sponsored slot is live on Buy My Bio
               </h2>
               <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
                 {session.ownerPlacement ??
                   `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`}
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                Paste this exactly as shown — including the “Sponsored:” label, which is
-                required so the placement is clearly disclosed as advertising and stays within
-                X's rules. This is the exact text the current sponsor paid for. We re-read your
-                live X bio every day while this sponsor is the current owner. Each sale is paid
-                out 7 days after it was first verified live. If someone else pays more, just swap in the new
-                sponsor's placement — your earlier payouts stay on track. Removing a placement
-                while that sponsor still owns the slot cancels that payout.
+                This sponsorship appears on your Buy My Bio profile only. You never have to change
+                your X bio, and Buy My Bio never edits your X profile. Each sale is paid out 7 days
+                after purchase, and being outbid doesn't affect payouts you've already earned.
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                You add this to your X bio yourself — Buy My Bio never edits your profile. We only
-                read your bio to check the placement is live.
-              </p>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!session.ownerMessage) return;
-                    void navigator.clipboard.writeText(
-                      session.ownerPlacement ??
-                        `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`,
-                    );
-                    setMessage("Placement copied.");
-                  }}
-                  className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
-                >
-                  Copy placement
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const msg = session.ownerPlacement
-                      ? session.ownerPlacement.replace(
-                          session.ownerUrl ? ` ${session.ownerUrl}` : "",
-                          "",
-                        )
-                      : (session.ownerMessage ?? "");
-                    void navigator.clipboard.writeText(msg.trim());
-                    setMessage("Message copied.");
-                  }}
-                  className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
-                >
-                  Copy message
-                </button>
-                {session.ownerUrl ? (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      void navigator.clipboard.writeText(session.ownerUrl!);
-                      setMessage("URL copied.");
-                    }}
-                    className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
-                  >
-                    Copy URL
-                  </button>
-                ) : null}
-                {session.activation?.status === "awaiting_activation" ? (
-                  <button
-                    type="button"
-                    onClick={onActivate}
-                    disabled={busy}
-                    className="btn-ink btn-ink-hover disabled:opacity-50"
-                  >
-                    {busy ? "Checking…" : "Verify placement"}
-                  </button>
-                ) : null}
-              </div>
-              {session.activation?.status !== "awaiting_activation" &&
-              session.activation?.firstVerifiedAt ? (
-                <p className="mt-3 text-sm font-semibold">✓ Verified live</p>
-              ) : null}
-              {session.activation?.status === "awaiting_activation" &&
-              session.activation.deadline ? (
-                <p className="mt-3 text-sm font-semibold">
-                  Activate by {new Date(session.activation.deadline).toLocaleString()}. If it isn't
-                  verified live by then, you don't earn this sale.
-                </p>
-              ) : null}
-              {session.activation?.firstVerifiedAt ? (
-                <p className="mt-3 font-mono text-xs text-muted-foreground">
-                  Verified live {new Date(session.activation.firstVerifiedAt).toLocaleString()} ·
-                  payout releases 7 days after this.
-                </p>
-              ) : null}
-              {session.compliance?.status === "non_compliant" ? (
-                <p className="mt-3 border-2 border-destructive px-3 py-2 text-sm font-semibold text-destructive">
-                  Your listing is suspended because this placement is missing from your X bio.
-                  Restore it exactly as shown and your listing goes live again after the next
-                  check.
-                </p>
-              ) : null}
             </div>
           ) : null}
 
-          <div className="panel mt-8 p-6">
-            <div className="label-xs">Step 2</div>
-            <h2 className="mt-1 text-xl font-extrabold">Add this to your X bio</h2>
-            <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold">
-              {session.requiredPlacement}
-            </div>
-            <p className="mt-3 text-sm text-muted-foreground">
-              Paste it into your X bio or website field, save your profile, then verify. If we can't
-              read it automatically, an admin will confirm it manually.
-            </p>
-            <button
-              onClick={onVerify}
-              disabled={busy || session.bioVerified}
-              className="btn-ink btn-ink-hover mt-6 disabled:opacity-50"
-            >
-              {session.bioVerified ? "X bio verified" : busy ? "Checking…" : "Verify your X bio"}
-            </button>
-          </div>
 
           {token ? (
             <PayoutsPanel token={token} status={payouts} onChange={() => loadPayouts(token)} />
