@@ -39,6 +39,7 @@ function handleOf(row: MarketplaceRow) {
 
 function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: boolean }) {
   const handle = handleOf(row);
+  const creatorUrl = row.creator.x_profile_url ?? row.creator.social_profile_url;
   return (
     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
       {row.creator.profile_image_url ? (
@@ -63,8 +64,20 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
           {row.creator.display_name}
         </Link>
         <div className="flex items-center gap-1.5 truncate font-mono text-xs text-muted-foreground sm:text-sm">
-          <XIcon className="size-3" />
-          <span>@{handle}</span>
+          <XIcon className="size-3 shrink-0" />
+          {creatorUrl ? (
+            <a
+              href={creatorUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate hover:underline"
+              aria-label={`Open @${handle} on X`}
+            >
+              @{handle}
+            </a>
+          ) : (
+            <span>@{handle}</span>
+          )}
           {row.creator.x_account_verified ? <span aria-label="X account connected">✓</span> : null}
         </div>
         {large && row.creator.x_follower_count ? (
