@@ -318,7 +318,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
               The most valuable bios on X
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
-              Buy a sponsored slot. Keep it until somebody pays more.
+              Buy your favorite X user's bio. Keep it until somebody pays more.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2 font-mono text-[0.65rem] font-bold text-muted-foreground">
