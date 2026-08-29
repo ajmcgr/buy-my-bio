@@ -5,6 +5,7 @@ import {
   getCreatorSession,
   verifyMyBio,
   activatePlacement,
+  disconnectXAccount,
   type CreatorSession,
 } from "@/lib/creator.functions";
 import {
