@@ -3,17 +3,34 @@ import { baseUrl } from "./db.server";
 
 const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@buymybio.com>";
 
-async function send(to: string, subject: string, html: string) {
+type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean };
+
+async function send(to: string, subject: string, html: string, options: SendOptions = {}) {
   const key = process.env["RESEND_API_KEY"];
-  if (!key || !to) return;
+  if (!key || !to) {
+    const error = new Error(
+      !key ? "RESEND_API_KEY is not configured" : "email recipient is missing",
+    );
+    if (options.throwOnFailure) throw error;
+    console.error("resend failed", error.message);
+    return { sent: false };
+  }
   try {
-    await fetch("https://api.resend.com/emails", {
+    const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${key}`,
+        "Content-Type": "application/json",
+        ...(options.idempotencyKey ? { "Idempotency-Key": options.idempotencyKey } : {}),
+      },
       body: JSON.stringify({ from: FROM, to: [to], subject, html }),
     });
+    if (!response.ok) throw new Error(`Resend returned HTTP ${response.status}`);
+    return { sent: true };
   } catch (e) {
     console.error("resend failed", e);
+    if (options.throwOnFailure) throw e;
+    return { sent: false };
   }
 }
 
@@ -86,6 +103,8 @@ export async function sendWinnerEmail(o: {
   company: string;
   ownershipId: string;
   globalRank?: number | null;
+  idempotencyKey?: string;
+  throwOnFailure?: boolean;
 }) {
   const link = `${baseUrl()}/u/${o.username}`;
   const share = `${baseUrl()}/own/${o.ownershipId}`;
@@ -110,6 +129,10 @@ export async function sendWinnerEmail(o: {
       ${button(link, "View your profile \u2192")}
       ${textLink(tweet, "Share it on X \u2192")}
     `),
+    {
+      ...(o.idempotencyKey ? { idempotencyKey: o.idempotencyKey } : {}),
+      ...(o.throwOnFailure !== undefined ? { throwOnFailure: o.throwOnFailure } : {}),
+    },
   );
 }
 
@@ -241,6 +264,8 @@ export async function sendPlacementVerifiedEmail(o: {
   audience: "buyer" | "creator";
   handle: string;
   eligibleDate?: string | null;
+  idempotencyKey?: string;
+  throwOnFailure?: boolean;
 }) {
   const buyer = o.audience === "buyer";
   await send(
@@ -257,6 +282,10 @@ export async function sendPlacementVerifiedEmail(o: {
       )}
       ${button(`${baseUrl()}/u/${o.handle}`, "View the profile \u2192")}
     `),
+    {
+      ...(o.idempotencyKey ? { idempotencyKey: o.idempotencyKey } : {}),
+      ...(o.throwOnFailure !== undefined ? { throwOnFailure: o.throwOnFailure } : {}),
+    },
   );
 }
 

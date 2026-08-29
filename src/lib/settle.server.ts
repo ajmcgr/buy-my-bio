@@ -2,7 +2,7 @@ import { admin } from "./db.server";
 import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
 
 import { retrieveSession } from "./stripe.server";
-import { sendOutbidEmail, sendWinnerEmail, humanDuration } from "./email.server";
+import { sendOutbidEmail, humanDuration } from "./email.server";
 import { nextPriceCents } from "./format";
 
 export type SettleResult =
@@ -16,6 +16,7 @@ export type SettleResult =
       creatorHandle: string;
       globalRank: number | null;
       previousOwner: string | null;
+      recoveryPending?: boolean;
     }
   | { status: "stale"; reason: string; paymentId: string }
   | { status: "payment_error"; reason: string; paymentId: string }
@@ -28,27 +29,53 @@ export type SettleResult =
  * `already_applied` retry, so a temporary post-takeover failure is repaired by
  * the next Stripe webhook delivery without recreating ownership or activity.
  */
+function logSettlementFailure(
+  stage: string,
+  opts: { paymentId: string; listingId?: string; ownershipId?: string },
+  error: unknown,
+) {
+  console.error("settlement stage failed", {
+    stage,
+    paymentId: opts.paymentId,
+    listingId: opts.listingId,
+    ownershipId: opts.ownershipId,
+    error: error instanceof Error ? error.message : String(error),
+  });
+}
+
 async function ensurePostTakeoverSettlement(opts: {
   paymentId: string;
   listingId: string;
   ownershipId: string;
   collectedCents: number;
   stripeLivemode: boolean;
-}) {
+}): Promise<boolean> {
+  let complete = true;
   if (opts.stripeLivemode) {
-    const { recordPayout } = await import("./payouts.server");
-    await recordPayout({
-      paymentId: opts.paymentId,
-      listingId: opts.listingId,
-      ownershipId: opts.ownershipId,
-      grossCents: opts.collectedCents,
-    });
+    try {
+      const { recordPayout } = await import("./payouts.server");
+      await recordPayout({
+        paymentId: opts.paymentId,
+        listingId: opts.listingId,
+        ownershipId: opts.ownershipId,
+        grossCents: opts.collectedCents,
+      });
+    } catch (error) {
+      complete = false;
+      logSettlementFailure("payout", opts, error);
+    }
   }
 
   if (WEBSITE_ONLY_SPONSORSHIP) {
-    const { markActivated } = await import("./activation.server");
-    await markActivated(opts.ownershipId, opts.paymentId, new Date().toISOString());
+    try {
+      const { markActivated } = await import("./activation.server");
+      await markActivated(opts.ownershipId, opts.paymentId, new Date().toISOString());
+    } catch (error) {
+      complete = false;
+      logSettlementFailure("activation", opts, error);
+    }
   }
+  return complete;
 }
 
 /**
@@ -57,7 +84,13 @@ async function ensurePostTakeoverSettlement(opts: {
  */
 export async function settleCheckoutSession(sessionId: string): Promise<SettleResult> {
   const db = admin();
-  const session = (await retrieveSession(sessionId)) as Record<string, unknown>;
+  let session: Record<string, unknown>;
+  try {
+    session = (await retrieveSession(sessionId)) as Record<string, unknown>;
+  } catch (error) {
+    logSettlementFailure("payment_verification", { paymentId: "unknown" }, error);
+    throw error;
+  }
   const paymentId = (session["metadata"] as Record<string, string> | null)?.["payment_id"];
   if (!paymentId) return { status: "unknown" };
 
@@ -161,7 +194,17 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     }
   }
 
-  const { data: result } = await db.rpc("apply_takeover", { _payment_id: payment.id });
+  const { data: result, error: takeoverError } = await db.rpc("apply_takeover", {
+    _payment_id: payment.id,
+  });
+  if (takeoverError) {
+    logSettlementFailure(
+      "takeover",
+      { paymentId: payment.id, listingId: payment.listing_id },
+      takeoverError,
+    );
+    throw new Error(`apply_takeover failed: ${takeoverError.message}`);
+  }
   const r = (result ?? {}) as Record<string, unknown>;
 
   if (!r["ok"]) {
@@ -201,7 +244,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
           .maybeSingle()
       : { data: null };
     if (!own?.id) throw new Error("applied payment is missing its ownership");
-    await ensurePostTakeoverSettlement({
+    const postSettlementComplete = await ensurePostTakeoverSettlement({
       paymentId: payment.id,
       listingId: payment.listing_id,
       ownershipId: own.id,
@@ -217,6 +260,27 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     } catch {
       // The ownership remains valid even if a rank refresh is temporarily unavailable.
     }
+    const { data: payout } = await db
+      .from("payouts")
+      .select("release_at")
+      .eq("payment_id", payment.id)
+      .maybeSingle();
+    const { ensureSettlementEmails } = await import("./settlement-notifications.server");
+    const emailComplete = postSettlementComplete
+      ? await ensureSettlementEmails({
+          paymentId: payment.id,
+          ownershipId: own.id,
+          companyName: payment.company_name,
+          buyerEmail: payment.email,
+          amountCents: payment.amount_cents,
+          destination: payment.destination_url,
+          username: slug,
+          handle: existingCreator?.x_username ?? existingCreator?.social_handle ?? slug,
+          creatorId: slugRow?.creator_id ?? "",
+          globalRank: existingRank,
+          eligibleDate: (payout?.release_at as string | null) ?? null,
+        })
+      : false;
     return {
       status: "owned",
       ownershipId: own?.id ?? "",
@@ -227,6 +291,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       creatorHandle: existingCreator?.x_username ?? existingCreator?.social_handle ?? slug,
       globalRank: existingRank,
       previousOwner: null,
+      recoveryPending: !postSettlementComplete || !emailComplete,
     };
   }
 
@@ -234,7 +299,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
   if (typeof ownershipId !== "string" || !ownershipId)
     throw new Error("takeover did not return an ownership id");
 
-  await ensurePostTakeoverSettlement({
+  const postSettlementComplete = await ensurePostTakeoverSettlement({
     paymentId: payment.id,
     listingId: payment.listing_id,
     ownershipId,
@@ -346,17 +411,6 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
   }
 
   try {
-    await sendWinnerEmail({
-      to: payment.email,
-      handle,
-      username,
-      amountCents: payment.amount_cents,
-      destination: payment.destination_url,
-      company: payment.company_name,
-      ownershipId,
-      globalRank,
-    });
-
     const prev = r["previous"] as Record<string, unknown> | null;
     if (prev && prev["email"]) {
       await sendOutbidEmail({
@@ -376,8 +430,34 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       });
     }
   } catch (e) {
-    console.error("email failure", e);
+    logSettlementFailure(
+      "outbid_email",
+      { paymentId: payment.id, listingId: payment.listing_id, ownershipId },
+      e,
+    );
   }
+
+  const { data: payout } = await db
+    .from("payouts")
+    .select("release_at")
+    .eq("payment_id", payment.id)
+    .maybeSingle();
+  const { ensureSettlementEmails } = await import("./settlement-notifications.server");
+  const emailComplete = postSettlementComplete
+    ? await ensureSettlementEmails({
+        paymentId: payment.id,
+        ownershipId,
+        companyName: payment.company_name,
+        buyerEmail: payment.email,
+        amountCents: payment.amount_cents,
+        destination: payment.destination_url,
+        username,
+        handle,
+        creatorId: listing?.creator_id ?? "",
+        globalRank,
+        eligibleDate: (payout?.release_at as string | null) ?? null,
+      })
+    : false;
 
   await db.from("analytics_events").insert({
     name: "checkout_completed",
@@ -394,6 +474,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     slug,
     creatorHandle: handle,
     globalRank,
+    recoveryPending: !postSettlementComplete || !emailComplete,
     previousOwner:
       ((r["previous"] as Record<string, unknown> | null)?.["company_name"] as string | undefined) ??
       null,

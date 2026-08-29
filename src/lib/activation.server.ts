@@ -149,64 +149,7 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
       ownershipId,
       detail: { first_verified_at: firstVerifiedAt },
     });
-    await notifyActivated(ownershipId, paymentId, releaseAt);
   }
-}
-
-/** Tells the buyer they're live and the creator when they become payable. */
-async function notifyActivated(ownershipId: string, paymentId: string, releaseAt: string) {
-  try {
-    const db = admin();
-    const { data: payment } = await db
-      .from("payments")
-      .select("email, listing_id")
-      .eq("id", paymentId)
-      .maybeSingle();
-    if (!payment) return;
-    const { data: listing } = await db
-      .from("listings")
-      .select("creator_id, slug")
-      .eq("id", payment.listing_id)
-      .maybeSingle();
-    if (!listing) return;
-    const { data: creator } = await db
-      .from("creators")
-      .select("id, username, x_username, social_handle")
-      .eq("id", listing.creator_id)
-      .maybeSingle();
-    const handle =
-      (creator?.x_username as string | null) ??
-      (creator?.social_handle as string | null) ??
-      (creator?.username as string | null) ??
-      listing.slug;
-
-    const { sendPlacementVerifiedEmail } = await import("./email.server");
-    if (payment.email)
-      await sendPlacementVerifiedEmail({
-        to: String(payment.email),
-        audience: "buyer",
-        handle,
-      });
-
-    if (creator) {
-      const { creatorEmail } = await import("./notify.server");
-      const to = await creatorEmail(creator.id);
-      if (to)
-        await sendPlacementVerifiedEmail({
-          to,
-          audience: "creator",
-          handle,
-          eligibleDate: new Date(releaseAt).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }),
-        });
-    }
-  } catch (e) {
-    console.error("activation notifications failed", e);
-  }
-  void ownershipId;
 }
 
 /** 24h elapsed with no successful verification. Creator earns nothing. */

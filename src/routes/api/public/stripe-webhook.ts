@@ -26,7 +26,9 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
           const session = event.data.object;
           const { settleCheckoutSession } = await import("@/lib/settle.server");
           try {
-            await settleCheckoutSession(String(session["id"]));
+            const settled = await settleCheckoutSession(String(session["id"]));
+            if (settled.status === "owned" && settled.recoveryPending)
+              return new Response("settlement recovery pending", { status: 500 });
           } catch (e) {
             console.error("settle failed", e);
             return new Response("settle failed", { status: 500 });
