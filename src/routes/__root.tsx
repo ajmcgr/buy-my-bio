@@ -232,6 +232,9 @@ function SiteHeader() {
           <Link to="/owners" className="hover:underline">
             Owners
           </Link>
+          <Link to="/faq" className="hover:underline">
+            FAQ
+          </Link>
           <Link to="/creator" className="hover:underline">
             <span className="sm:hidden">Sell</span>
             <span className="hidden sm:inline">Sell your bio</span>
