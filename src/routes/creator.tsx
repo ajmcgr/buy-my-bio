@@ -250,7 +250,7 @@ function CreatorPage() {
                     );
                     setMessage("Placement copied.");
                   }}
-                  className="btn-ghost"
+                  className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
                 >
                   Copy placement
                 </button>
