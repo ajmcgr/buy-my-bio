@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { startCheckout } from "@/lib/checkout.functions";
+import { uploadSponsorImage } from "@/lib/sponsor-image.functions";
 import { trackEvent } from "@/lib/listing.functions";
 import { money } from "@/lib/format";
 import type { ListingView } from "@/lib/listing.functions";
@@ -22,11 +23,14 @@ export function BuyDialog({
   onClose: () => void;
 }) {
   const checkout = useServerFn(startCheckout);
+  const uploadImage = useServerFn(uploadSponsorImage);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
   const [message, setMessage] = useState("");
   const [link, setLink] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   if (!open) return null;
   const price = view.requiredPriceCents;
@@ -37,6 +41,38 @@ export function BuyDialog({
     link.trim() || "https://yourlink.com",
   );
   const overLimit = message.trim().length > limit;
+
+  function chooseImage(file: File | null) {
+    if (!file) return;
+    if (!new Set(["image/jpeg", "image/png", "image/webp"]).has(file.type)) {
+      setError("Use a PNG, JPG, or WebP image.");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setError("Your image must be 2 MB or smaller.");
+      return;
+    }
+    setError(null);
+    setImage(file);
+    const reader = new FileReader();
+    reader.onload = () => setImagePreview(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(file);
+  }
+
+  async function uploadSelectedImage() {
+    if (!image) return null;
+    const source = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result ?? ""));
+      reader.onerror = () => reject(new Error("read_failed"));
+      reader.readAsDataURL(image);
+    });
+    const result = await uploadImage({
+      data: { data: source.replace(/^data:[^;]+;base64,/, ""), type: image.type },
+    });
+    if ("error" in result) throw new Error(result.error);
+    return result.url;
+  }
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -56,6 +92,7 @@ export function BuyDialog({
       return;
     }
     try {
+      const logoUrl = await uploadSelectedImage();
       const res = await checkout({
         data: {
           username: view.creator.username,
@@ -64,7 +101,7 @@ export function BuyDialog({
           destinationUrl: link.trim(),
           email: String(f.get("email") ?? ""),
           xHandle: String(f.get("xhandle") ?? "") || null,
-          logoUrl: String(f.get("logo") ?? "") || null,
+          logoUrl,
           agreed,
           creatorToken:
             typeof window === "undefined" ? null : localStorage.getItem("bmb_creator_token"),
@@ -201,15 +238,30 @@ export function BuyDialog({
               <input id="xhandle" name="xhandle" placeholder="@you" className="field mt-1" />
             </div>
             <div>
-              <label className="label-xs" htmlFor="logo">
-                Logo URL
+              <label className="label-xs" htmlFor="sponsor-image">
+                Sponsor image
               </label>
-              <input
-                id="logo"
-                name="logo"
-                placeholder="https://.../logo.png"
-                className="field mt-1"
-              />
+              <div className="mt-1 flex items-center gap-3">
+                {imagePreview ? (
+                  <img
+                    src={imagePreview}
+                    alt="Sponsor image preview"
+                    className="size-11 shrink-0 border-2 border-border object-cover"
+                  />
+                ) : (
+                  <div className="size-11 shrink-0 border-2 border-dashed border-border bg-muted" />
+                )}
+                <input
+                  id="sponsor-image"
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  onChange={(event) => chooseImage(event.target.files?.[0] ?? null)}
+                  className="block w-full text-xs text-muted-foreground file:mr-3 file:border-0 file:bg-foreground file:px-3 file:py-2 file:font-bold file:text-background"
+                />
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Optional. PNG, JPG or WebP up to 2 MB. It appears as a square icon.
+              </p>
             </div>
           </div>
 
