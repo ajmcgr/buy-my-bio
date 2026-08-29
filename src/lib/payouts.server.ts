@@ -331,11 +331,16 @@ export async function releaseOne(payoutId: string): Promise<string> {
       }
 
       // Still the current owner: one confirmed mismatch is not terminal.
+      const { data: listingRow } = await db
+        .from("listings")
+        .select("id")
+        .eq("creator_id", creator.id)
+        .maybeSingle();
       const { registerActiveMismatch } = await import("./verification.server");
       const outcome = await registerActiveMismatch(
         {
           ownershipId: ownership.id,
-          listingId: "",
+          listingId: String(listingRow?.id ?? ""),
           paymentId: payout.payment_id,
           creatorId: creator.id,
           payoutId,
