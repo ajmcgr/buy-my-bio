@@ -210,7 +210,13 @@ const disconnectIn = z.object({
 
 /**
  * Disconnect the creator's X account (and optionally delete their Buy My Bio data).
- * Blocked while a sponsorship is live or awaiting activation, so paid buyers can't be stranded.
+ *
+ * Disconnecting is always allowed, but it NEVER cancels an obligation:
+ * - the listing is suspended so no new buyer can bid,
+ * - live/awaiting sponsorships, payouts, refunds and violation history are untouched,
+ * - when an obligation is still open we keep the public X user id so the
+ *   server-side app-only verification can keep running (no user token involved).
+ * Hard deletion is refused while an obligation or any payment history exists.
  */
 export const disconnectXAccount = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => disconnectIn.parse(input))
@@ -231,6 +237,7 @@ export const disconnectXAccount = createServerFn({ method: "POST" })
       .eq("creator_id", c.id)
       .maybeSingle();
 
+    let hasObligation = false;
     if (listing) {
       const { data: live } = await db
         .from("ownerships")
@@ -238,31 +245,27 @@ export const disconnectXAccount = createServerFn({ method: "POST" })
         .eq("listing_id", listing.id)
         .eq("status", "active")
         .limit(1);
-      if (live && live.length > 0)
-        return {
-          error:
-            "You have a live sponsorship on your bio. It has to finish (or be refunded) before you can disconnect — email us and we'll sort it out.",
-        } as const;
-
-      const { data: pendingPayout } = await db
-        .from("payouts")
-        .select("id")
-        .eq("creator_id", c.id)
-        .in("status", ["pending", "blocked"])
-        .limit(1);
-      if (pendingPayout && pendingPayout.length > 0)
-        return {
-          error:
-            "You still have a payout being held. We can't disconnect your X account until it's released or cancelled.",
-        } as const;
-
-      await db.from("listings").update({ status: "suspended" }).eq("id", listing.id);
+      if (live && live.length > 0) hasObligation = true;
     }
 
-    // Wipe the X connection either way.
-    await db
-      .from("creators")
-      .update({
+    const { data: openPayout } = await db
+      .from("payouts")
+      .select("id")
+      .eq("creator_id", c.id)
+      .in("status", ["pending", "blocked"])
+      .limit(1);
+    if (openPayout && openPayout.length > 0) hasObligation = true;
+
+    // Stop new buyers either way. Existing obligations continue unchanged.
+    if (listing) await db.from("listings").update({ status: "suspended" }).eq("id", listing.id);
+
+    const wipe: Record<string, unknown> = {
+      session_token: null,
+      updated_at: new Date().toISOString(),
+    };
+    if (!hasObligation) {
+      // No open obligation: fully unlink the X identity.
+      Object.assign(wipe, {
         x_user_id: null,
         x_username: null,
         x_display_name: null,
@@ -275,15 +278,14 @@ export const disconnectXAccount = createServerFn({ method: "POST" })
         x_bio_verified_at: null,
         x_bio_verified_method: null,
         x_bio_snapshot: null,
-        session_token: null,
         verification_status: "pending",
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", c.id);
+      });
+    }
+    await db.from("creators").update(wipe).eq("id", c.id);
 
-    if (!data.deleteData) return { ok: true, deleted: false } as const;
+    if (!data.deleteData) return { ok: true, deleted: false, hasObligation } as const;
 
-    // Only hard-delete when no money ever moved through this listing.
+    // Only hard-delete when nothing is owed and no money ever moved.
     let hasPayments = false;
     if (listing) {
       const { data: pay } = await db
@@ -293,8 +295,10 @@ export const disconnectXAccount = createServerFn({ method: "POST" })
         .limit(1);
       hasPayments = Boolean(pay && pay.length > 0);
     }
-    if (hasPayments) return { ok: true, deleted: false, retained: true } as const;
+    if (hasObligation || hasPayments)
+      return { ok: true, deleted: false, retained: true, hasObligation } as const;
 
     await db.from("creators").delete().eq("id", c.id);
-    return { ok: true, deleted: true } as const;
+    return { ok: true, deleted: true, hasObligation: false } as const;
   });
+
