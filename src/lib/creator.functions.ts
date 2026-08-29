@@ -40,7 +40,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
 
     const { data: listing } = await db
       .from("listings")
-      .select("status")
+      .select("id, status")
       .eq("creator_id", c.id)
       .maybeSingle();
 
@@ -58,7 +58,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
         .from("ownerships")
         .select("bio_message")
         .eq("status", "active")
-        .eq("listing_id", (await db.from("listings").select("id").eq("creator_id", c.id).maybeSingle()).data?.id ?? "")
+        .eq("listing_id", listing.id)
         .maybeSingle();
       ownerMessage = (ownership?.bio_message as string | null) ?? null;
     }
