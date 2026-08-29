@@ -141,68 +141,26 @@ function TakeoverButton({ row, prominent = false }: { row: MarketplaceRow; promi
   );
 }
 
-function TrophyCard({ row }: { row: MarketplaceRow }) {
-  return (
-    <article className="relative overflow-hidden border-x-2 border-b-2 border-border bg-card">
-      <div className="flex items-center justify-between gap-3 border-b-2 border-border bg-accent px-4 py-3 text-accent-foreground sm:px-6">
-        <div className="flex items-center gap-2 font-mono text-xs font-extrabold">
-          <Trophy className="size-4" /> #1 most valuable bio
-        </div>
-        <span className="font-mono text-[0.65rem] font-bold">The trophy</span>
-      </div>
-      <div className="grid lg:grid-cols-[1.25fr_0.9fr]">
-        <div className="p-5 sm:p-7">
-          <CreatorIdentity row={row} large />
-          {row.creator.bio ? (
-            <p className="mt-5 max-w-xl text-sm leading-relaxed text-muted-foreground">
-              {row.creator.bio}
-            </p>
-          ) : null}
-          {row.owner ? (
-            <div className="mt-5 border-2 border-border bg-background px-4 py-3 text-sm">
-              <SponsorDetails row={row} />
-            </div>
-          ) : null}
-        </div>
-        <div className="border-t-2 border-border bg-foreground p-5 text-background lg:border-t-0 lg:border-l-2 lg:p-7">
-          <div className="font-mono text-[0.65rem] font-bold text-background/60">Bio value</div>
-          <div className="mt-1 text-[clamp(3.25rem,9vw,6rem)] leading-none font-extrabold tracking-[-0.06em]">
-            {money(row.bioValueCents ?? 0)}
-          </div>
-          <div className="mt-6 grid grid-cols-3 gap-5 border-t border-background/30 pt-5">
-            <div>
-              <div className="font-mono text-[0.6rem] font-bold text-background/60">Sponsor</div>
-              <div className="mt-1 truncate font-extrabold">{row.owner?.company_name}</div>
-            </div>
-            <div>
-              <div className="font-mono text-[0.6rem] font-bold text-background/60">Next price</div>
-              <div className="mt-1 font-extrabold">{money(row.requiredPriceCents)}</div>
-            </div>
-            <div>
-              <div className="font-mono text-[0.6rem] font-bold text-background/60">
-                Sponsor clicks
-              </div>
-              <div className="mt-1 font-extrabold">{row.sponsorClickCount.toLocaleString()}</div>
-            </div>
-          </div>
-          <div className="mt-6 [&_.btn-ink]:border-accent [&_.btn-ink]:bg-accent [&_.btn-ink]:text-accent-foreground">
-            <TakeoverButton row={row} prominent />
-          </div>
-          <p className="mt-3 text-center font-mono text-[0.65rem] text-background/60">
-            Pay more → value rises → rank holds or climbs
-          </p>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: number }) {
+function LeaderboardRow({
+  row,
+  position,
+  isMostValuableLeader = false,
+}: {
+  row: MarketplaceRow;
+  position: number;
+  isMostValuableLeader?: boolean;
+}) {
   const owned = row.bioValueCents !== null && row.owner;
   const displayRank = row.globalRank ?? (owned ? position + 1 : null);
   return (
     <article className="grid gap-4 border-x-2 border-b-2 border-border bg-card p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_0.6fr_auto] sm:items-center sm:gap-5 sm:px-5">
-      <div className="font-mono text-2xl font-extrabold">
+      <div
+        className="flex items-center gap-1 font-mono text-2xl font-extrabold"
+        aria-label={isMostValuableLeader ? "#1 most valuable" : undefined}
+      >
+        {isMostValuableLeader ? (
+          <Trophy className="size-4 text-primary" aria-hidden="true" />
+        ) : null}
         {displayRank ? `#${displayRank}` : "—"}
       </div>
       <CreatorIdentity row={row} />
@@ -330,7 +288,6 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
   }, [router]);
 
   const numberOne = market.sort === "most-valuable" ? market.rows[0] : null;
-  const remainingRows = numberOne ? market.rows.slice(1) : market.rows;
   const showSeparateUnowned = market.sort === "most-valuable" && market.unowned.length > 0;
 
   return (
@@ -381,25 +338,25 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           </div>
         </div>
 
-        {numberOne ? <TrophyCard row={numberOne} /> : null}
-        {remainingRows.length > 0 ? (
+        {market.rows.length > 0 ? (
           <div>
-            {remainingRows.map((row, index) => (
+            {market.rows.map((row, index) => (
               <LeaderboardRow
                 key={row.listing.id}
                 row={row}
-                position={index + (numberOne ? 1 : 0)}
+                position={index}
+                isMostValuableLeader={market.sort === "most-valuable" && index === 0}
               />
             ))}
           </div>
-        ) : !numberOne ? (
+        ) : (
           <div className="border-x-2 border-b-2 border-border bg-card px-5 py-10 text-center">
             <p className="text-xl font-extrabold">No profiles have been listed yet.</p>
             <p className="mt-2 text-sm text-muted-foreground">
               The first successful live payment will create the first real market value and #1 rank.
             </p>
           </div>
-        ) : null}
+        )}
       </section>
 
       {showSeparateUnowned ? (
