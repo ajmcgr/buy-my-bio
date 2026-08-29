@@ -30,13 +30,29 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     const { data: creator } = await db
       .from("creators")
-      .select("id, username, social_handle, x_username, x_account_verified, banned")
+      .select("id, user_id, username, social_handle, x_username, x_account_verified, banned")
       .eq("username", data.username.toLowerCase())
       .maybeSingle();
     if (!creator || creator.banned) return { error: "Listing unavailable." };
     if (!creator.x_account_verified) return { error: "This creator has disconnected X." };
 
-    // Self-bidding guard (server-side, not just a hidden button).
+    // Self-bidding guard. The HttpOnly session cookie is set only by the
+    // trusted X OAuth callback; request-body identity fields are never used.
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const creatorSession = getRequest().headers
+      .get("cookie")
+      ?.match(/(?:^|;\s*)bmb_creator_session=([^;]+)/)?.[1];
+    if (creatorSession) {
+      const { data: currentCreator } = await db
+        .from("creators")
+        .select("user_id")
+        .eq("session_token", decodeURIComponent(creatorSession))
+        .maybeSingle();
+      if (currentCreator?.user_id && currentCreator.user_id === creator.user_id)
+        return { error: "You can't sponsor your own profile." };
+    }
+
+    // Legacy advisory checks only; never used as the authoritative decision.
     const norm = (v: string | null | undefined) => (v ?? "").trim().replace(/^@/, "").toLowerCase();
     const buyerHandle = norm(data.xHandle);
     const creatorHandles = [creator.x_username, creator.social_handle, creator.username].map(norm);

@@ -46,7 +46,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
         // X user id is the authoritative identity, never the username.
         const { data: existing } = await db
           .from("creators")
-          .select("id, username, session_token, x_bio_verified")
+          .select("id, username, session_token, x_bio_verified, user_id")
           .eq("x_user_id", xUser.id)
           .maybeSingle();
 
@@ -103,6 +103,22 @@ export const Route = createFileRoute("/api/public/x-callback")({
             .insert({ creator_id: creatorId, slug: username, status: "draft" });
         }
 
+        // X is the trusted identity proof. Bind it once to an internal user so
+        // creator-only server checks never need browser-supplied handles/tokens.
+        if (!existing?.user_id && creatorId) {
+          const email = `x-${xUser.id}@creator.buymybio.invalid`;
+          const { data: user, error } = await db.auth.admin.createUser({
+            email,
+            email_confirm: true,
+            user_metadata: { x_user_id: xUser.id, creator_id: creatorId },
+          });
+          if (error || !user.user) {
+            console.error("creator identity binding failed", error);
+            return fail("creator_identity_failed");
+          }
+          await db.from("creators").update({ user_id: user.user.id }).eq("id", creatorId);
+        }
+
         // Website-only sponsorships: connecting X verifies identity, which is
         // all a listing needs. Nothing has to appear in the creator's X bio.
         const { WEBSITE_ONLY_SPONSORSHIP } = await import("@/lib/placement");
@@ -126,6 +142,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
             Location: `/creator?t=${encodeURIComponent(sessionToken)}&connected=${encodeURIComponent(
               xUser.username,
             )}`,
+            "Set-Cookie": `bmb_creator_session=${encodeURIComponent(sessionToken)}; Path=/; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax`,
           },
         });
       },
