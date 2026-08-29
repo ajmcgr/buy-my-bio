@@ -8,7 +8,7 @@ export type MarketplaceSort = "most-valuable" | "trending" | "new" | "affordable
 export type MarketplaceRow = ListingView & {
   globalRank: number | null;
   bioValueCents: number | null;
-  pageViewCount: number;
+  sponsorClickCount: number;
   listedAt: string;
   latestTakeoverAt: string | null;
 };
@@ -111,34 +111,17 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
   );
   const listingIds = listings.map((l) => l.id);
 
-  const [ownershipResult, pageViewResult] = await Promise.all([
-    listingIds.length
-      ? db
-          .from("ownerships")
-          .select(
-            "id, listing_id, payment_id, company_name, destination_url, logo_url, amount_cents, started_at, ended_at, click_count, status, bio_message, placement_format",
-          )
-          .in("listing_id", listingIds)
-          .order("started_at", { ascending: false })
-          .limit(1000)
-      : { data: [] },
-    // Analytics events are service-role only. Preview falls back to zero rather
-    // than making the public leaderboard fail when that credential is absent.
-    canVerifyPayments && listingIds.length
-      ? db
-          .from("analytics_events")
-          .select("listing_id")
-          .eq("name", "listing_view")
-          .in("listing_id", listingIds)
-          .limit(10000)
-      : { data: [] },
-  ]);
+  const ownershipResult = listingIds.length
+    ? await db
+        .from("ownerships")
+        .select(
+          "id, listing_id, payment_id, company_name, destination_url, logo_url, amount_cents, started_at, ended_at, click_count, status, bio_message, placement_format",
+        )
+        .in("listing_id", listingIds)
+        .order("started_at", { ascending: false })
+        .limit(1000)
+    : { data: [] };
   const ownerships = (ownershipResult.data ?? []) as OwnershipRow[];
-  const pageViewsByListing = new Map<string, number>();
-  for (const event of (pageViewResult.data ?? []) as Array<{ listing_id: string | null }>) {
-    if (event.listing_id)
-      pageViewsByListing.set(event.listing_id, (pageViewsByListing.get(event.listing_id) ?? 0) + 1);
-  }
   const paymentIds = [...new Set(ownerships.flatMap((o) => (o.payment_id ? [o.payment_id] : [])))];
 
   // If the provenance migration has not been applied yet, this query returns no
@@ -207,7 +190,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
       canBuy,
       globalRank: null,
       bioValueCents: owner?.amount_cents ?? null,
-      pageViewCount: pageViewsByListing.get(listing.id) ?? 0,
+      sponsorClickCount: owner?.click_count ?? 0,
       retainedBioChars: 0,
       messageCharLimit: MESSAGE_MAX_CHARS,
       listedAt: listing.created_at,

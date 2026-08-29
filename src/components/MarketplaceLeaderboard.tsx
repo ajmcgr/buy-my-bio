@@ -179,8 +179,8 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
               <div className="mt-1 font-extrabold">{money(row.requiredPriceCents)}</div>
             </div>
             <div>
-              <div className="font-mono text-[0.6rem] font-bold text-background/60">Page clicks</div>
-              <div className="mt-1 font-extrabold">{row.pageViewCount.toLocaleString()}</div>
+              <div className="font-mono text-[0.6rem] font-bold text-background/60">Sponsor clicks</div>
+              <div className="mt-1 font-extrabold">{row.sponsorClickCount.toLocaleString()}</div>
             </div>
           </div>
           <div className="mt-6 [&_.btn-ink]:border-accent [&_.btn-ink]:bg-accent [&_.btn-ink]:text-accent-foreground">
@@ -221,8 +221,10 @@ function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: numb
         <SponsorDetails row={row} />
       </div>
       <div>
-        <div className="label-xs">Page clicks</div>
-        <div className="mt-0.5 text-xl font-extrabold">{row.pageViewCount.toLocaleString()}</div>
+        <div className="label-xs">Sponsor clicks</div>
+        <div className="mt-0.5 text-xl font-extrabold">
+          {row.sponsorClickCount.toLocaleString()}
+        </div>
       </div>
       <TakeoverButton row={row} />
     </article>
