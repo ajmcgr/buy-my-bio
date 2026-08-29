@@ -113,7 +113,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
             .update({
               x_bio_verified: true,
               x_bio_verified_at: now,
-              x_bio_verified_method: WEBSITE_ONLY_SPONSORSHIP ? "api" : "api",
+              x_bio_verified_method: "api",
             })
             .eq("id", creatorId);
           await db.from("listings").update({ status: "active" }).eq("creator_id", creatorId);
