@@ -236,7 +236,20 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
       continue;
     }
 
-    // Confirmed mismatch.
+    // Confirmed mismatch — but first make sure this buyer is STILL the current
+    // owner. If a newer buyer legitimately paid more between the two reads,
+    // the old message is expected to be gone: that is an outbid, not a
+    // violation, and the old payout stays eligible.
+    const { data: fresh } = await db
+      .from("ownerships")
+      .select("status")
+      .eq("id", o.id)
+      .maybeSingle();
+    if (!fresh || fresh.status !== "active") {
+      summary.skipped += 1;
+      continue;
+    }
+
     summary.mismatched += 1;
     const phase = payout && payout.status === "paid" ? "post_payout" : "hold";
     const failPatch = {
@@ -246,7 +259,10 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
       verification_failure_at: now,
       verification_failure_reason: result.reason,
     };
-    await db.from("ownerships").update(failPatch).eq("id", o.id);
+    await db
+      .from("ownerships")
+      .update({ ...failPatch, placement_end_reason: "seller_removed" })
+      .eq("id", o.id);
     if (payout) {
       await db
         .from("payouts")
