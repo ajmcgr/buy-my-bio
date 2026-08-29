@@ -130,7 +130,7 @@ export function BuyDialog({
             <div className="text-4xl font-extrabold tracking-tight">{money(price)}</div>
           </div>
 
-          <label className="flex items-start gap-3 text-sm">
+          <label className="flex items-start gap-3 text-sm text-foreground">
             <input
               type="checkbox"
               checked={agreed}
@@ -140,12 +140,13 @@ export function BuyDialog({
             />
             <span>
               I agree to the{" "}
-              <a href="/terms" className="underline">
+              <a href="/terms" className="font-semibold underline">
                 Terms
               </a>{" "}
               and understand destinations are subject to moderation.
             </span>
           </label>
+
 
           {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
