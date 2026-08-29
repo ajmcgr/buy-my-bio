@@ -19,16 +19,15 @@ import { money } from "@/lib/format";
 export const Route = createFileRoute("/creator")({
   head: () => ({
     meta: [
-      { title: "Sell Your X Bio — Buy My Bio" },
+      { title: "Add Your Profile — Buy My Bio" },
       {
         name: "description",
-        content:
-          "Connect your X account, add the Buy My Bio placement to your profile, and open your bio to bids.",
+        content: "Connect X, list your profile, and let anyone sponsor you on BuyMyBio.com.",
       },
-      { property: "og:title", content: "Sell Your X Bio — Buy My Bio" },
+      { property: "og:title", content: "Add Your Profile — Buy My Bio" },
       {
         property: "og:description",
-        content: "Verify your X account and bio placement to start earning from your bio link.",
+        content: "Connect X to verify your identity, then list your profile on Buy My Bio.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -110,7 +109,7 @@ function CreatorPage() {
     if (!token) return;
     const obligation = Boolean(session?.ownerMessage || session?.activation);
     const obligationWarning =
-      "Disconnecting X will stop your listing from accepting new buyers. It does not cancel any current sponsorship or pending payout obligations.";
+      "Disconnecting X will keep your profile in the rankings but stop it from accepting new sponsors. It does not cancel any current sponsorship or pending payout obligations.";
     const warn = deleteData
       ? "Disconnect X and delete your Buy My Bio data? This can't be undone."
       : "Disconnect your X account from Buy My Bio?";
@@ -133,16 +132,15 @@ function CreatorPage() {
         : "hasObligation" in res && res.hasObligation
           ? "Your X account is disconnected and your listing no longer accepts new buyers. Your current sponsorship and any held payout continue under the existing rules."
           : "retained" in res && res.retained
-            ? "Your X account is disconnected and your bio is off the marketplace. Past transaction records are kept for legal and accounting reasons."
-            : "Your X account is disconnected. Connect again any time to relist.",
+            ? "Your X account is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect. Past transaction records are retained."
+            : "Your X account is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect.",
     );
   }
-
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-14">
       <h1 className="text-[clamp(2rem,7vw,3.25rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
-        Sell your X bio
+        Add your profile
       </h1>
       <p className="mt-4 text-muted-foreground">
         Connect your real X account to verify your identity, then choose when to list your profile
@@ -246,7 +244,7 @@ function CreatorPage() {
                 </div>
                 <div className="border-t border-background/25 px-5 py-5 sm:border-t-0">
                   <div className="font-mono text-[0.65rem] font-bold text-background/60">
-                    Owned by
+                    Sponsored by
                   </div>
                   <div className="mt-1 truncate text-xl font-extrabold">
                     {session.ownerName ?? "Unowned"}
@@ -256,7 +254,7 @@ function CreatorPage() {
               {session.globalRank && session.bioValueCents !== null ? (
                 <a
                   href={`https://x.com/intent/post?text=${encodeURIComponent(
-                    `My X bio is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank} on @BuyMyBio.`,
+                    `My profile sponsorship is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank} on @BuyMyBio.`,
                   )}&url=${encodeURIComponent(`https://buymybio.com/u/${session.username}`)}`}
                   target="_blank"
                   rel="noreferrer"
@@ -286,7 +284,6 @@ function CreatorPage() {
             </div>
           ) : null}
 
-
           {token ? (
             <PayoutsPanel token={token} status={payouts} onChange={() => loadPayouts(token)} />
           ) : null}
@@ -295,11 +292,9 @@ function CreatorPage() {
             <div className="label-xs">Account</div>
             <h2 className="mt-1 text-xl font-extrabold">Disconnect your X account</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              This unlinks @{session.handle}, removes your bio from the marketplace and signs you
-              out. You can reconnect any time. Disconnecting X will stop your listing from accepting
-              new buyers. It does not cancel any current sponsorship or pending payout obligations —
-              those continue under the existing verification and payout rules, and past transaction
-              records are kept.
+              This unlinks @{session.handle} and signs you out. Your profile stays permanently in
+              the rankings, but its sponsor is hidden and nobody can bid until you reconnect and
+              list it again. Existing payment and payout records remain intact.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -319,10 +314,6 @@ function CreatorPage() {
               </button>
             </div>
           </div>
-
-
-
-
 
           <p className="mt-6 text-sm text-muted-foreground">
             Listing status:{" "}
@@ -468,7 +459,7 @@ function PayoutsPanel({
             </ul>
           ) : (
             <p className="mt-5 text-sm text-muted-foreground">
-              No takeovers yet. Payouts appear here the moment someone buys your bio.
+              No sponsorships yet. Payouts appear here when someone sponsors your profile.
             </p>
           )}
 

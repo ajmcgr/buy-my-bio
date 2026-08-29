@@ -116,9 +116,7 @@ export async function verifyStripeSignature(payload: string, header: string | nu
     ["sign"],
   );
   const sig = await crypto.subtle.sign("HMAC", key, enc.encode(`${t}.${payload}`));
-  const expected = [...new Uint8Array(sig)]
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const expected = [...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("");
   if (expected.length !== v1.length) return false;
   let diff = 0;
   for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ v1.charCodeAt(i);
@@ -137,7 +135,8 @@ export async function createConnectAccount(opts: { email?: string | null; userna
       type: "express",
       "capabilities[transfers][requested]": "true",
       "business_profile[name]": `Buy My Bio — ${opts.username}`,
-      "business_profile[product_description]": "Sponsored placement in an X bio",
+      "business_profile[product_description]":
+        "Sponsored placement on a Buy My Bio creator profile",
       "metadata[buymybio_username]": opts.username,
       ...(opts.email ? { email: opts.email } : {}),
     }),

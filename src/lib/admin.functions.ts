@@ -20,7 +20,12 @@ export const getAdminData = createServerFn({ method: "POST" })
         )
         .order("created_at", { ascending: false })
         .limit(100),
-      db.from("listings").select("id, creator_id, slug, status, starting_price_cents, compliance_status, non_compliant_reason").limit(200),
+      db
+        .from("listings")
+        .select(
+          "id, creator_id, slug, status, starting_price_cents, compliance_status, non_compliant_reason",
+        )
+        .limit(200),
       db
         .from("payments")
         .select(
@@ -227,7 +232,9 @@ export const getAdminTransactions = createServerFn({ method: "POST" })
       const o = oMap.get(p.id) as Record<string, string | null> | undefined;
       const po = pMap.get(p.id) as Record<string, string | null> | undefined;
       const l = lMap.get(p.listing_id) as { slug: string; creator_id: string } | undefined;
-      const c = l ? (cMap.get(l.creator_id) as { username: string; x_username: string | null } | undefined) : undefined;
+      const c = l
+        ? (cMap.get(l.creator_id) as { username: string; x_username: string | null } | undefined)
+        : undefined;
 
       const refundStatus = String(p.refund_status ?? "none");
       const placement = (o?.["placement_status"] as string | null) ?? null;
@@ -237,7 +244,7 @@ export const getAdminTransactions = createServerFn({ method: "POST" })
       if (
         p.admin_review_required ||
         refundStatus === "failed" ||
-        (po?.["status"] === "failed" as unknown) ||
+        po?.["status"] === ("failed" as unknown) ||
         placement === "non_compliant" ||
         (o?.["final_verification_status"] as string | null) === "unresolved"
       )
@@ -335,7 +342,9 @@ export const adminTransactionAction = createServerFn({ method: "POST" })
     if (data.action === "retry_verification") {
       const { data: ownership } = await db
         .from("ownerships")
-        .select("id, listing_id, payment_id, bio_message, destination_url, placement_format, first_verified_at")
+        .select(
+          "id, listing_id, payment_id, bio_message, destination_url, placement_format, first_verified_at",
+        )
         .eq("payment_id", data.paymentId)
         .maybeSingle();
       if (!ownership) return { error: "ownership_not_found" } as const;

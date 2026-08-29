@@ -11,8 +11,8 @@ export const Route = createFileRoute("/u/$username")({
   head: ({ loaderData }) => {
     const name = loaderData?.creator.display_name ?? "this creator";
     const handle = loaderData?.creator.social_handle ?? loaderData?.creator.username ?? "";
-    const title = `Buy @${handle}'s X Bio — Buy My Bio`;
-    const description = `Buy the sponsored slot in ${name}'s X bio. Pay more than the current owner and the message + link is yours until someone outbids you.`;
+    const title = `Sponsor @${handle} — Buy My Bio`;
+    const description = `Sponsor ${name} on BuyMyBio.com. Your message and link stay on their profile until somebody pays more.`;
     return {
       meta: [
         { title },
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/u/$username")({
       ],
     };
   },
-  component: () => <BioListing view={Route.useLoaderData()} heading={false} />,
+  component: CreatorProfile,
   errorComponent: () => (
     <div className="mx-auto max-w-xl px-5 py-24 text-center">
       <h1 className="text-3xl font-extrabold">Couldn't load this bio.</h1>
@@ -32,8 +32,12 @@ export const Route = createFileRoute("/u/$username")({
   ),
   notFoundComponent: () => (
     <div className="mx-auto max-w-xl px-5 py-24 text-center">
-      <h1 className="text-3xl font-extrabold">No such X bio.</h1>
+      <h1 className="text-3xl font-extrabold">No such creator profile.</h1>
       <p className="mt-2 text-muted-foreground">This creator isn't listed.</p>
     </div>
   ),
 });
+
+function CreatorProfile() {
+  return <BioListing view={Route.useLoaderData()} heading={false} />;
+}

@@ -4,9 +4,8 @@ export const Route = createFileRoute("/api/public/x-callback")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const { exchangeCode, fetchXUser, randomToken, placementPresent } = await import(
-          "@/lib/x.server"
-        );
+        const { exchangeCode, fetchXUser, randomToken, placementPresent } =
+          await import("@/lib/x.server");
         const { admin, baseUrl } = await import("@/lib/db.server");
         const db = admin();
         const base = baseUrl();
@@ -120,7 +119,6 @@ export const Route = createFileRoute("/api/public/x-callback")({
           // explicitly click "List my profile" in the dashboard. Listings that
           // are already live stay live.
         }
-
 
         return new Response(null, {
           status: 302,

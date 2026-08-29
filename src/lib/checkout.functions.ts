@@ -19,13 +19,7 @@ export const startCheckout = createServerFn({ method: "POST" })
     const { admin, baseUrl } = await import("./db.server");
     const { safeDestination, safeLogoUrl } = await import("./validate");
     const { createCheckoutSession } = await import("./stripe.server");
-    const {
-      CURRENT_PLACEMENT_FORMAT,
-      buildPlacementText,
-      normalizeFormat,
-      retainedBioText,
-      validatePlacement,
-    } = await import("./placement");
+    const { CURRENT_PLACEMENT_FORMAT, validatePlacement } = await import("./placement");
     const db = admin();
 
     if (!data.agreed) return { error: "You must accept the terms." };
@@ -36,29 +30,25 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     const { data: creator } = await db
       .from("creators")
-      .select(
-        "id, username, social_handle, x_username, x_account_verified, x_bio_verified, x_bio_snapshot, banned",
-      )
+      .select("id, username, social_handle, x_username, x_account_verified, banned")
       .eq("username", data.username.toLowerCase())
       .maybeSingle();
     if (!creator || creator.banned) return { error: "Listing unavailable." };
-    if (!creator.x_account_verified || !creator.x_bio_verified)
-      return { error: "This listing is not verified yet." };
+    if (!creator.x_account_verified) return { error: "This creator has disconnected X." };
 
     // Self-bidding guard (server-side, not just a hidden button).
-    const norm = (v: string | null | undefined) =>
-      (v ?? "").trim().replace(/^@/, "").toLowerCase();
+    const norm = (v: string | null | undefined) => (v ?? "").trim().replace(/^@/, "").toLowerCase();
     const buyerHandle = norm(data.xHandle);
     const creatorHandles = [creator.x_username, creator.social_handle, creator.username].map(norm);
     if (buyerHandle && creatorHandles.includes(buyerHandle))
-      return { error: "You can't buy your own bio." };
+      return { error: "You can't sponsor your own profile." };
     if (data.creatorToken) {
       const { data: self } = await db
         .from("creators")
         .select("id")
         .eq("session_token", data.creatorToken)
         .maybeSingle();
-      if (self?.id === creator.id) return { error: "You can't buy your own bio." };
+      if (self?.id === creator.id) return { error: "You can't sponsor your own profile." };
     }
 
     const { data: listing } = await db
@@ -91,26 +81,11 @@ export const startCheckout = createServerFn({ method: "POST" })
       buyerId = created?.id;
     }
 
-    // Canonical sponsored placement + X bio length safety, enforced server-side.
-    const { data: currentOwner } = await db
-      .from("ownerships")
-      .select("bio_message, destination_url, placement_format")
-      .eq("listing_id", listing.id)
-      .eq("status", "active")
-      .maybeSingle();
-    const retainedChars = retainedBioText(creator.x_bio_snapshot as string | null, [
-      buildPlacementText(
-        (currentOwner?.bio_message as string | null) ?? null,
-        (currentOwner?.destination_url as string | null) ?? null,
-        normalizeFormat(currentOwner?.placement_format as string | null),
-      ),
-      (currentOwner?.bio_message as string | null) ?? null,
-      (currentOwner?.destination_url as string | null) ?? null,
-    ]).length;
+    // Website-only placement validation. The creator's X bio length is irrelevant.
     const placement = validatePlacement({
       message: data.bioMessage,
       url: destination,
-      retainedChars,
+      retainedChars: 0,
     });
     if (!placement.ok) return { error: placement.error };
 

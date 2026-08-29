@@ -1,11 +1,6 @@
 import { admin } from "./db.server";
 import { nextPriceCents } from "./format";
-import {
-  buildPlacementText,
-  messageCharLimit,
-  normalizeFormat,
-  retainedBioText,
-} from "./placement";
+import { MESSAGE_MAX_CHARS } from "./placement";
 import type { ListingView, OwnerView } from "./listing.functions";
 
 export type MarketplaceSort = "most-valuable" | "trending" | "new" | "affordable";
@@ -88,7 +83,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
       .select(
         "id, creator_id, slug, status, starting_price_cents, minimum_increase_percentage, created_at",
       )
-      .eq("status", "active")
+      .in("status", ["active", "disconnected"])
       .order("created_at", { ascending: false }),
     db
       .from("creators")
@@ -98,11 +93,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
       .eq("banned", false),
   ]);
 
-  const creators = new Map(
-    ((creatorResult.data ?? []) as CreatorRow[])
-      .filter((c) => c.x_account_verified && c.x_bio_verified)
-      .map((c) => [c.id, c]),
-  );
+  const creators = new Map(((creatorResult.data ?? []) as CreatorRow[]).map((c) => [c.id, c]));
   const listings = ((listingResult.data ?? []) as ListingRow[]).filter((l) =>
     creators.has(l.creator_id),
   );
@@ -149,20 +140,10 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
   const allRows: MarketplaceRow[] = listings.map((listing) => {
     const creator = creators.get(listing.creator_id)!;
     const ownershipHistory = ownersByListing.get(listing.id) ?? [];
-    const owner = ownershipHistory.find((o) => o.status === "active") ?? null;
+    const canBuy = listing.status === "active" && Boolean(creator.x_account_verified);
+    const owner = canBuy ? (ownershipHistory.find((o) => o.status === "active") ?? null) : null;
     const history = ownershipHistory.filter((o) => o.status !== "active");
     const increase = Number(listing.minimum_increase_percentage);
-    const retainedChars = retainedBioText(creator.x_bio_snapshot, [
-      owner
-        ? buildPlacementText(
-            owner.bio_message ?? null,
-            owner.destination_url,
-            normalizeFormat(owner.placement_format),
-          )
-        : null,
-      owner?.bio_message ?? null,
-      owner?.destination_url ?? null,
-    ]).length;
     return {
       creator: {
         id: creator.id,
@@ -192,11 +173,11 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
       requiredPriceCents: owner
         ? nextPriceCents(owner.amount_cents, increase)
         : listing.starting_price_cents,
-      canBuy: true,
+      canBuy,
       globalRank: null,
       bioValueCents: owner?.amount_cents ?? null,
-      retainedBioChars: retainedChars,
-      messageCharLimit: messageCharLimit(retainedChars, null),
+      retainedBioChars: 0,
+      messageCharLimit: MESSAGE_MAX_CHARS,
       listedAt: listing.created_at,
       latestTakeoverAt: owner?.started_at ?? history[0]?.started_at ?? null,
     };

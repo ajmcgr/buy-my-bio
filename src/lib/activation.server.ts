@@ -335,7 +335,8 @@ export async function runActivationSweep(limit = 50): Promise<ActivationSummary>
       continue;
     }
 
-    const deadline = (o.activation_deadline as string | null) ??
+    const deadline =
+      (o.activation_deadline as string | null) ??
       activationDeadlineFrom((o.started_at as string) ?? now);
     if (new Date(deadline).getTime() <= Date.now()) {
       summary.failed += 1;
@@ -371,7 +372,9 @@ export async function runActivationSweep(limit = 50): Promise<ActivationSummary>
 }
 
 /** Same check, on demand, for one creator (creator dashboard button). */
-export async function activateForCreator(creatorId: string): Promise<
+export async function activateForCreator(
+  creatorId: string,
+): Promise<
   | { state: "none" }
   | { state: "activated" }
   | { state: "waiting"; reason: string }

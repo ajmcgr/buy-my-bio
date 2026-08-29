@@ -15,6 +15,8 @@ export async function lookupPublicProfile(xUserId: string): Promise<XUser> {
   const body = await res.text();
   if (!res.ok) throw new Error(`X user lookup failed [${res.status}]: ${body}`);
 
+  // X's response contains nested entity shapes that vary by field expansion.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const u = (JSON.parse(body) as { data: Record<string, any> }).data;
   const entities = u["entities"] ?? {};
   const expandedUrls: string[] = [];

@@ -23,7 +23,6 @@ export const MESSAGE_MAX_CHARS = 100;
 /** Legacy X bio limit (historical placements only). */
 export const X_BIO_MAX_CHARS = 160;
 
-
 /** Placement format versions. v1 = legacy (no automatic disclosure). */
 export type PlacementFormat = "v1" | "v2";
 export const CURRENT_PLACEMENT_FORMAT: PlacementFormat = "v2";
@@ -86,10 +85,8 @@ export function messageCharLimit(retainedChars: number, url: string | null | und
   return Math.max(0, Math.min(MESSAGE_MAX_CHARS, room));
 }
 
-
 export type PlacementValidation =
-  | { ok: true; placement: string; limit: number }
-  | { ok: false; error: string; limit: number };
+  { ok: true; placement: string; limit: number } | { ok: false; error: string; limit: number };
 
 /**
  * Single source of truth for "does this sponsored placement fit and is it

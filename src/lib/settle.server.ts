@@ -96,10 +96,8 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     }
   }
 
-
   const { data: result } = await db.rpc("apply_takeover", { _payment_id: payment.id });
   const r = (result ?? {}) as Record<string, unknown>;
-
 
   if (!r["ok"]) {
     const reason = String(r["reason"] ?? "unknown");
@@ -174,7 +172,6 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     }
   }
 
-
   const { recordEvent } = await import("./events.server");
   await recordEvent("payment_succeeded", {
     paymentId: payment.id,
@@ -199,7 +196,6 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       console.error("activation window setup failed", e);
     }
   }
-
 
   // context for emails
   const { data: listing } = await db
@@ -238,10 +234,8 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
 
   if (!WEBSITE_ONLY_SPONSORSHIP) {
     try {
-      const {
-        sendBuyerAwaitingActivationEmail,
-        sendCreatorActionRequiredEmail,
-      } = await import("./email.server");
+      const { sendBuyerAwaitingActivationEmail, sendCreatorActionRequiredEmail } =
+        await import("./email.server");
       await sendBuyerAwaitingActivationEmail({
         to: payment.email,
         handle,
@@ -267,7 +261,6 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       console.error("activation email failure", e);
     }
   }
-
 
   try {
     await sendWinnerEmail({
@@ -328,7 +321,6 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       console.error("website fulfillment failed", e);
     }
   }
-
 
   await db.from("analytics_events").insert({
     name: "checkout_completed",

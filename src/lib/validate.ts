@@ -1,10 +1,4 @@
-const BLOCKED_HOSTS = [
-  "localhost",
-  "127.0.0.1",
-  "0.0.0.0",
-  "buymybio.com",
-  "www.buymybio.com",
-];
+const BLOCKED_HOSTS = ["localhost", "127.0.0.1", "0.0.0.0", "buymybio.com", "www.buymybio.com"];
 
 /** Returns a normalised https URL, or null if the destination is not allowed. */
 export function safeDestination(raw: string): string | null {

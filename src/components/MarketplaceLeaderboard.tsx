@@ -9,60 +9,33 @@ import type {
   MarketplaceSort,
 } from "@/lib/marketplace.server";
 import { getSupabase } from "@/integrations/supabase/browser";
-import { getSiteTraffic } from "@/lib/analytics.functions";
 
 import { BuyDialog } from "./BuyDialog";
 import { XIcon } from "./XIcon";
 
 const sorts: Array<{ value: MarketplaceSort; label: string }> = [
-  { value: "most-valuable", label: "Most valuable" },
-  { value: "trending", label: "Trending" },
   { value: "new", label: "New" },
+  { value: "trending", label: "Trending" },
   { value: "affordable", label: "Affordable" },
+  { value: "most-valuable", label: "Most valuable" },
 ];
 
 function TrafficCounters() {
-  const [traffic, setTraffic] = useState<{ pageviews: number; online: number } | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    const load = () => {
-      getSiteTraffic()
-        .then((t) => {
-          if (alive) setTraffic(t);
-        })
-        .catch(() => {
-          /* counters are decorative */
-        });
-    };
-    load();
-    const id = setInterval(load, 30_000);
-    return () => {
-      alive = false;
-      clearInterval(id);
-    };
-  }, []);
-
-  if (!traffic) return <p className="font-mono text-xs font-bold text-primary">&nbsp;</p>;
-
   return (
-    <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-xs font-bold text-primary">
-      <span>{traffic.pageviews.toLocaleString()} page views</span>
-      <span className="inline-flex items-center gap-1.5 text-muted-foreground">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
-        </span>
-        {traffic.online.toLocaleString()} online now
-      </span>
-    </p>
+    <a
+      href="https://cloud.umami.is/share/3BTUSlr3W6nAGqWJ"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="font-mono text-xs font-bold text-primary hover:underline"
+    >
+      Total visitors 1,360 ↗
+    </a>
   );
 }
 
 function handleOf(row: MarketplaceRow) {
   return row.creator.x_username ?? row.creator.social_handle ?? row.creator.username;
 }
-
 
 function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: boolean }) {
   const handle = handleOf(row);
@@ -106,7 +79,7 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
 
 function TakeoverButton({ row, prominent = false }: { row: MarketplaceRow; prominent?: boolean }) {
   const [open, setOpen] = useState(false);
-  const verb = row.owner ? "Steal" : "Own";
+  const verb = row.owner ? "Take over" : "Sponsor";
   return (
     <>
       <button
@@ -115,8 +88,9 @@ function TakeoverButton({ row, prominent = false }: { row: MarketplaceRow; promi
         disabled={!row.canBuy}
         className={`${prominent ? "w-full py-4 text-base sm:text-lg" : "px-4 py-2.5 text-sm"} btn-ink btn-ink-hover whitespace-nowrap disabled:opacity-40`}
       >
-        {verb}
-        {row.globalRank === 1 ? " #1" : ""} — {money(row.requiredPriceCents)}
+        {row.canBuy
+          ? `${verb}${row.globalRank === 1 ? " #1" : ""} — ${money(row.requiredPriceCents)}`
+          : "Unavailable"}
       </button>
       <BuyDialog view={row} open={open} onClose={() => setOpen(false)} />
     </>
@@ -148,7 +122,7 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
               className="mt-5 flex items-center justify-between gap-4 border-2 border-border bg-background px-4 py-3 text-sm hover:bg-muted"
             >
               <span>
-                <span className="label-xs block">Sponsored on Buy My Bio</span>
+                <span className="label-xs block">Sponsored</span>
                 <span className="font-extrabold">{row.owner.company_name}</span>
               </span>
               <ArrowUpRight className="size-4 shrink-0" />
@@ -162,7 +136,7 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-background/30 pt-5">
             <div>
-              <div className="font-mono text-[0.6rem] font-bold text-background/60">Owned by</div>
+              <div className="font-mono text-[0.6rem] font-bold text-background/60">Sponsor</div>
               <div className="mt-1 truncate font-extrabold">{row.owner?.company_name}</div>
             </div>
             <div>
@@ -192,14 +166,31 @@ function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: numb
       </div>
       <CreatorIdentity row={row} />
       <div>
-        <div className="label-xs">{owned ? "Bio value" : "Starting price"}</div>
-        <div className="mt-0.5 text-xl font-extrabold">
-          {money(owned ? row.bioValueCents! : row.listing.starting_price_cents)}
+        <div className="label-xs">
+          {!row.canBuy ? "Sponsorship" : owned ? "Bio value" : "Starting price"}
         </div>
-        {!owned ? <div className="mt-0.5 font-mono text-[0.65rem] font-bold">Unowned</div> : null}
+        <div className="mt-0.5 text-xl font-extrabold">
+          {!row.canBuy
+            ? "Unavailable"
+            : money(owned ? row.bioValueCents! : row.listing.starting_price_cents)}
+        </div>
+        {!owned && row.canBuy ? (
+          <div className="mt-0.5 font-mono text-[0.65rem] font-bold">Unsponsored</div>
+        ) : null}
       </div>
       <div className="min-w-0">
-        <div className="label-xs">Owned by</div>
+        {row.owner ? (
+          <a
+            href={row.owner.destination_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="label-xs hover:underline"
+          >
+            Sponsored ↗
+          </a>
+        ) : (
+          <div className="label-xs">Sponsored</div>
+        )}
         <div className="mt-0.5 truncate font-bold">{row.owner?.company_name ?? "—"}</div>
       </div>
       <TakeoverButton row={row} />
@@ -243,21 +234,21 @@ function timeAgo(value: string) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-function SellYourBio() {
+function AddYourBio() {
   const [handle, setHandle] = useState("");
   return (
     <section
-      aria-labelledby="sell-heading"
+      aria-labelledby="add-heading"
       className="mb-8 border-2 border-border bg-card px-4 py-5 sm:px-6 sm:py-6"
     >
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 id="sell-heading" className="text-xl font-semibold">
-            Sell your X bio
+          <h2 id="add-heading" className="text-xl font-semibold">
+            Add your bio
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Connect your X account, add your Buy My Bio link to your bio, and let sponsors bid for the
-            slot.
+            Connect X to add your profile and let anyone sponsor it on Buy My Bio. Nothing is posted
+            or changed on X.
           </p>
         </div>
         <form
@@ -315,32 +306,31 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           <div className="flex flex-col items-center">
             <TrafficCounters />
             <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
-              The most valuable bios on X
+              Sponsor creators on Buy My Bio
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
-              Buy your favorite X user's bio. Keep it until somebody pays more.
+              Sponsor a creator's Buy My Bio profile. Keep the spot until somebody pays more.
             </p>
           </div>
         </div>
-
       </section>
 
-      <SellYourBio />
+      <AddYourBio />
 
       <section aria-labelledby="leaderboard-heading">
         <div className="flex flex-col gap-4 border-2 border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
             <h2 id="leaderboard-heading" className="text-lg font-extrabold">
-              Who has the most valuable X bio?
+              Creator sponsorship rankings
             </h2>
             <p className="text-xs text-muted-foreground">
-              Ranked by the latest successful takeover. No weighting. No boosting.
+              Ranked by successful sponsorship payments. No weighting. No boosting.
             </p>
           </div>
           <div className="flex max-w-full gap-1 overflow-x-auto" aria-label="Leaderboard sorting">
             {sorts.map((sort) => {
               const active = market.sort === sort.value;
-              const href = sort.value === "most-valuable" ? "/" : `/?sort=${sort.value}`;
+              const href = sort.value === "new" ? "/" : `/?sort=${sort.value}`;
               return (
                 <a
                   key={sort.value}
@@ -370,7 +360,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           </div>
         ) : !numberOne ? (
           <div className="border-x-2 border-b-2 border-border bg-card px-5 py-10 text-center">
-            <p className="text-xl font-extrabold">No Bio Value has been established yet.</p>
+            <p className="text-xl font-extrabold">No profiles have been listed yet.</p>
             <p className="mt-2 text-sm text-muted-foreground">
               The first successful live payment will create the first real market value and #1 rank.
             </p>
@@ -383,7 +373,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
               <h2 id="unowned-heading" className="text-xl font-extrabold">
-                Unowned bios
+                Unsponsored profiles
               </h2>
               <p className="text-xs text-muted-foreground">
                 Starting prices are not Bio Value and do not affect the rankings.
@@ -416,19 +406,19 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         <div className="border-2 border-border bg-accent p-5 text-accent-foreground">
           <div className="label-xs !text-accent-foreground/60">The status loop</div>
           <p className="mt-3 text-xl leading-tight font-extrabold">
-            Pay more. Bio Value rises. Rank rises. Everyone sees it.
+            Sponsor a profile. Its value rises. Its rank rises. Everyone sees it.
           </p>
           <Link
             to="/creator"
             className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold underline"
           >
-            Sell your bio <ArrowUpRight className="size-4" />
+            Add your bio <ArrowUpRight className="size-4" />
           </Link>
           {numberOne ? (
             <a
               className="mt-4 flex items-center gap-2 text-sm font-bold underline"
               href={`https://x.com/intent/post?text=${encodeURIComponent(
-                `The #1 most valuable X bio is @${handleOf(numberOne)} at ${money(numberOne.bioValueCents ?? 0)}.`,
+                `@${handleOf(numberOne)} has the #1 creator sponsorship on Buy My Bio at ${money(numberOne.bioValueCents ?? 0)}.`,
               )}&url=${encodeURIComponent(`https://buymybio.com/u/${numberOne.creator.username}`)}`}
               target="_blank"
               rel="noreferrer"

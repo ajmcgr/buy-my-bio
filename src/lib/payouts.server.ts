@@ -6,7 +6,7 @@
  * the platform until ALL of the following are true at release time:
  *   - the hold window has elapsed
  *   - the payment is still `applied` and not refunded, live-mode
- *   - the creator's X bio still contains the required Buy My Bio placement
+ *   - the sponsored placement was fulfilled on BuyMyBio.com
  *   - the creator's connected account has transfers enabled
  */
 
@@ -40,8 +40,8 @@ export async function recordPayout(opts: {
   const feeCents = Math.round((opts.grossCents * feePct) / 100);
   const netCents = Math.max(0, opts.grossCents - feeCents);
 
-  // NOTE: the hold does NOT start at payment time. `release_at` stays NULL
-  // until the placement is verified live on X for the first time.
+  // The settlement path marks website delivery immediately and starts the
+  // standard hold from the successful payment time.
   const { error } = await db.from("payouts").insert({
     creator_id: listing.creator_id,
     listing_id: listing.id,
@@ -176,9 +176,8 @@ export async function releaseOne(payoutId: string): Promise<string> {
   if (!creator.stripe_account_id) return block(payoutId, "no_connected_account");
 
   // Re-check the connected account rather than trusting the cached flag.
-  const { retrieveAccount, retrievePaymentIntent, createTransfer } = await import(
-    "./stripe.server"
-  );
+  const { retrieveAccount, retrievePaymentIntent, createTransfer } =
+    await import("./stripe.server");
   const account = (await retrieveAccount(creator.stripe_account_id)) as Record<string, unknown>;
   const payoutsEnabled = account["payouts_enabled"] === true;
   const transfersActive =
@@ -229,7 +228,6 @@ export async function releaseOne(payoutId: string): Promise<string> {
       createTransfer,
     );
   }
-
 
   const endReason = (ownership?.placement_end_reason as string | null) ?? null;
 
@@ -295,14 +293,20 @@ export async function releaseOne(payoutId: string): Promise<string> {
         last_verification_error: null,
       })
       .eq("id", payoutId);
-    return transferPayout(payoutId, payout, payment, creator, retrievePaymentIntent, createTransfer);
+    return transferPayout(
+      payoutId,
+      payout,
+      payment,
+      creator,
+      retrievePaymentIntent,
+      createTransfer,
+    );
   }
 
   // An unconfirmed mismatch is being re-checked: hold the money, don't punish.
   if (ownership?.mismatch_pending_since) {
     return block(payoutId, "mismatch_pending_confirmation");
   }
-
 
   const { checkPlacement } = await import("./verification.server");
   const result = await checkPlacement({
@@ -332,7 +336,9 @@ export async function releaseOne(payoutId: string): Promise<string> {
     if (ownership) {
       const { data: fresh } = await db
         .from("ownerships")
-        .select("status, placement_end_reason, final_verification_status, mismatch_pending_since, mismatch_recheck_at")
+        .select(
+          "status, placement_end_reason, final_verification_status, mismatch_pending_since, mismatch_recheck_at",
+        )
         .eq("id", ownership.id)
         .maybeSingle();
       if (fresh && fresh.status !== "active" && fresh.placement_end_reason !== "seller_removed") {
@@ -400,7 +406,6 @@ export async function releaseOne(payoutId: string): Promise<string> {
     return `blocked: verification_failed: ${result.reason}`;
   }
 
-
   await db
     .from("payouts")
     .update({
@@ -460,7 +465,10 @@ async function transferPayout(
       refund_status: string | null;
       stripe_refund_id: string | null;
     } | null;
-    if (linked && ((linked.refund_status && linked.refund_status !== "none") || linked.stripe_refund_id)) {
+    if (
+      linked &&
+      ((linked.refund_status && linked.refund_status !== "none") || linked.stripe_refund_id)
+    ) {
       await db
         .from("payouts")
         .update({ status: "cancelled", payout_status: "blocked", last_error: "payment_refunded" })

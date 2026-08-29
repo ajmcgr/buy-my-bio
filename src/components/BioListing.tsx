@@ -17,7 +17,7 @@ function ProfileCard({ view }: { view: ListingView }) {
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
-            {c.x_bio_verified ? (
+            {c.x_account_verified ? (
               <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold text-accent-foreground">
                 ✓ X account connected
               </span>
@@ -79,19 +79,17 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
     <div className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
       {heading ? (
         <h1 className="text-[clamp(2.75rem,11vw,6.5rem)] leading-[0.85] font-semibold tracking-[-0.05em]">
-          Sell your X bio
+          Add your profile
         </h1>
       ) : (
         <h1 className="text-[clamp(2rem,7vw,3.5rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
-          Buy @{view.creator.x_username ?? view.creator.social_handle}'s X bio
+          Sponsor @{view.creator.x_username ?? view.creator.social_handle}
         </h1>
       )}
 
-      <p className="mt-5 text-2xl font-bold sm:text-3xl">
-        Buy the sponsored slot in someone's X bio.
-      </p>
+      <p className="mt-5 text-2xl font-bold sm:text-3xl">Sponsor this creator on Buy My Bio.</p>
       <p className="mt-1 text-base text-muted-foreground sm:text-lg">
-        Highest bidder owns the message + link until they're outbid.
+        Your message + link stays on this profile until somebody pays more.
       </p>
 
       <div className="mt-8 grid border-2 border-border bg-foreground text-background sm:grid-cols-3">
@@ -111,9 +109,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
         </div>
         <div className="border-t border-background/25 px-5 py-4 sm:border-t-0">
-          <div className="font-mono text-[0.65rem] font-bold text-background/60">Owned by</div>
+          <div className="font-mono text-[0.65rem] font-bold text-background/60">Sponsored by</div>
           <div className="mt-1 truncate text-2xl font-extrabold">
-            {owner?.company_name ?? "Unowned"}
+            {owner?.company_name ?? "Unsponsored"}
           </div>
         </div>
       </div>
@@ -121,7 +119,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
       {view.globalRank && view.bioValueCents !== null && view.bioValueCents !== undefined ? (
         <a
           href={`https://x.com/intent/post?text=${encodeURIComponent(
-            `@${view.creator.x_username ?? view.creator.social_handle}'s X bio is worth ${money(view.bioValueCents)} — currently #${view.globalRank} on @BuyMyBio.`,
+            `@${view.creator.x_username ?? view.creator.social_handle}'s profile sponsorship is worth ${money(view.bioValueCents)} — currently #${view.globalRank} on @BuyMyBio.`,
           )}&url=${encodeURIComponent(`https://buymybio.com/u/${view.creator.username}`)}`}
           target="_blank"
           rel="noreferrer"
@@ -136,7 +134,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
         <div className="panel flex flex-col justify-between">
           <div className="border-b-2 border-border px-5 py-4">
-            <div className="label-xs">Sponsored on Buy My Bio</div>
+            <div className="label-xs">Sponsored</div>
             <div className="mt-1 flex items-center gap-3">
               {owner?.logo_url && (
                 <img
@@ -181,13 +179,15 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               onClick={() => setOpen(true)}
               className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-semibold tracking-tight"
             >
-              {owner ? `Steal${view.globalRank === 1 ? " #1" : " this X bio"}` : "Own this X bio"} —{" "}
-              {money(price)}
+              {owner
+                ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}`
+                : "Sponsor this profile"}{" "}
+              — {money(price)}
             </button>
             <div className="panel mt-6 px-5 py-5 text-sm">
               <p>
-                <span className="font-bold">What you get:</span> you're buying a sponsored message
-                + tracked link on this creator's Buy My Bio profile. This sponsorship appears on
+                <span className="font-bold">What you get:</span> you're buying a sponsored message +
+                tracked link on this creator's Buy My Bio profile. This sponsorship appears on
                 BuyMyBio.com only.
               </p>
               <p className="mt-2 text-muted-foreground">
@@ -199,10 +199,10 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </>
         ) : (
           <div className="panel px-5 py-6 text-center">
-            <p className="font-bold">This bio isn't accepting buyers right now.</p>
+            <p className="font-bold">This profile isn't accepting sponsors right now.</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              {!view.creator.x_bio_verified
-                ? "This creator hasn't listed their profile yet."
+              {!view.creator.x_account_verified
+                ? "This creator has disconnected X. Their ranking entry remains permanent."
                 : "The listing is paused."}
             </p>
           </div>
@@ -210,17 +210,17 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
       </div>
 
       <section className="mt-20">
-        <h2 className="label-xs">Previous owners</h2>
+        <h2 className="label-xs">Previous sponsors</h2>
         {view.history.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            No previous owners yet. {owner ? "" : "Be the first."}
+            No previous sponsors yet. {owner ? "" : "Be the first."}
           </p>
         ) : (
           <div className="panel mt-3 divide-y-2 divide-border">
             <div className="label-xs grid grid-cols-4 gap-2 px-4 py-2">
-              <span>Owner</span>
+              <span>Sponsor</span>
               <span>Paid</span>
-              <span>Owned for</span>
+              <span>Sponsored for</span>
               <span className="text-right">Clicks</span>
             </div>
             {view.history.map((o) => (
@@ -237,9 +237,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
       <section className="mt-20 grid gap-6 sm:grid-cols-3">
         {[
-          ["1. Buy", "Pay more than the current owner."],
-          ["2. Own", "Your message + link sits in the creator's X bio and points at your site."],
-          ["3. Get outbid", "Someone pays more and takes it."],
+          ["1. Sponsor", "Pay the current price for the creator's sponsor spot."],
+          ["2. Get featured", "Your message + link appears on the creator's Buy My Bio profile."],
+          ["3. Get outbid", "Someone pays more and their sponsorship replaces yours."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
             <div className="text-lg font-extrabold">{t}</div>
@@ -247,7 +247,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
         ))}
       </section>
-      <p className="mt-6 font-mono text-sm">No deadline. No expiry. Highest bidder owns it.</p>
+      <p className="mt-6 font-mono text-sm">
+        No deadline. No expiry. The top sponsor keeps the spot.
+      </p>
 
       <BuyDialog view={view} open={open} onClose={() => setOpen(false)} />
     </div>

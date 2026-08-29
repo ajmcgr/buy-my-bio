@@ -28,7 +28,9 @@ async function creatorFromToken(token: string) {
   const db = admin();
   const { data } = await db
     .from("creators")
-    .select("id, username, banned, stripe_account_id, stripe_payouts_enabled, stripe_details_submitted")
+    .select(
+      "id, username, banned, stripe_account_id, stripe_payouts_enabled, stripe_details_submitted",
+    )
     .eq("session_token", token)
     .maybeSingle();
   return { db, creator: data };
@@ -42,7 +44,9 @@ export const getPayoutStatus = createServerFn({ method: "POST" })
 
     const { data: rows } = await db
       .from("payouts")
-      .select("id, amount_cents, gross_cents, status, hold_until, released_at, last_error, fee_percentage")
+      .select(
+        "id, amount_cents, gross_cents, status, hold_until, released_at, last_error, fee_percentage",
+      )
       .eq("creator_id", creator.id)
       .order("created_at", { ascending: false })
       .limit(50);

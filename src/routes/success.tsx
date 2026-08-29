@@ -14,11 +14,14 @@ export const Route = createFileRoute("/success")({
   head: () => ({
     meta: [
       { title: "Purchase successful — Buy My Bio" },
-      { name: "description", content: "Your purchase is confirmed and your sponsored placement is live on Buy My Bio." },
-      { property: "og:title", content: "I just bought the link in a bio" },
+      {
+        name: "description",
+        content: "Your purchase is confirmed and your sponsored placement is live on Buy My Bio.",
+      },
+      { property: "og:title", content: "I just sponsored a creator on Buy My Bio" },
       {
         property: "og:description",
-        content: "The bio link now points to my startup — until someone outbids me.",
+        content: "My sponsored message and link are live on BuyMyBio.com until someone outbids me.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -84,18 +87,18 @@ function Success() {
       </div>
       {result.globalRank === 1 ? (
         <div className="mt-6 flex items-center gap-3 border-2 border-border bg-accent px-5 py-4 font-mono text-sm font-extrabold text-accent-foreground">
-          <Trophy className="size-5" /> The most valuable sponsored X bio on Buy My Bio
+          <Trophy className="size-5" /> The #1 creator sponsorship on Buy My Bio
         </div>
       ) : result.globalRank ? (
         <p className="mt-4 font-mono text-sm font-bold">Now #{result.globalRank} most valuable</p>
       ) : null}
       <div className="panel mt-8 divide-y-2 divide-border">
         <div className="px-5 py-4">
-          <div className="label-xs">Owner</div>
+          <div className="label-xs">Sponsor</div>
           <div className="text-xl font-extrabold">{result.companyName}</div>
         </div>
         <div className="px-5 py-4">
-          <div className="label-xs">X bio</div>
+          <div className="label-xs">Creator</div>
           <div className="text-xl font-extrabold">@{result.creatorHandle}</div>
         </div>
         <div className="px-5 py-4">
@@ -114,8 +117,8 @@ function Success() {
         <a
           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
             result.globalRank === 1
-              ? `We own the #1 most valuable bio on X.\n\n@${result.creatorHandle} — ${money(result.amountCents)}`
-              : `We just bought @${result.creatorHandle}'s X bio for ${money(result.amountCents)}${result.globalRank ? `. Now #${result.globalRank} on @BuyMyBio.` : "."}`,
+              ? `We hold the #1 creator sponsorship on Buy My Bio.\n\n@${result.creatorHandle} — ${money(result.amountCents)}`
+              : `We just sponsored @${result.creatorHandle} on Buy My Bio for ${money(result.amountCents)}${result.globalRank ? `. Now #${result.globalRank} on @BuyMyBio.` : "."}`,
           )}&url=${encodeURIComponent(`https://buymybio.com/u/${result.slug}`)}`}
           target="_blank"
           rel="noreferrer"
@@ -129,8 +132,8 @@ function Success() {
       </div>
 
       <p className="mt-8 text-sm text-muted-foreground">
-        Once we verify it live, the slot is yours until somebody pays more — we'll email you if
-        someone outbids you, so you can take it back.
+        The spot is live now and remains yours until somebody pays more. We'll email you if someone
+        outbids you, so you can take it back.
       </p>
     </div>
   );

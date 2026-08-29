@@ -7,10 +7,10 @@ export const Route = createFileRoute("/owners")({
   loader: async () => await getMarketplace({ data: { sort: "most-valuable" } }),
   head: () => ({
     meta: [
-      { title: "Top Bio Owners — Buy My Bio" },
+      { title: "Top Sponsors — Buy My Bio" },
       {
         name: "description",
-        content: "See the buyers and brands that own the most valuable sponsored X bio slots.",
+        content: "See the buyers and brands holding the most valuable creator sponsorships.",
       },
     ],
   }),
@@ -42,9 +42,9 @@ function OwnersPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
-      <p className="font-mono text-xs font-bold text-primary">Owners</p>
+      <p className="font-mono text-xs font-bold text-primary">Sponsors</p>
       <h1 className="mt-2 text-[clamp(2.5rem,8vw,5rem)] leading-[0.88] font-extrabold tracking-[-0.05em]">
-        Who owns X?
+        Top sponsors
       </h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">
         The brands holding the most valuable sponsored bio slots, ranked by genuine current Bio
@@ -54,7 +54,7 @@ function OwnersPage() {
       {numberOne?.owner ? (
         <section className="mt-9 border-2 border-border bg-accent p-5 text-accent-foreground sm:p-7">
           <div className="flex items-center gap-2 font-mono text-xs font-extrabold">
-            <Trophy className="size-4" /> Owns the #1 bio
+            <Trophy className="size-4" /> Sponsors the #1 profile
           </div>
           <div className="mt-5 grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
             <div>
@@ -74,7 +74,7 @@ function OwnersPage() {
           </div>
           <a
             href={`https://x.com/intent/post?text=${encodeURIComponent(
-              `${numberOne.owner.company_name} owns the #1 most valuable bio on X.`,
+              `${numberOne.owner.company_name} holds the #1 creator sponsorship on Buy My Bio.`,
             )}&url=${encodeURIComponent(`https://buymybio.com/u/${numberOne.creator.username}`)}`}
             target="_blank"
             rel="noreferrer"
@@ -87,7 +87,7 @@ function OwnersPage() {
 
       <section className="mt-10" aria-labelledby="owner-rankings">
         <h2 id="owner-rankings" className="mb-3 text-xl font-extrabold">
-          Owner rankings
+          Sponsor rankings
         </h2>
         {owners.length ? (
           <div className="border-t-2 border-border">
@@ -121,7 +121,7 @@ function OwnersPage() {
           </div>
         ) : (
           <div className="border-2 border-border bg-card p-8 text-center text-muted-foreground">
-            No buyer owns a production-paid bio yet.
+            No sponsor holds a production-paid profile yet.
           </div>
         )}
       </section>

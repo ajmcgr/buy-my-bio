@@ -231,7 +231,6 @@ function Admin() {
   );
 }
 
-
 const BUCKETS = [
   ["attention", "Needs attention"],
   ["awaiting", "Awaiting activation"],
@@ -312,26 +311,38 @@ function Transactions({ token }: { token: string }) {
             </div>
             <div className="mt-2 grid gap-x-6 gap-y-1 font-mono text-[11px] text-muted-foreground sm:grid-cols-2">
               <span>payment: {t.paymentStatus}</span>
-              <span>ownership: {t.ownershipStatus ?? "—"} / {t.placementStatus ?? "—"}</span>
+              <span>
+                ownership: {t.ownershipStatus ?? "—"} / {t.placementStatus ?? "—"}
+              </span>
               <span>activation deadline: {when(t.activationDeadline)}</span>
               <span>first verified: {when(t.firstVerifiedAt)}</span>
-              <span>verification: {t.verificationStatus ?? "—"}{t.verificationError ? ` (${t.verificationError})` : ""}</span>
+              <span>
+                verification: {t.verificationStatus ?? "—"}
+                {t.verificationError ? ` (${t.verificationError})` : ""}
+              </span>
               <span>
                 final verification: {t.finalVerification ?? "—"}
                 {t.finalVerifiedAt ? ` · ${when(t.finalVerifiedAt)}` : ""}
               </span>
               <span>
-                mismatch: {t.mismatchPendingSince ? `pending confirmation since ${when(t.mismatchPendingSince)}` : "—"}
+                mismatch:{" "}
+                {t.mismatchPendingSince
+                  ? `pending confirmation since ${when(t.mismatchPendingSince)}`
+                  : "—"}
                 {t.mismatchReason ? ` · ${t.mismatchReason}` : ""}
               </span>
-              <span>payout: {t.payoutStatus ?? "—"} · release {when(t.releaseAt)}</span>
+              <span>
+                payout: {t.payoutStatus ?? "—"} · release {when(t.releaseAt)}
+              </span>
               <span>transfer: {t.stripeTransferId ?? "—"}</span>
               <span>
                 refund: {t.refundStatus}
                 {t.refundReason ? ` · ${t.refundReason}` : ""}
                 {t.stripeRefundId ? ` · ${t.stripeRefundId}` : ""}
               </span>
-              {t.refundError && <span className="text-destructive">refund error: {t.refundError}</span>}
+              {t.refundError && (
+                <span className="text-destructive">refund error: {t.refundError}</span>
+              )}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               {["retry_refund", "retry_verification", "retry_payout", "clear_review"].map((a) => (

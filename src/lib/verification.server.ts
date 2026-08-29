@@ -25,7 +25,7 @@ export function normalizeBioText(value: string): string {
     .toLowerCase()
     .replace(/https?:\/\//g, "")
     .replace(/[\u2018\u2019\u201c\u201d]/g, "'")
-    .replace(/[^a-z0-9'@.\/_-]+/g, " ")
+    .replace(/[^a-z0-9'@./_-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim();
 }
@@ -130,13 +130,14 @@ export async function checkPlacement(opts: {
 
   return {
     outcome: "mismatch",
-    reason: !messageOk && !urlOk
-      ? "sponsored_message_and_url_missing"
-      : !messageOk
-        ? "sponsored_message_missing"
-        : !urlOk
-          ? "sponsored_url_missing"
-          : "sponsored_disclosure_missing",
+    reason:
+      !messageOk && !urlOk
+        ? "sponsored_message_and_url_missing"
+        : !messageOk
+          ? "sponsored_message_missing"
+          : !urlOk
+            ? "sponsored_url_missing"
+            : "sponsored_disclosure_missing",
     snapshot: profile.description,
   };
 }
@@ -408,11 +409,7 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
       summary.skipped += 1;
       continue;
     }
-    if (
-      !recheckDue &&
-      o.last_verification_attempt_at &&
-      o.last_verification_attempt_at > cutoff
-    ) {
+    if (!recheckDue && o.last_verification_attempt_at && o.last_verification_attempt_at > cutoff) {
       summary.skipped += 1;
       continue;
     }
@@ -571,7 +568,9 @@ export async function verifyOutgoingBeforeTakeover(
   const db = admin();
   const { data: o } = await db
     .from("ownerships")
-    .select("id, payment_id, bio_message, destination_url, placement_format, first_verified_at, placement_status")
+    .select(
+      "id, payment_id, bio_message, destination_url, placement_format, first_verified_at, placement_status",
+    )
     .eq("listing_id", listingId)
     .eq("status", "active")
     .not("first_verified_at", "is", null)
@@ -832,4 +831,3 @@ export async function resolveUnresolvedFinalVerifications(limit = 25): Promise<R
 
   return summary;
 }
-

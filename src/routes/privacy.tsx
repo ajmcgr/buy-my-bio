@@ -19,11 +19,11 @@ export const Route = createFileRoute("/privacy")({
       <h1 className="text-3xl font-extrabold">Privacy Policy</h1>
       <p>
         We collect the email, company name, and destination URL you provide at checkout so we can
-        deliver your ownership and contact you when you're outbid.
+        deliver your sponsorship and contact you when you're outbid.
       </p>
       <p>
-        When someone follows a bio link we record the timestamp, referrer, and a one-way hash of the
-        visitor's IP address and user agent. We use the hash only to estimate unique clicks; we
+        When someone follows a sponsor link we record the timestamp, referrer, and a one-way hash of
+        the visitor's IP address and user agent. We use the hash only to estimate unique clicks; we
         cannot reverse it and we do not store raw IP addresses.
       </p>
       <p>Payments are handled by Stripe under their privacy policy. We never see card details.</p>

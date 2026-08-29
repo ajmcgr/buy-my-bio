@@ -68,10 +68,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Buy My Bio — The Most Valuable Bios on X" },
+      { title: "Buy My Bio — Sponsor Creators" },
       {
         name: "description",
-        content: "See the most valuable X bios, who owns them, and how much it costs to take them.",
+        content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
       },
       { property: "og:site_name", content: "Buy My Bio" },
       { property: "og:type", content: "website" },
@@ -107,7 +107,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         "data-website-id": "4e9c09af-8147-468f-8feb-ed5739250ab1",
         defer: true,
       },
-
     ],
   }),
   shellComponent: RootShell,
@@ -191,7 +190,6 @@ function HamburgerMenu() {
             About
           </Link>
           <Link
-
             to="/terms"
             onClick={() => setOpen(false)}
             className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -236,8 +234,8 @@ function SiteHeader() {
             FAQ
           </Link>
           <Link to="/creator" className="hover:underline">
-            <span className="sm:hidden">Sell</span>
-            <span className="hidden sm:inline">Sell your bio</span>
+            <span className="sm:hidden">Add</span>
+            <span className="hidden sm:inline">Add your bio</span>
           </Link>
           <ThemeToggle />
           <HamburgerMenu />
@@ -273,9 +271,9 @@ function SiteFooter() {
           .
         </span>
         <span className="max-w-2xl text-muted-foreground/80">
-          Buy My Bio sells disclosed sponsored placements in creators' X bios. Buy My Bio is not
-          affiliated with or endorsed by X. “X” is a trademark of X Corp. Creators manually update
-          and keep full control of their own accounts.
+          Buy My Bio sells disclosed sponsored placements on creator profiles hosted on
+          BuyMyBio.com. Buy My Bio is not affiliated with or endorsed by X. “X” is a trademark of X
+          Corp. X is used only for creator identity and public profile information.
         </span>
       </div>
     </footer>

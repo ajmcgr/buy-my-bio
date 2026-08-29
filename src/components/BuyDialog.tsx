@@ -85,7 +85,9 @@ export function BuyDialog({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/60 p-4 sm:p-8">
       <div className="panel mx-auto w-full max-w-lg">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
-          <span className="label-xs !text-foreground">{view.owner ? "Steal this X bio" : "Own this X bio"}</span>
+          <span className="label-xs !text-foreground">
+            {view.owner ? "Take over this sponsorship" : "Sponsor this profile"}
+          </span>
           <button
             onClick={onClose}
             className="text-2xl leading-none font-bold text-foreground hover:opacity-70"
@@ -97,8 +99,10 @@ export function BuyDialog({
 
         <div className="grid grid-cols-2 border-b-2 border-border">
           <div className="border-r-2 border-border px-5 py-4">
-            <div className="label-xs">Current owner</div>
-            <div className="font-bold text-foreground">{view.owner?.company_name ?? "Available"}</div>
+            <div className="label-xs">Current sponsor</div>
+            <div className="font-bold text-foreground">
+              {view.owner?.company_name ?? "Available"}
+            </div>
           </div>
           <div className="px-5 py-4">
             <div className="label-xs">{view.owner ? "Bio value" : "Starting price"}</div>
@@ -110,13 +114,13 @@ export function BuyDialog({
 
         <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
           <p>
-            You're buying a <b>sponsored placement</b> — a disclosed advertising message and
-            tracked link on this creator's Buy My Bio profile.
+            You're buying a <b>sponsored placement</b> — a disclosed advertising message and tracked
+            link on this creator's Buy My Bio profile.
           </p>
           <p className="mt-2 text-foreground/75">
-            You are not buying the X account, username, profile photo, banner, posts, or any
-            access to the account, and nothing is added to the creator's X profile. The placement
-            appears on buymybio.com only.
+            You are not buying the X account, username, profile photo, banner, posts, or any access
+            to the account, and nothing is added to the creator's X profile. The placement appears
+            on buymybio.com only.
           </p>
           <p className="mt-2 text-foreground/75">
             Your placement is always published with a “{SPONSOR_PREFIX}” label so it's clear to
@@ -124,7 +128,6 @@ export function BuyDialog({
             are employed by the account, and must not impersonate the creator or anyone else.
           </p>
         </div>
-
 
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
           <div>
@@ -217,11 +220,15 @@ export function BuyDialog({
 
           <div className="border-2 border-border bg-accent px-4 py-3">
             <div className="label-xs !text-accent-foreground/70">Your takeover price</div>
-            <div className="text-4xl font-extrabold tracking-tight text-accent-foreground">{money(price)}</div>
+            <div className="text-4xl font-extrabold tracking-tight text-accent-foreground">
+              {money(price)}
+            </div>
           </div>
 
           <div className="border-2 border-border px-4 py-3 text-sm text-foreground">
-            <p className="font-semibold">You'll own this sponsored slot until somebody pays more.</p>
+            <p className="font-semibold">
+              You'll hold this sponsored spot until somebody pays more.
+            </p>
             <p className="mt-1 text-muted-foreground">
               Your sponsored message goes live on this creator's Buy My Bio profile immediately
               after payment. Nothing needs to change on X.
@@ -241,11 +248,10 @@ export function BuyDialog({
               <a href="/terms" className="font-semibold underline">
                 Terms
               </a>{" "}
-              , confirm my placement is honest advertising that doesn't impersonate the creator
-              or anyone else, and understand messages and destinations are subject to moderation.
+              , confirm my placement is honest advertising that doesn't impersonate the creator or
+              anyone else, and understand messages and destinations are subject to moderation.
             </span>
           </label>
-
 
           {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
@@ -259,7 +265,7 @@ export function BuyDialog({
           >
             {busy
               ? "Opening checkout…"
-              : `${view.owner ? `Steal${view.globalRank === 1 ? " #1" : " this X bio"}` : "Own this X bio"} — ${money(price)}`}
+              : `${view.owner ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}` : "Sponsor this profile"} — ${money(price)}`}
           </button>
         </form>
       </div>

@@ -120,7 +120,6 @@
   color: color-mix(in oklch, var(--color-foreground) 72%, var(--color-card));
 }
 
-
 @utility panel {
   border: 2px solid var(--color-border);
   background: var(--color-card);
@@ -187,4 +186,3 @@
     background: color-mix(in oklch, var(--color-accent) 22%, var(--color-card));
   }
 }
-

@@ -22,7 +22,7 @@ export type CreatorSession = {
   ownerName: string | null;
   ownerMessage: string | null;
   ownerUrl: string | null;
-  /** Exact text (including the automatic "Sponsored:" label) that must be live in the bio. */
+  /** Exact sponsored message shown on the creator's Buy My Bio profile. */
   ownerPlacement: string | null;
   compliance: { status: string; reason: string | null } | null;
   activation: {
@@ -55,7 +55,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       .maybeSingle();
 
     let marketRow = null;
-    if (c.x_account_verified && c.x_bio_verified) {
+    if (listing) {
       const { loadMarketplace } = await import("./marketplace.server");
       const market = await loadMarketplace("new");
       marketRow =
@@ -129,101 +129,14 @@ export const publishListing = createServerFn({ method: "POST" })
     const db = admin();
     const { data: c } = await db
       .from("creators")
-      .select("id, banned")
+      .select("id, banned, x_account_verified")
       .eq("session_token", data.token)
       .maybeSingle();
     if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
-    const { error } = await db
-      .from("listings")
-      .update({ status: "active" })
-      .eq("creator_id", c.id);
+    if (!c.x_account_verified) return { error: "Connect X before listing your profile." } as const;
+    const { error } = await db.from("listings").update({ status: "active" }).eq("creator_id", c.id);
     if (error) return { error: "We couldn't publish your listing. Please try again." } as const;
     return { ok: true } as const;
-  });
-
-/**
- * Re-reads the creator's live X profile and only flips BIO VERIFIED when the
- * required placement is actually present right now.
- */
-export const verifyMyBio = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
-  .handler(async ({ data }) => {
-    const { admin } = await import("./db.server");
-    const { xConfigured } = await import("./x.server");
-    const db = admin();
-
-    const { data: c } = await db
-      .from("creators")
-      .select("id, username, x_user_id, banned")
-      .eq("session_token", data.token)
-      .maybeSingle();
-    if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
-    if (!c.x_user_id) return { error: "Connect your X account first." } as const;
-    if (!xConfigured()) return { error: "X verification isn't configured yet." } as const;
-
-    const { lookupPublicProfile, placementPresent } = await import("./x-app.server");
-    let profile;
-    try {
-      profile = await lookupPublicProfile(String(c.x_user_id));
-    } catch (e) {
-      console.error("bio verify lookup failed", e);
-      return {
-        error: "We couldn't read your X profile automatically. An admin will review it shortly.",
-      } as const;
-    }
-
-    const present = placementPresent(profile, c.username);
-    const now = new Date().toISOString();
-    await db
-      .from("creators")
-      .update({
-        x_bio_snapshot: profile.description,
-        x_follower_count: profile.followers,
-        ...(present
-          ? { x_bio_verified: true, x_bio_verified_at: now, x_bio_verified_method: "api" }
-          : {}),
-      })
-      .eq("id", c.id);
-
-    if (present) {
-      await db.from("listings").update({ status: "active" }).eq("creator_id", c.id);
-      return { ok: true } as const;
-    }
-    return {
-      error: `We couldn't find "buymybio.com/${c.username}" in your X profile yet. Add it, save, then try again.`,
-    } as const;
-  });
-
-
-/**
- * Creator-triggered activation check for the CURRENT owner's placement.
- * Clicking is never enough — we re-read the live X bio and only start the
- * 7-day payout hold when the sponsored message + link are actually there.
- */
-export const activatePlacement = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
-  .handler(async ({ data }) => {
-    const { admin } = await import("./db.server");
-    const db = admin();
-    const { data: c } = await db
-      .from("creators")
-      .select("id, banned")
-      .eq("session_token", data.token)
-      .maybeSingle();
-    if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
-
-    const { activateForCreator } = await import("./activation.server");
-    const result = await activateForCreator(c.id);
-    if (result.state === "activated") return { ok: true } as const;
-    if (result.state === "none") return { error: "No sponsorship is waiting for activation." } as const;
-    if (result.state === "unavailable")
-      return {
-        error: "We couldn't read your X profile just now. We'll keep retrying automatically.",
-      } as const;
-    return {
-      error:
-        "We couldn't find the sponsor's message and link in your X bio yet. Paste both exactly, save your profile, then check again.",
-    } as const;
   });
 
 const disconnectIn = z.object({
@@ -235,10 +148,10 @@ const disconnectIn = z.object({
  * Disconnect the creator's X account (and optionally delete their Buy My Bio data).
  *
  * Disconnecting is always allowed, but it NEVER cancels an obligation:
- * - the listing is suspended so no new buyer can bid,
+ * - the profile remains publicly listed but cannot accept new sponsorships,
  * - live/awaiting sponsorships, payouts, refunds and violation history are untouched,
- * - when an obligation is still open we keep the public X user id so the
- *   server-side app-only verification can keep running (no user token involved).
+ * - public X identity fields are retained so the permanent ranking entry and a
+ *   future reconnect resolve to the same creator.
  * Hard deletion is refused while an obligation or any payment history exists.
  */
 export const disconnectXAccount = createServerFn({ method: "POST" })
@@ -280,30 +193,17 @@ export const disconnectXAccount = createServerFn({ method: "POST" })
     if (openPayout && openPayout.length > 0) hasObligation = true;
 
     // Stop new buyers either way. Existing obligations continue unchanged.
-    if (listing) await db.from("listings").update({ status: "suspended" }).eq("id", listing.id);
+    if (listing) await db.from("listings").update({ status: "disconnected" }).eq("id", listing.id);
 
     const wipe: Record<string, unknown> = {
       session_token: null,
       updated_at: new Date().toISOString(),
+      x_account_verified: false,
+      x_account_verified_at: null,
+      x_bio_verified: false,
+      x_bio_verified_at: null,
+      x_bio_verified_method: null,
     };
-    if (!hasObligation) {
-      // No open obligation: fully unlink the X identity.
-      Object.assign(wipe, {
-        x_user_id: null,
-        x_username: null,
-        x_display_name: null,
-        x_profile_image_url: null,
-        x_profile_url: null,
-        x_follower_count: null,
-        x_account_verified: false,
-        x_account_verified_at: null,
-        x_bio_verified: false,
-        x_bio_verified_at: null,
-        x_bio_verified_method: null,
-        x_bio_snapshot: null,
-        verification_status: "pending",
-      });
-    }
     await db.from("creators").update(wipe).eq("id", c.id);
 
     if (!data.deleteData) return { ok: true, deleted: false, hasObligation } as const;
@@ -324,4 +224,3 @@ export const disconnectXAccount = createServerFn({ method: "POST" })
     await db.from("creators").delete().eq("id", c.id);
     return { ok: true, deleted: true, hasObligation: false } as const;
   });
-

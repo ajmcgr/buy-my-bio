@@ -91,6 +91,8 @@ export async function fetchXUser(accessToken: string): Promise<XUser> {
   const res = await fetch(ME_URL, { headers: { Authorization: `Bearer ${accessToken}` } });
   const body = await res.text();
   if (!res.ok) throw new Error(`X users/me failed [${res.status}]: ${body}`);
+  // X's response contains nested entity shapes that vary by field expansion.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const u = (JSON.parse(body) as { data: Record<string, any> }).data;
   const entities = u["entities"] ?? {};
   const urls: string[] = [];
@@ -120,8 +122,6 @@ export function requiredPlacement(username: string): string {
 /** True when the required Buy My Bio placement is currently present in the profile. */
 export function placementPresent(user: XUser, username: string): boolean {
   const needle = requiredPlacement(username).toLowerCase();
-  const haystack = [user.description, user.url ?? "", ...user.expandedUrls]
-    .join(" ")
-    .toLowerCase();
+  const haystack = [user.description, user.url ?? "", ...user.expandedUrls].join(" ").toLowerCase();
   return haystack.includes(needle);
 }

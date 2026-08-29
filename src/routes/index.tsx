@@ -6,20 +6,20 @@ import { MarketplaceLeaderboard } from "@/components/MarketplaceLeaderboard";
 const sortSchema = z.enum(["most-valuable", "trending", "new", "affordable"]);
 
 export const Route = createFileRoute("/")({
-  validateSearch: z.object({ sort: sortSchema.optional().catch("most-valuable") }),
-  loaderDeps: ({ search }) => ({ sort: search.sort ?? "most-valuable" }),
+  validateSearch: z.object({ sort: sortSchema.optional().catch("new") }),
+  loaderDeps: ({ search }) => ({ sort: search.sort ?? "new" }),
   loader: async ({ deps }) => await getMarketplace({ data: { sort: deps.sort } }),
   head: () => ({
     meta: [
-      { title: "Buy My Bio — The Most Valuable Bios on X" },
+      { title: "Buy My Bio — Sponsor Creators" },
       {
         name: "description",
-        content: "See the most valuable X bios, who owns them, and how much it costs to take them.",
+        content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
       },
-      { property: "og:title", content: "Buy My Bio — The Most Valuable Bios on X" },
+      { property: "og:title", content: "Buy My Bio — Sponsor Creators" },
       {
         property: "og:description",
-        content: "See the most valuable X bios, who owns them, and how much it costs to take them.",
+        content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

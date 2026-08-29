@@ -6,10 +6,10 @@ export const Route = createFileRoute("/terms")({
       { title: "Terms of Service — Buy My Bio" },
       {
         name: "description",
-        content: "The rules for buying and owning a bio link on Buy My Bio.",
+        content: "The rules for sponsoring creator profiles on Buy My Bio.",
       },
       { property: "og:title", content: "Terms of Service — Buy My Bio" },
-      { property: "og:description", content: "The rules for buying and owning a bio link." },
+      { property: "og:description", content: "The rules for sponsoring creator profiles." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -27,21 +27,20 @@ export const Route = createFileRoute("/terms")({
       <p>
         You are not buying an X account. No sale transfers ownership of, credentials for, or any
         access to an X account, username, profile photo, banner or posts. Creators retain full
-        control of their accounts at all times and may remove a placement, which cancels the
-        related payout and refunds the buyer.
+        control of their accounts at all times. Sponsorships are displayed and managed by Buy My Bio
+        on BuyMyBio.com, not by the creator on X.
       </p>
       <p>
-        Every placement is published and labelled “Sponsored on Buy My Bio”, which Buy My Bio
-        generates and verifies. Creators are never required to edit their X bio, post, follow,
-        like, repost, reply or perform any other action on X. Buyers may not remove, alter or obscure that label, and a placement
-        without it is treated as non-compliant.
+        Every placement is published and labelled “Sponsored”, which Buy My Bio generates and
+        verifies. Creators are never required to edit their X bio, post, follow, like, repost, reply
+        or perform any other action on X. Buyers may not remove, alter or obscure that label, and a
+        placement without it is treated as non-compliant.
       </p>
       <p>
         Sponsored messages must be honest advertising. You may not impersonate the creator, X Corp,
         Buy My Bio or any other person or brand, and you may not state or imply that you own,
-        operate, are employed by, or are endorsed by the account beyond the paid placement.
-        Creators must not misrepresent a placement as their own personal endorsement where that is
-        untrue.
+        operate, are employed by, or are endorsed by the account beyond the paid placement. Creators
+        must not misrepresent a placement as their own personal endorsement where that is untrue.
       </p>
       <p>
         Placements must comply with applicable advertising rules. Buy My Bio may suspend a listing
@@ -56,8 +55,8 @@ export const Route = createFileRoute("/terms")({
         is refunded in full and automatically.
       </p>
       <p>
-        Messages and destinations are moderated. Adult content, illegal goods or services, malware, phishing,
-        scams, and hate speech are prohibited and will be disabled without refund.
+        Messages and destinations are moderated. Adult content, illegal goods or services, malware,
+        phishing, scams, and hate speech are prohibited and will be disabled without refund.
       </p>
       <p>
         Creators may pause a listing or reject a destination. If a listing is permanently removed

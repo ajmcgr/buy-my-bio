@@ -1,8 +1,7 @@
 import { admin } from "./db.server";
 
 export type Gate =
-  | { ok: true; userId: string; email: string | null }
-  | { ok: false; error: string };
+  { ok: true; userId: string; email: string | null } | { ok: false; error: string };
 
 export async function requireUser(token: string): Promise<Gate> {
   const { data, error } = await admin().auth.getUser(token);
