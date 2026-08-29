@@ -165,20 +165,24 @@ function CreatorPage() {
       ) : !session ? (
         <div className="panel mt-8 p-6">
           <div className="label-xs">Step 1</div>
-          <h2 className="mt-1 text-xl font-extrabold">Connect your X account</h2>
+          <h2 className="mt-1 text-xl font-extrabold">Connect X to verify your account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            We use X sign-in to confirm you own the account. Buyers never need an account.
+            You stay in control. Buy My Bio never edits your X profile — the connection is
+            read-only, used for identity and placement verification. We never post, DM, follow or
+            change anything on your account.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            You're listing <b>sponsored space</b> in your bio — not your account. You keep full
-            control of your profile, and every placement you add is labelled “Sponsored:” so it's
-            clearly disclosed as advertising and stays within X's rules. You're responsible for
-            following X's Terms of Service on your own account, and you can remove a placement at
-            any time (that cancels the related payout and refunds the buyer).
+            You're listing <b>sponsored space</b> in your bio — not your account. When someone buys
+            your sponsored slot, you'll update your bio yourself. We'll verify when it's live. Every
+            placement is labelled “Sponsored:” so it's clearly disclosed advertising, and you can
+            remove one at any time (that cancels the related payout and refunds the buyer).
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
           </a>
+          <p className="mt-3 font-mono text-xs text-muted-foreground">
+            Used for identity and placement verification.
+          </p>
         </div>
       ) : (
         <>
@@ -278,6 +282,10 @@ function CreatorPage() {
                 sponsor's placement — your earlier payouts stay on track. Removing a placement
                 while that sponsor still owns the slot cancels that payout.
               </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You add this to your X bio yourself — Buy My Bio never edits your profile. We only
+                read your bio to check the placement is live.
+              </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -293,6 +301,34 @@ function CreatorPage() {
                 >
                   Copy placement
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const msg = session.ownerPlacement
+                      ? session.ownerPlacement.replace(
+                          session.ownerUrl ? ` ${session.ownerUrl}` : "",
+                          "",
+                        )
+                      : (session.ownerMessage ?? "");
+                    void navigator.clipboard.writeText(msg.trim());
+                    setMessage("Message copied.");
+                  }}
+                  className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                >
+                  Copy message
+                </button>
+                {session.ownerUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(session.ownerUrl!);
+                      setMessage("URL copied.");
+                    }}
+                    className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                  >
+                    Copy URL
+                  </button>
+                ) : null}
                 {session.activation?.status === "awaiting_activation" ? (
                   <button
                     type="button"
@@ -300,10 +336,14 @@ function CreatorPage() {
                     disabled={busy}
                     className="btn-ink btn-ink-hover disabled:opacity-50"
                   >
-                    {busy ? "Checking…" : "I've updated my bio — check now"}
+                    {busy ? "Checking…" : "Verify placement"}
                   </button>
                 ) : null}
               </div>
+              {session.activation?.status !== "awaiting_activation" &&
+              session.activation?.firstVerifiedAt ? (
+                <p className="mt-3 text-sm font-semibold">✓ Verified live</p>
+              ) : null}
               {session.activation?.status === "awaiting_activation" &&
               session.activation.deadline ? (
                 <p className="mt-3 text-sm font-semibold">
