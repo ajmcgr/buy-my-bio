@@ -181,18 +181,49 @@ export async function releaseOne(payoutId: string): Promise<string> {
     .eq("id", creator.id);
   if (!payoutsEnabled || !transfersActive) return block(payoutId, "onboarding_incomplete");
 
-  // The placement must still be live on X right now — this is the whole point
-  // of the hold: creators cannot take the money and delete the placement.
+  // Each purchase has its own payout and its own hold. The placement only has
+  // to be live while THIS buyer is still the current owner — being legitimately
+  // outbid ends the obligation and keeps the payout eligible.
   const { data: ownership } = await db
     .from("ownerships")
-    .select("id, status, destination_url, bio_message, bio_verification_status")
+    .select(
+      "id, status, destination_url, bio_message, bio_verification_status, placement_end_reason",
+    )
     .eq("payment_id", payout.payment_id)
     .maybeSingle();
 
-  if (ownership?.bio_verification_status === "failed")
-    return block(payoutId, "placement_verification_failed");
-
   const now = new Date().toISOString();
+
+  const endReason = (ownership?.placement_end_reason as string | null) ?? null;
+
+  if (endReason === "seller_removed" || ownership?.bio_verification_status === "failed") {
+    await db
+      .from("payouts")
+      .update({
+        status: "cancelled",
+        bio_verification_status: "failed",
+        last_error: "placement_verification_failed",
+      })
+      .eq("id", payoutId);
+    return "blocked: placement_verification_failed";
+  }
+
+  const stillCurrentOwner = !ownership || ownership.status === "active";
+
+  if (!stillCurrentOwner) {
+    // Legitimate ownership change (outbid). The completed ownership period is
+    // owed to the creator — release without re-reading the bio.
+    await db
+      .from("payouts")
+      .update({
+        bio_verification_status: "verified",
+        last_verification_attempt_at: now,
+        last_verification_error: null,
+      })
+      .eq("id", payoutId);
+    return transferPayout(payoutId, payout, payment, creator, retrievePaymentIntent, createTransfer);
+  }
+
   const { checkPlacement } = await import("./verification.server");
   const result = await checkPlacement({
     creatorId: creator.id,
@@ -215,6 +246,37 @@ export async function releaseOne(payoutId: string): Promise<string> {
   }
 
   if (result.outcome === "mismatch") {
+    // Race guard: a newer buyer may have taken over between the two reads.
+    if (ownership) {
+      const { data: fresh } = await db
+        .from("ownerships")
+        .select("status, placement_end_reason")
+        .eq("id", ownership.id)
+        .maybeSingle();
+      if (fresh && fresh.status !== "active" && fresh.placement_end_reason !== "seller_removed") {
+        await db
+          .from("payouts")
+          .update({
+            bio_verification_status: "verified",
+            last_verification_attempt_at: now,
+            last_verification_error: null,
+          })
+          .eq("id", payoutId);
+        return transferPayout(
+          payoutId,
+          payout,
+          payment,
+          creator,
+          retrievePaymentIntent,
+          createTransfer,
+        );
+      }
+    }
+    if (ownership)
+      await db
+        .from("ownerships")
+        .update({ placement_end_reason: "seller_removed" })
+        .eq("id", ownership.id);
     await db
       .from("payouts")
       .update({
@@ -277,6 +339,29 @@ export async function releaseOne(payoutId: string): Promise<string> {
       })
       .eq("id", ownership.id);
 
+  return transferPayout(payoutId, payout, payment, creator, retrievePaymentIntent, createTransfer);
+}
+
+type PayoutRow = { id: string; payment_id: string; amount_cents: number };
+type PaymentRow = { stripe_payment_intent: string | null };
+type CreatorRow = { stripe_account_id: string };
+
+/** Moves the money. Assumes every eligibility guard already passed. */
+async function transferPayout(
+  payoutId: string,
+  payout: PayoutRow,
+  payment: PaymentRow,
+  creator: CreatorRow,
+  retrievePaymentIntent: (id: string) => Promise<unknown>,
+  createTransfer: (opts: {
+    amountCents: number;
+    destination: string;
+    sourceTransaction: string | null;
+    payoutId: string;
+    paymentId: string;
+  }) => Promise<Record<string, unknown>>,
+): Promise<string> {
+  const db = admin();
   // Prefer settling against the original charge so the funds are traceable.
   let sourceTransaction: string | null = null;
   if (payment.stripe_payment_intent) {
