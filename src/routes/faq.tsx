@@ -22,21 +22,21 @@ export const Route = createFileRoute("/faq")({
 });
 
 const faqs: [string, string][] = [
-  ["What am I actually buying?", "You're buying a sponsored message + link inside this creator's X bio. You write the exact text that goes in their bio. You are not buying the X account, username, profile photo, banner, posts or access to the account."],
-  ["Which platforms are supported?", "X bios only for now."],
-  ["How long do I own a bio?", "You keep the sponsored slot until somebody pays more. When another buyer takes the slot, their message replaces yours."],
-  ["What happens when somebody pays more?", "The new buyer immediately becomes the current owner. The creator updates their X bio to the new sponsor's message and link. The previous owner's placement ends normally and any valid pending creator payout remains eligible for release."],
-  ["How do you make sure my sponsorship stays live?", "While you are the current owner, we re-read the creator's live X bio through the X API every day and check your message and link are still there. Nobody has to keep an old sponsor's placement live once someone else has legitimately paid more."],
-  ["What happens if a creator removes my sponsorship?", "If the creator removes or changes the placement while you are still the current owner, their payout for that purchase becomes ineligible and the listing is suspended until it's restored. If your placement disappears because another buyer legitimately paid more, that is a normal ownership change rather than a violation."],
-  ["When does a creator get paid?", "Creator earnings are held for 7 days before payout. If a sponsor is legitimately outbid during that period, the creator still gets paid for that completed ownership period. The 7-day hold does not prevent new buyers from taking the slot."],
-  ["How much of the bio can a sponsor use?", "Sponsored messages can contain up to 100 characters plus a separate link. This keeps space available for the profile owner's own bio while still giving sponsors a meaningful placement."],
-  ["What if I'm outbid one minute later?", "It can happen. You keep the exposure you got, and we email you the price to take it back."],
-  ["Do I get a refund if I'm outbid?", "No — you paid for ownership from the moment you bought it. If two payments race, the loser is refunded in full automatically."],
+  ["How does Buy My Bio work?", "X users list sponsored space in their bio. Anyone can buy the slot at the current price. Once the placement is verified live, you own it until somebody pays more."],
+  ["How long do I own a bio?", "Until somebody pays more. There is no fixed sponsorship period. Your message and link stay in the bio while you're the current owner."],
+  ["What happens when somebody pays more?", "The new buyer takes ownership of the slot and the creator updates their X bio with the new sponsor's message and link. If your placement was already live, your ownership simply ends normally."],
+  ["How quickly does my sponsorship go live?", "Creators have up to 24 hours to activate a new placement. Buy My Bio verifies the sponsored message and link directly against their connected X account."],
+  ["What if the creator never adds my sponsorship?", "Creators only earn a transaction after Buy My Bio verifies the sponsored placement live. If they don't activate it within 24 hours, they aren't eligible for the payout and the transaction is handled as a failed placement."],
+  ["What if somebody outbids me before my sponsorship goes live?", "A creator only earns a sponsorship after it has been verified live. If you're outbid before your placement is ever activated, the creator doesn't earn that transaction and it is treated as a failed placement."],
+  ["How do you make sure my sponsorship stays live?", "Buy My Bio checks connected X profiles while a sponsorship is active. We verify that the current owner's sponsored message and link remain in the bio."],
+  ["What happens if a creator removes my sponsorship?", "If a creator removes or changes your placement while you're still the current owner, their payout for that transaction is blocked. Being replaced because another buyer legitimately paid more is different and counts as a normal ownership change."],
+  ["When do creators get paid?", "Creator earnings are held for 7 days after a placement is first verified live. Being legitimately outbid during that period doesn't cancel a valid payout. The hold exists to protect the marketplace and doesn't prevent anyone from buying the bio."],
+  ["Can someone buy my bio immediately after another person buys it?", "Yes. There is no waiting period. If someone pays the next price, they can take ownership. Every successfully activated purchase is tracked separately."],
+  ["How much can a sponsor put in my bio?", "Sponsored messages can contain up to 100 characters plus a separate link. This leaves room for the profile owner's own bio while giving sponsors meaningful space."],
+  ["Are X accounts verified?", "Yes. Creators connect their X account so Buy My Bio can verify account ownership and check active sponsored placements."],
+  ["Can I buy my own bio?", "No. Listing owners can't buy or outbid their own bio."],
   ["Can I change my message or link?", "Contact us and we'll update it, subject to moderation."],
   ["What links are not allowed?", "Adult content, illegal goods, malware, scams, hate speech, or anything that would get the creator's X account banned."],
-  ["What exactly is checked?", "We read the creator's live X bio through the X API every day and look for the current owner's message word-for-word (ignoring case and extra spacing) plus their link. A temporary X API error never counts against a creator — we simply retry."],
-  ["Does each purchase have its own payout?", "Yes. Every purchase creates its own creator payout with its own 7-day release date. Rapid outbidding is fine — earlier sponsors\u2019 payouts keep their original timers and are unaffected by later sales."],
-  ["What is the buymybio.com/yourhandle link for then?", "That link is only used once, during creator onboarding, to verify the creator controls the X account and can edit their bio. After verification the buyer's message and link are what get checked."],
 ];
 
 
@@ -50,7 +50,7 @@ function FAQPage() {
       <div className="mt-10 grid gap-6 sm:grid-cols-3">
         {[
           ["1. Buy", "Pay more than the current owner. The price is set by the last sale plus a minimum increase."],
-          ["2. Own", "Your message + tracked link sits in the creator's X bio. Track the clicks you get."],
+          ["2. Own", "Once the creator activates it, your message + tracked link sits in their X bio. Own the slot until someone pays more."],
           ["3. Get outbid", "Someone pays more, they take over, and you get an email with the new price."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">

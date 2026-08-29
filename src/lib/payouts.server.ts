@@ -39,8 +39,8 @@ export async function recordPayout(opts: {
   const feeCents = Math.round((opts.grossCents * feePct) / 100);
   const netCents = Math.max(0, opts.grossCents - feeCents);
 
-  const holdUntil = new Date(Date.now() + holdDays() * 86_400_000).toISOString();
-
+  // NOTE: the hold does NOT start at payment time. `release_at` stays NULL
+  // until the placement is verified live on X for the first time.
   const { error } = await db.from("payouts").insert({
     creator_id: listing.creator_id,
     listing_id: listing.id,
@@ -50,7 +50,10 @@ export async function recordPayout(opts: {
     fee_cents: feeCents,
     amount_cents: netCents,
     fee_percentage: feePct,
-    hold_until: holdUntil,
+    hold_until: null,
+    release_at: null,
+    first_verified_at: null,
+    payout_status: "not_eligible",
     status: "pending",
   });
   // A duplicate key just means the webhook and the success page both settled.
@@ -82,8 +85,10 @@ export async function releaseDuePayouts(limit = 25): Promise<ReleaseSummary> {
     .from("payouts")
     .select("id, creator_id, payment_id, amount_cents, attempts")
     .in("status", ["pending", "blocked"])
-    .lte("hold_until", new Date().toISOString())
-    .order("hold_until", { ascending: true })
+    .not("first_verified_at", "is", null)
+    .not("release_at", "is", null)
+    .lte("release_at", new Date().toISOString())
+    .order("release_at", { ascending: true })
     .limit(limit);
 
   for (const payout of due ?? []) {
@@ -109,7 +114,7 @@ export async function releaseDuePayouts(limit = 25): Promise<ReleaseSummary> {
 async function block(payoutId: string, reason: string): Promise<string> {
   await admin()
     .from("payouts")
-    .update({ status: "blocked", last_error: reason })
+    .update({ status: "blocked", payout_status: "blocked", last_error: reason })
     .eq("id", payoutId);
   return `blocked: ${reason}`;
 }
@@ -120,12 +125,18 @@ export async function releaseOne(payoutId: string): Promise<string> {
 
   const { data: payout } = await db
     .from("payouts")
-    .select("id, creator_id, payment_id, amount_cents, status, attempts")
+    .select(
+      "id, creator_id, payment_id, amount_cents, status, attempts, first_verified_at, release_at",
+    )
     .eq("id", payoutId)
     .maybeSingle();
   if (!payout) return "blocked: payout_missing";
   if (payout.status === "paid") return "paid";
   if (payout.status === "cancelled") return "blocked: cancelled";
+  // Hard requirement: the creator only earns once the placement was verified live.
+  if (!payout.first_verified_at) return block(payoutId, "never_activated");
+  if (!payout.release_at || new Date(payout.release_at).getTime() > Date.now())
+    return "blocked: hold_not_elapsed";
   if (payout.amount_cents < 100) return block(payoutId, "amount_below_stripe_minimum");
 
   await db
@@ -144,7 +155,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
   if (payment.refund_status && payment.refund_status !== "none") {
     await db
       .from("payouts")
-      .update({ status: "cancelled", last_error: "payment_refunded" })
+      .update({ status: "cancelled", payout_status: "blocked", last_error: "payment_refunded" })
       .eq("id", payoutId);
     return "blocked: payment_refunded";
   }
@@ -187,7 +198,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
   const { data: ownership } = await db
     .from("ownerships")
     .select(
-      "id, status, destination_url, bio_message, bio_verification_status, placement_end_reason",
+      "id, status, placement_status, destination_url, bio_message, bio_verification_status, placement_end_reason, first_verified_at",
     )
     .eq("payment_id", payout.payment_id)
     .maybeSingle();
@@ -196,11 +207,30 @@ export async function releaseOne(payoutId: string): Promise<string> {
 
   const endReason = (ownership?.placement_end_reason as string | null) ?? null;
 
+  const placementStatus = (ownership?.placement_status as string | null) ?? null;
+  if (
+    placementStatus === "superseded_before_activation" ||
+    placementStatus === "activation_failed" ||
+    endReason === "superseded_before_activation" ||
+    endReason === "activation_failed"
+  ) {
+    await db
+      .from("payouts")
+      .update({
+        status: "cancelled",
+        payout_status: "blocked",
+        last_error: "never_activated",
+      })
+      .eq("id", payoutId);
+    return "blocked: never_activated";
+  }
+
   if (endReason === "seller_removed" || ownership?.bio_verification_status === "failed") {
     await db
       .from("payouts")
       .update({
         status: "cancelled",
+        payout_status: "blocked",
         bio_verification_status: "failed",
         last_error: "placement_verification_failed",
       })
@@ -281,6 +311,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
       .from("payouts")
       .update({
         status: "cancelled",
+        payout_status: "blocked",
         bio_verification_status: "failed",
         verification_failure_at: now,
         verification_failure_reason: result.reason,
@@ -389,6 +420,7 @@ async function transferPayout(
     .from("payouts")
     .update({
       status: "paid",
+      payout_status: "released",
       released_at: new Date().toISOString(),
       stripe_transfer_id: String(transfer["id"]),
       last_error: null,

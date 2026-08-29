@@ -51,6 +51,8 @@ export function BuyDialog({
           xHandle: String(f.get("xhandle") ?? "") || null,
           logoUrl: String(f.get("logo") ?? "") || null,
           agreed,
+          creatorToken:
+            typeof window === "undefined" ? null : localStorage.getItem("bmb_creator_token"),
         },
       });
       if ("url" in res && res.url) {
@@ -154,8 +156,8 @@ export function BuyDialog({
               {message.trim() || "Your message"} {link.trim() || "https://yourlink.com"}
             </p>
             <p className="mt-2 text-xs text-muted-foreground">
-              We re-read the bio through the X API every day. The creator is only paid if this
-              stays live.
+              Own the slot until someone pays more. X verified · Payment protected · Creators
+              paid after verification.
             </p>
           </div>
 

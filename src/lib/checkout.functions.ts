@@ -10,6 +10,7 @@ const schema = z.object({
   xHandle: z.string().max(40).optional().nullable(),
   logoUrl: z.string().max(400).optional().nullable(),
   agreed: z.boolean(),
+  creatorToken: z.string().max(200).optional().nullable(),
 });
 
 export const startCheckout = createServerFn({ method: "POST" })
@@ -28,12 +29,28 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     const { data: creator } = await db
       .from("creators")
-      .select("id, username, social_handle, x_account_verified, x_bio_verified, banned")
+      .select("id, username, social_handle, x_username, x_account_verified, x_bio_verified, banned")
       .eq("username", data.username.toLowerCase())
       .maybeSingle();
     if (!creator || creator.banned) return { error: "Listing unavailable." };
     if (!creator.x_account_verified || !creator.x_bio_verified)
       return { error: "This listing is not verified yet." };
+
+    // Self-bidding guard (server-side, not just a hidden button).
+    const norm = (v: string | null | undefined) =>
+      (v ?? "").trim().replace(/^@/, "").toLowerCase();
+    const buyerHandle = norm(data.xHandle);
+    const creatorHandles = [creator.x_username, creator.social_handle, creator.username].map(norm);
+    if (buyerHandle && creatorHandles.includes(buyerHandle))
+      return { error: "You can't buy your own bio." };
+    if (data.creatorToken) {
+      const { data: self } = await db
+        .from("creators")
+        .select("id")
+        .eq("session_token", data.creatorToken)
+        .maybeSingle();
+      if (self?.id === creator.id) return { error: "You can't buy your own bio." };
+    }
 
     const { data: listing } = await db
       .from("listings")

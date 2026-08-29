@@ -131,6 +131,16 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
 
   const ownershipId = String(r["ownership_id"]);
 
+  // The buyer paid, but the creator has NOT delivered yet: start the 24-hour
+  // activation window and void any earlier purchase that was never activated.
+  try {
+    const { startActivationWindow, supersedeUnactivated } = await import("./activation.server");
+    await startActivationWindow(ownershipId, new Date().toISOString());
+    await supersedeUnactivated(payment.listing_id, ownershipId);
+  } catch (e) {
+    console.error("activation window setup failed", e);
+  }
+
   // context for emails
   const { data: listing } = await db
     .from("listings")
@@ -194,8 +204,8 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("email failure", e);
   }
 
-  // Hold the creator's share in escrow; released later by the payout job once
-  // the placement re-verifies on X.
+  // Record the creator's held share. It only becomes eligible once the
+  // placement is verified live on X (release_at = first_verified_at + 7 days).
   if (stripeLivemode) {
     try {
       const { recordPayout } = await import("./payouts.server");

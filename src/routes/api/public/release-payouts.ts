@@ -23,11 +23,13 @@ export const Route = createFileRoute("/api/public/release-payouts")({
 
         // Daily bio verification sweep first (during the hold AND after payout),
         // then release everything that is still eligible.
+        const { runActivationSweep } = await import("@/lib/activation.server");
+        const activation = await runActivationSweep();
         const { runPlacementSweep } = await import("@/lib/verification.server");
         const verification = await runPlacementSweep();
         const { releaseDuePayouts } = await import("@/lib/payouts.server");
         const summary = await releaseDuePayouts();
-        return Response.json({ verification, payouts: summary });
+        return Response.json({ activation, verification, payouts: summary });
       },
     },
   },
