@@ -18,6 +18,8 @@ export function BuyDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [message, setMessage] = useState("");
+  const [link, setLink] = useState("");
 
   if (!open) return null;
   const price = view.requiredPriceCents;
