@@ -1,3 +1,4 @@
+import { buildPlacementText, normalizeFormat } from "./placement";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
@@ -21,6 +22,8 @@ export type CreatorSession = {
   ownerName: string | null;
   ownerMessage: string | null;
   ownerUrl: string | null;
+  /** Exact text (including the automatic "Sponsored:" label) that must be live in the bio. */
+  ownerPlacement: string | null;
   compliance: { status: string; reason: string | null } | null;
   activation: {
     status: string;
@@ -60,6 +63,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
     }
 
     let ownerMessage: string | null = null;
+    let ownerFormat: string | null = null;
     let ownerUrl: string | null = null;
     let activation: CreatorSession["activation"] = null;
     if (listing) {
@@ -72,6 +76,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
         .eq("listing_id", listing.id)
         .maybeSingle();
       ownerMessage = (ownership?.bio_message as string | null) ?? null;
+      ownerFormat = (ownership?.placement_format as string | null) ?? null;
       ownerUrl = (ownership?.destination_url as string | null) ?? null;
       if (ownership) {
         activation = {
@@ -100,6 +105,9 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       ownerName: marketRow?.owner?.company_name ?? null,
       ownerMessage,
       ownerUrl,
+      ownerPlacement: ownerMessage
+        ? buildPlacementText(ownerMessage, ownerUrl, normalizeFormat(ownerFormat))
+        : null,
       activation,
       compliance: listing
         ? {

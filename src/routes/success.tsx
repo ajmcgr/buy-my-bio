@@ -76,6 +76,10 @@ function Success() {
           Creators have up to 24 hours to activate a placement. We'll email you the moment we
           verify it live — and if they don't activate it in time, your payment is refunded.
         </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Your placement goes live with a “Sponsored:” label so it's clearly disclosed as paid
+          advertising. You've bought a sponsored placement in this bio — not the account itself.
+        </p>
       </div>
       {result.globalRank === 1 ? (
         <div className="mt-6 flex items-center gap-3 border-2 border-border bg-accent px-5 py-4 font-mono text-sm font-extrabold text-accent-foreground">

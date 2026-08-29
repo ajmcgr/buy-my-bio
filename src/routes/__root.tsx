@@ -272,6 +272,11 @@ function SiteFooter() {
           </a>
           .
         </span>
+        <span className="max-w-2xl text-muted-foreground/80">
+          Buy My Bio sells disclosed sponsored placements in creators' X bios. Buy My Bio is not
+          affiliated with, endorsed by, or sponsored by X Corp. “X” is a trademark of X Corp.
+          Creators keep full control of their own accounts.
+        </span>
       </div>
     </footer>
   );

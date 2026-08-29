@@ -140,6 +140,13 @@ function CreatorPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             We use X sign-in to confirm you own the account. Buyers never need an account.
           </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            You're listing <b>sponsored space</b> in your bio — not your account. You keep full
+            control of your profile, and every placement you add is labelled “Sponsored:” so it's
+            clearly disclosed as advertising and stays within X's rules. You're responsible for
+            following X's Terms of Service on your own account, and you can remove a placement at
+            any time (that cancels the related payout and refunds the buyer).
+          </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
           </a>
@@ -230,11 +237,13 @@ function CreatorPage() {
                   : "Keep this in your X bio"}
               </h2>
               <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
-                {session.ownerMessage}
-                {session.ownerUrl ? ` ${session.ownerUrl}` : ""}
+                {session.ownerPlacement ??
+                  `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`}
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                This is the exact message and link the current sponsor paid for. We re-read your
+                Paste this exactly as shown — including the “Sponsored:” label, which is
+                required so the placement is clearly disclosed as advertising and stays within
+                X's rules. This is the exact text the current sponsor paid for. We re-read your
                 live X bio every day while this sponsor is the current owner. Each sale is paid
                 out 7 days after it was first verified live. If someone else pays more, just swap in the new
                 sponsor's placement — your earlier payouts stay on track. Removing a placement
@@ -246,7 +255,8 @@ function CreatorPage() {
                   onClick={() => {
                     if (!session.ownerMessage) return;
                     void navigator.clipboard.writeText(
-                      `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`,
+                      session.ownerPlacement ??
+                        `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`,
                     );
                     setMessage("Placement copied.");
                   }}
