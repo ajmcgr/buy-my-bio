@@ -43,22 +43,27 @@ function Success() {
 
   if (result.status !== "owned") {
     const stale = result.status === "stale";
+    const paymentError = result.status === "payment_error";
     const testMode = stale && result.reason === "test_mode_not_allowed";
     return (
       <div className="mx-auto max-w-xl px-5 py-24 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">
           {testMode
             ? "Live payments aren't enabled"
-            : stale
-              ? "Someone beat you to it"
-              : "Payment pending"}
+            : paymentError
+              ? "We couldn't verify this payment"
+              : stale
+                ? "Someone beat you to it"
+                : "Payment pending"}
         </h1>
         <p className="mt-3 text-muted-foreground">
           {testMode
             ? "This was a Stripe test-mode checkout, so it cannot create a sponsorship or public sponsorship value."
-            : stale
-              ? "The price moved before your payment landed. You'll be refunded automatically — no charge sticks."
-              : "We're still confirming your payment. This page updates within a minute."}
+            : paymentError
+              ? "Your payment did not match the expected Checkout details. If you were charged, we'll refund it automatically."
+              : stale
+                ? "The price moved before your payment landed. You'll be refunded automatically — no charge sticks."
+                : "We're still confirming your payment. This page updates within a minute."}
         </p>
         <Link to="/" className="btn-ink btn-ink-hover mt-8">
           Back to rankings

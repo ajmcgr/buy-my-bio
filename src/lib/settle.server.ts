@@ -18,6 +18,7 @@ export type SettleResult =
       previousOwner: string | null;
     }
   | { status: "stale"; reason: string; paymentId: string }
+  | { status: "payment_error"; reason: string; paymentId: string }
   | { status: "unpaid" }
   | { status: "unknown" };
 
@@ -31,7 +32,7 @@ async function ensurePostTakeoverSettlement(opts: {
   paymentId: string;
   listingId: string;
   ownershipId: string;
-  grossCents: number;
+  collectedCents: number;
   stripeLivemode: boolean;
 }) {
   if (opts.stripeLivemode) {
@@ -40,7 +41,7 @@ async function ensurePostTakeoverSettlement(opts: {
       paymentId: opts.paymentId,
       listingId: opts.listingId,
       ownershipId: opts.ownershipId,
-      grossCents: opts.grossCents,
+      grossCents: opts.collectedCents,
     });
   }
 
@@ -62,27 +63,59 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
 
   const { data: payment } = await db
     .from("payments")
-    .select("id, listing_id, amount_cents, email, company_name, destination_url, status")
+    .select(
+      "id, listing_id, amount_cents, actual_paid_cents, email, company_name, destination_url, status",
+    )
     .eq("id", paymentId)
     .maybeSingle();
   if (!payment) return { status: "unknown" };
 
   if (session["payment_status"] !== "paid") return { status: "unpaid" };
-  if (Number(session["amount_total"]) !== payment.amount_cents) {
+
+  const amountSubtotalCents = Number(session["amount_subtotal"]);
+  const actualPaidCents = Number(session["amount_total"]);
+  const paymentIntent = (session["payment_intent"] as string) ?? null;
+  const stripeLivemode = session["livemode"] === true;
+  const validStripeAmounts =
+    Number.isInteger(amountSubtotalCents) &&
+    Number.isInteger(actualPaidCents) &&
+    amountSubtotalCents === payment.amount_cents &&
+    actualPaidCents >= 0 &&
+    actualPaidCents <= amountSubtotalCents;
+
+  if (!validStripeAmounts) {
     await db
       .from("payments")
-      .update({ flagged: true, admin_notes: "amount mismatch vs stripe" })
+      .update({
+        status: "paid",
+        stripe_payment_intent: paymentIntent,
+        stripe_livemode: stripeLivemode,
+        actual_paid_cents: Number.isInteger(actualPaidCents) ? actualPaidCents : null,
+        paid_at: new Date().toISOString(),
+        flagged: true,
+        admin_notes: "checkout subtotal or total did not match the quoted sponsorship bid",
+      })
       .eq("id", payment.id);
-    return { status: "stale", reason: "amount_mismatch", paymentId: payment.id };
+    // A verification failure after Stripe reports payment must enter the same
+    // idempotent refund path as a genuine outbid. If Stripe supplied no intent
+    // for a non-zero total, refundPayment records an admin-review obligation
+    // rather than silently leaving the buyer stranded.
+    if (paymentIntent || actualPaidCents > 0) {
+      const { refundPayment } = await import("./refunds.server");
+      await refundPayment(payment.id, "concurrent_purchase_conflict");
+    }
+    return { status: "payment_error", reason: "amount_verification_failed", paymentId: payment.id };
   }
 
-  const stripeLivemode = session["livemode"] === true;
   if (!stripeLivemode && process.env["ALLOW_TEST_PAYMENTS"] !== "true") {
     await db
       .from("payments")
       .update({
         flagged: true,
         admin_notes: "test-mode Stripe payment blocked from takeover",
+        actual_paid_cents: actualPaidCents,
+        stripe_payment_intent: paymentIntent,
+        stripe_livemode: stripeLivemode,
         ...(payment.status === "applied" ? {} : { status: "failed" }),
       })
       .eq("id", payment.id);
@@ -92,9 +125,12 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     .from("payments")
     .update({
       status: payment.status === "applied" ? "applied" : "paid",
-      stripe_payment_intent: (session["payment_intent"] as string) ?? null,
+      stripe_payment_intent: paymentIntent,
       stripe_livemode: stripeLivemode,
+      actual_paid_cents: actualPaidCents,
       paid_at: new Date().toISOString(),
+      flagged: false,
+      admin_notes: null,
     })
     .eq("id", payment.id);
 
@@ -169,7 +205,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       paymentId: payment.id,
       listingId: payment.listing_id,
       ownershipId: own.id,
-      grossCents: payment.amount_cents,
+      collectedCents: payment.actual_paid_cents ?? actualPaidCents,
       stripeLivemode,
     });
     let existingRank: number | null = null;
@@ -202,7 +238,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     paymentId: payment.id,
     listingId: payment.listing_id,
     ownershipId,
-    grossCents: payment.amount_cents,
+    collectedCents: actualPaidCents,
     stripeLivemode,
   });
 
