@@ -1,5 +1,5 @@
 import { admin } from "./db.server";
-import { sendPlacementVerifiedEmail, sendWinnerEmail } from "./email.server";
+import { sendPlacementVerifiedEmail, sendWinnerEmail, type EmailSendResult } from "./email.server";
 import { recordEvent } from "./events.server";
 import { creatorEmail } from "./notify.server";
 
@@ -16,7 +16,7 @@ function logFailure(stage: string, paymentId: string, error: unknown) {
 async function deliverOnce(opts: {
   paymentId: string;
   type: EmailType;
-  send: (idempotencyKey: string) => Promise<unknown>;
+  send: (idempotencyKey: string) => Promise<EmailSendResult | { sent: false }>;
 }): Promise<boolean> {
   const db = admin();
   const { data: delivery, error: insertError } = await db
@@ -50,10 +50,16 @@ async function deliverOnce(opts: {
   if (row.status === "sent") return true;
 
   try {
-    await opts.send(`socialbid:${opts.paymentId}:${opts.type}`);
+    const result = await opts.send(`socialbid:${opts.paymentId}:${opts.type}`);
+    if (!result.sent) throw new Error("Resend did not accept the email");
     const { error } = await db
       .from("payment_email_deliveries")
-      .update({ status: "sent", sent_at: new Date().toISOString(), last_error: null })
+      .update({
+        status: "sent",
+        provider_id: result.providerId,
+        sent_at: new Date().toISOString(),
+        last_error: null,
+      })
       .eq("id", row.id);
     if (error) throw new Error(error.message);
     await recordEvent("settlement_email_sent", {

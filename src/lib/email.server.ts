@@ -1,11 +1,17 @@
 import { SPONSOR_PREFIX } from "./placement";
 import { baseUrl } from "./db.server";
 
-const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@buymybio.com>";
+const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@socialbid.co>";
 
 type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean };
+export type EmailSendResult = { sent: true; providerId: string | null };
 
-async function send(to: string, subject: string, html: string, options: SendOptions = {}) {
+async function send(
+  to: string,
+  subject: string,
+  html: string,
+  options: SendOptions = {},
+): Promise<EmailSendResult | { sent: false }> {
   const key = process.env["RESEND_API_KEY"];
   if (!key || !to) {
     const error = new Error(
@@ -25,8 +31,21 @@ async function send(to: string, subject: string, html: string, options: SendOpti
       },
       body: JSON.stringify({ from: FROM, to: [to], subject, html }),
     });
-    if (!response.ok) throw new Error(`Resend returned HTTP ${response.status}`);
-    return { sent: true };
+    const body = (await response.json().catch(() => null)) as {
+      id?: unknown;
+      message?: unknown;
+      name?: unknown;
+    } | null;
+    if (!response.ok) {
+      const providerMessage =
+        typeof body?.message === "string"
+          ? body.message
+          : typeof body?.name === "string"
+            ? body.name
+            : "no provider message";
+      throw new Error(`Resend returned HTTP ${response.status}: ${providerMessage}`);
+    }
+    return { sent: true, providerId: typeof body?.id === "string" ? body.id : null };
   } catch (e) {
     console.error("resend failed", e);
     if (options.throwOnFailure) throw e;
@@ -111,7 +130,7 @@ export async function sendWinnerEmail(o: {
   const tweet = `https://x.com/intent/post?text=${encodeURIComponent(
     `I just sponsored @${o.handle} on Social Bid for ${money(o.amountCents)}.`,
   )}&url=${encodeURIComponent(share)}`;
-  await send(
+  return send(
     o.to,
     o.globalRank === 1 ? `You hold the #1 sponsorship on Social Bid.` : `You sponsor @${o.handle}.`,
     shell(`
@@ -268,7 +287,7 @@ export async function sendPlacementVerifiedEmail(o: {
   throwOnFailure?: boolean;
 }) {
   const buyer = o.audience === "buyer";
-  await send(
+  return send(
     o.to,
     buyer ? "Your sponsorship is live" : "Your profile has a new sponsor",
     shell(`
