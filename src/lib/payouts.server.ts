@@ -198,7 +198,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
   const { data: ownership } = await db
     .from("ownerships")
     .select(
-      "id, status, placement_status, destination_url, bio_message, bio_verification_status, placement_end_reason, first_verified_at, final_verification_status, final_verified_at, mismatch_pending_since",
+      "id, status, placement_status, destination_url, bio_message, placement_format, bio_verification_status, placement_end_reason, first_verified_at, final_verification_status, final_verified_at, mismatch_pending_since",
     )
     .eq("payment_id", payout.payment_id)
     .maybeSingle();
@@ -288,6 +288,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
         (payment as { bio_message?: string | null }).bio_message) ||
       null,
     url: (ownership?.destination_url as string | null) ?? null,
+    placementFormat: (ownership?.placement_format as string | null) ?? null,
   });
 
   if (result.outcome === "unavailable") {
