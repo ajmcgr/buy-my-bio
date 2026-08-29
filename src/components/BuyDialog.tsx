@@ -4,6 +4,13 @@ import { startCheckout } from "@/lib/checkout.functions";
 import { trackEvent } from "@/lib/listing.functions";
 import { money } from "@/lib/format";
 import type { ListingView } from "@/lib/listing.functions";
+import {
+  MESSAGE_MAX_CHARS,
+  SPONSOR_PREFIX,
+  buildPlacementText,
+  messageCharLimit,
+  validatePlacement,
+} from "@/lib/placement";
 
 export function BuyDialog({
   view,
@@ -23,6 +30,13 @@ export function BuyDialog({
 
   if (!open) return null;
   const price = view.requiredPriceCents;
+  const retainedChars = view.retainedBioChars ?? 0;
+  const limit = messageCharLimit(retainedChars, link);
+  const preview = buildPlacementText(
+    message.trim() || "Your message",
+    link.trim() || "https://yourlink.com",
+  );
+  const overLimit = message.trim().length > limit;
 
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -30,13 +44,14 @@ export function BuyDialog({
     setError(null);
     const f = new FormData(e.currentTarget);
     const msg = message.trim();
-    if (msg.length < 3 || msg.length > 100) {
-      setError("Your message must be between 3 and 100 characters.");
+    if (!/^https?:\/\/\S+\.\S+/i.test(link.trim())) {
+      setError("Your link must be a valid http:// or https:// URL.");
       setBusy(false);
       return;
     }
-    if (!/^https?:\/\/\S+\.\S+/i.test(link.trim())) {
-      setError("Your link must be a valid http:// or https:// URL.");
+    const check = validatePlacement({ message: msg, url: link.trim(), retainedChars });
+    if (!check.ok) {
+      setError(check.error);
       setBusy(false);
       return;
     }
@@ -94,10 +109,18 @@ export function BuyDialog({
         </div>
 
         <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
-          <p>You're buying a sponsored message + tracked link inside this creator's X bio.</p>
+          <p>
+            You're buying a <b>sponsored placement</b> — a disclosed advertising message and
+            tracked link inside this creator's X bio.
+          </p>
           <p className="mt-2 text-foreground/75">
-            You are not buying the X account, username, profile photo, banner, posts or access to
-            the account.
+            You are not buying the X account, username, profile photo, banner, posts, or any
+            access to the account. The creator keeps full control of their profile at all times.
+          </p>
+          <p className="mt-2 text-foreground/75">
+            Your placement is always published with a “{SPONSOR_PREFIX}” label so it's clear to
+            everyone that it's paid advertising. Your message must not imply that you own, run or
+            are employed by the account, and must not impersonate the creator or anyone else.
           </p>
         </div>
 
@@ -112,22 +135,22 @@ export function BuyDialog({
               name="biomessage"
               required
               minLength={3}
-              maxLength={100}
+              maxLength={MESSAGE_MAX_CHARS}
               value={message}
-              onChange={(e) => setMessage(e.target.value.slice(0, 100))}
+              onChange={(e) => setMessage(e.target.value.slice(0, MESSAGE_MAX_CHARS))}
               placeholder="Sponsored by YourStartup"
               className="field mt-1"
             />
             <div className="mt-1 flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                Your message and link will appear in this X bio until someone pays more.
+                {limit < MESSAGE_MAX_CHARS
+                  ? `This creator has ${limit} characters of bio space left.`
+                  : "Your placement stays in this X bio until someone pays more."}
               </span>
               <span
-                className={
-                  message.trim().length > 100 ? "font-semibold text-destructive" : "text-muted-foreground"
-                }
+                className={overLimit ? "font-semibold text-destructive" : "text-muted-foreground"}
               >
-                {message.trim().length} / 100
+                {message.trim().length} / {limit}
               </span>
             </div>
           </div>
@@ -146,18 +169,17 @@ export function BuyDialog({
               className="field mt-1"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              The link doesn't count towards your 100 characters.
+              Your link is counted separately from your message, but it still has to fit inside
+              the creator's 160-character X bio.
             </p>
           </div>
 
           <div className="border-2 border-border bg-muted px-4 py-3">
             <div className="label-xs">Exactly what goes in the X bio</div>
-            <p className="mt-1 text-sm font-medium break-words text-foreground">
-              {message.trim() || "Your message"} {link.trim() || "https://yourlink.com"}
-            </p>
+            <p className="mt-1 text-sm font-medium break-words text-foreground">{preview}</p>
             <p className="mt-2 text-xs text-muted-foreground">
-              Own the slot until someone pays more. X verified · Payment protected · Creators
-              paid after verification.
+              We add the “{SPONSOR_PREFIX}” label automatically — it can't be removed, and we
+              verify this exact text is live before releasing any payout.
             </p>
           </div>
 
@@ -219,7 +241,8 @@ export function BuyDialog({
               <a href="/terms" className="font-semibold underline">
                 Terms
               </a>{" "}
-              and understand destinations are subject to moderation.
+              , confirm my placement is honest advertising that doesn't impersonate the creator
+              or anyone else, and understand messages and destinations are subject to moderation.
             </span>
           </label>
 
@@ -228,7 +251,7 @@ export function BuyDialog({
 
           <button
             type="submit"
-            disabled={busy || !agreed || message.trim().length < 3 || message.trim().length > 100}
+            disabled={busy || !agreed || message.trim().length < 3 || overLimit || limit <= 0}
             onClick={() => {
               void trackEvent({ data: { name: "buy_clicked", listingId: view.listing.id } });
             }}
