@@ -125,7 +125,7 @@ export function BuyDialog({
       <div className="panel mx-auto w-full max-w-lg">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
           <span className="label-xs !text-foreground">
-            {view.owner ? "Take over this sponsorship" : "Sponsor this profile"}
+            {view.owner ? "Take over this sponsorship" : "Sponsor this creator"}
           </span>
           <button
             onClick={onClose}
@@ -317,7 +317,7 @@ export function BuyDialog({
           >
             {busy
               ? "Opening checkout…"
-              : `${view.owner ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}` : "Sponsor this profile"} — ${money(price)}`}
+              : `${view.owner ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}` : "Sponsor this creator"} — ${money(price)}`}
           </button>
         </form>
       </div>

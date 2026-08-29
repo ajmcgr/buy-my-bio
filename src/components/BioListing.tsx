@@ -89,7 +89,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
       <p className="mt-5 text-2xl font-bold sm:text-3xl">Sponsor this creator on Buy My Bio.</p>
       <p className="mt-1 text-base text-muted-foreground sm:text-lg">
-        Your message + link stays on this profile until somebody pays more.
+        Your message + link stays on this Buy My Bio page until somebody pays more.
       </p>
 
       <div className="mt-8 grid border-2 border-border bg-foreground text-background sm:grid-cols-3">
@@ -119,7 +119,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
       {view.globalRank && view.bioValueCents !== null && view.bioValueCents !== undefined ? (
         <a
           href={`https://x.com/intent/post?text=${encodeURIComponent(
-            `@${view.creator.x_username ?? view.creator.social_handle}'s profile sponsorship is worth ${money(view.bioValueCents)} — currently #${view.globalRank} on @BuyMyBio.`,
+            `@${view.creator.x_username ?? view.creator.social_handle}'s sponsorship on Buy My Bio is now worth ${money(view.bioValueCents)} — currently #${view.globalRank}.`,
           )}&url=${encodeURIComponent(`https://buymybio.com/u/${view.creator.username}`)}`}
           target="_blank"
           rel="noreferrer"
@@ -134,7 +134,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
         <div className="panel flex flex-col justify-between">
           <div className="border-b-2 border-border px-5 py-4">
-            <div className="label-xs">Sponsored</div>
+            <div className="label-xs">Sponsored on Buy My Bio</div>
             <div className="mt-1 flex items-center gap-3">
               {owner?.logo_url && (
                 <img
@@ -148,6 +148,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
                 {owner ? owner.company_name : "Available"}
               </span>
             </div>
+            <p className="mt-2 text-xs text-muted-foreground">
+              Sponsorship appears on BuyMyBio.com only.
+            </p>
           </div>
 
           <div className="px-5 py-6">
@@ -181,7 +184,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
             >
               {owner
                 ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}`
-                : "Sponsor this profile"}{" "}
+                : "Sponsor this creator"}{" "}
               — {money(price)}
             </button>
             <div className="panel mt-6 px-5 py-5 text-sm">

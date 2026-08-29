@@ -244,7 +244,7 @@ function CreatorPage() {
               {session.globalRank && session.bioValueCents !== null ? (
                 <a
                   href={`https://x.com/intent/post?text=${encodeURIComponent(
-                    `My profile sponsorship is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank} on @BuyMyBio.`,
+                    `My sponsorship on Buy My Bio is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank}.`,
                   )}&url=${encodeURIComponent(`https://buymybio.com/u/${session.username}`)}`}
                   target="_blank"
                   rel="noreferrer"
