@@ -108,7 +108,6 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
       last_bio_verified_at: nowIso,
       last_verification_attempt_at: nowIso,
       last_verification_error: null,
-      ...( { } ),
     })
     .eq("payment_id", paymentId)
     .neq("status", "paid");
