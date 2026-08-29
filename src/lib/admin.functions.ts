@@ -154,6 +154,10 @@ export type AdminTransaction = {
   activationDeadline: string | null;
   firstVerifiedAt: string | null;
   verificationStatus: string | null;
+  finalVerification: string | null;
+  finalVerifiedAt: string | null;
+  mismatchPendingSince: string | null;
+  mismatchReason: string | null;
   verificationError: string | null;
   payoutStatus: string | null;
   releaseAt: string | null;
@@ -194,7 +198,7 @@ export const getAdminTransactions = createServerFn({ method: "POST" })
         ? db
             .from("ownerships")
             .select(
-              "payment_id, status, placement_status, activation_deadline, first_verified_at, bio_verification_status, last_verification_error",
+              "payment_id, status, placement_status, activation_deadline, first_verified_at, bio_verification_status, last_verification_error, final_verification_status, final_verified_at, mismatch_pending_since, mismatch_reason",
             )
             .in("payment_id", ids)
         : { data: [] as never[] },
@@ -234,7 +238,8 @@ export const getAdminTransactions = createServerFn({ method: "POST" })
         p.admin_review_required ||
         refundStatus === "failed" ||
         (po?.["status"] === "failed" as unknown) ||
-        placement === "non_compliant"
+        placement === "non_compliant" ||
+        (o?.["final_verification_status"] as string | null) === "unresolved"
       )
         bucket = "attention";
       else if (refundStatus === "refunded" || refundStatus === "pending") bucket = "refunded";
@@ -256,6 +261,10 @@ export const getAdminTransactions = createServerFn({ method: "POST" })
         activationDeadline: (o?.["activation_deadline"] as string | null) ?? null,
         firstVerifiedAt: (o?.["first_verified_at"] as string | null) ?? null,
         verificationStatus: (o?.["bio_verification_status"] as string | null) ?? null,
+        finalVerification: (o?.["final_verification_status"] as string | null) ?? null,
+        finalVerifiedAt: (o?.["final_verified_at"] as string | null) ?? null,
+        mismatchPendingSince: (o?.["mismatch_pending_since"] as string | null) ?? null,
+        mismatchReason: (o?.["mismatch_reason"] as string | null) ?? null,
         verificationError:
           (o?.["last_verification_error"] as string | null) ??
           (po?.["last_error"] as string | null) ??
