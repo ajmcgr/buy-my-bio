@@ -29,6 +29,17 @@ export function BuyDialog({
     setBusy(true);
     setError(null);
     const f = new FormData(e.currentTarget);
+    const msg = message.trim();
+    if (msg.length < 3 || msg.length > 100) {
+      setError("Your message must be between 3 and 100 characters.");
+      setBusy(false);
+      return;
+    }
+    if (!/^https?:\/\/\S+\.\S+/i.test(link.trim())) {
+      setError("Your link must be a valid http:// or https:// URL.");
+      setBusy(false);
+      return;
+    }
     try {
       const res = await checkout({
         data: {
