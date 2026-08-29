@@ -117,8 +117,9 @@
   font-family: var(--font-mono);
   font-size: 0.6875rem;
   letter-spacing: 0.02em;
-  color: var(--color-muted-foreground);
+  color: color-mix(in oklch, var(--color-foreground) 72%, var(--color-card));
 }
+
 
 @utility panel {
   border: 2px solid var(--color-border);
