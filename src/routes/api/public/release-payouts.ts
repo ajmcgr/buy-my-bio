@@ -1,15 +1,33 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+async function socialBidPayoutCronSecret(): Promise<string | null> {
+  const configured = process.env["PAYOUT_CRON_SECRET_SOCIAL_BID"]?.trim();
+  if (configured) return configured;
+
+  try {
+    const { admin } = await import("@/lib/db.server");
+    const { data, error } = await admin().rpc("get_social_bid_payout_cron_secret");
+    if (error) throw new Error(error.message);
+    const vaultSecret = typeof data === "string" ? data.trim() : "";
+    return vaultSecret || null;
+  } catch (error) {
+    console.error("Social Bid payout cron Vault configuration lookup failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
 /**
  * Releases held creator payouts whose hold window has elapsed.
  * Call on a schedule (e.g. hourly) with:
- *   Authorization: Bearer $PAYOUT_CRON_SECRET
+ *   Authorization: Bearer $PAYOUT_CRON_SECRET_SOCIAL_BID
  */
 export const Route = createFileRoute("/api/public/release-payouts")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const secret = process.env["PAYOUT_CRON_SECRET"];
+        const secret = await socialBidPayoutCronSecret();
         if (!secret) return new Response("Not configured", { status: 503 });
 
         const provided = (request.headers.get("authorization") ?? "").replace(/^Bearer\s+/i, "");
