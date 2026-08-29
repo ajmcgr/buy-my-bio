@@ -77,6 +77,37 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
   );
 }
 
+function SponsorDetails({ row }: { row: MarketplaceRow }) {
+  return (
+    <div className="flex min-w-0 items-center gap-3">
+      {row.owner?.logo_url ? (
+        <img
+          src={row.owner.logo_url}
+          alt={`${row.owner.company_name} logo`}
+          className="size-8 shrink-0 border-2 border-border object-contain"
+          loading="lazy"
+        />
+      ) : null}
+      <div className="min-w-0">
+        <div className="label-xs">Sponsored</div>
+        {row.owner ? (
+          <a
+            href={row.owner.destination_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-0.5 flex min-w-0 items-center gap-1 font-bold hover:underline"
+          >
+            <span className="truncate">{row.owner.company_name}</span>
+            <ArrowUpRight className="size-3.5 shrink-0" />
+          </a>
+        ) : (
+          <div className="mt-0.5 font-bold">—</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function TakeoverButton({ row, prominent = false }: { row: MarketplaceRow; prominent?: boolean }) {
   const [open, setOpen] = useState(false);
   const verb = row.owner ? "Take over" : "Sponsor";
@@ -115,18 +146,9 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
             </p>
           ) : null}
           {row.owner ? (
-            <a
-              href={row.owner.destination_url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-5 flex items-center justify-between gap-4 border-2 border-border bg-background px-4 py-3 text-sm hover:bg-muted"
-            >
-              <span>
-                <span className="label-xs block">Sponsored</span>
-                <span className="font-extrabold">{row.owner.company_name}</span>
-              </span>
-              <ArrowUpRight className="size-4 shrink-0" />
-            </a>
+            <div className="mt-5 border-2 border-border bg-background px-4 py-3 text-sm">
+              <SponsorDetails row={row} />
+            </div>
           ) : null}
         </div>
         <div className="border-t-2 border-border bg-foreground p-5 text-background lg:border-t-0 lg:border-l-2 lg:p-7">
@@ -179,19 +201,7 @@ function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: numb
         ) : null}
       </div>
       <div className="min-w-0">
-        {row.owner ? (
-          <a
-            href={row.owner.destination_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="label-xs hover:underline"
-          >
-            Sponsored ↗
-          </a>
-        ) : (
-          <div className="label-xs">Sponsored</div>
-        )}
-        <div className="mt-0.5 truncate font-bold">{row.owner?.company_name ?? "—"}</div>
+        <SponsorDetails row={row} />
       </div>
       <TakeoverButton row={row} />
     </article>
@@ -321,7 +331,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         <div className="flex flex-col gap-4 border-2 border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
             <h2 id="leaderboard-heading" className="text-lg font-extrabold">
-              Creator sponsorship rankings
+              X rankings
             </h2>
             <p className="text-xs text-muted-foreground">
               Ranked by successful sponsorship payments. No weighting. No boosting.
