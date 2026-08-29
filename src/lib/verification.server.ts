@@ -329,12 +329,8 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
     await refundPayment(o.payment_id, "creator_removed_active_placement");
 
     try {
-      const { data: creatorContact } = await db
-        .from("creators")
-        .select("email")
-        .eq("id", creator.id)
-        .maybeSingle();
-      const contactEmail = (creatorContact as { email?: string | null } | null)?.email;
+      const { creatorEmail } = await import("./notify.server");
+      const contactEmail = await creatorEmail(creator.id);
       if (contactEmail) {
         const { sendListingSuspendedEmail } = await import("./email.server");
         await sendListingSuspendedEmail({ to: contactEmail, reason: result.reason });
