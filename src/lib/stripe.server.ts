@@ -57,8 +57,40 @@ export async function retrieveSession(id: string) {
   return stripe(`/checkout/sessions/${id}`, undefined, "GET");
 }
 
-export async function refundPaymentIntent(paymentIntent: string) {
-  return stripe("/refunds", form({ payment_intent: paymentIntent }));
+/**
+ * Refunds a charge. The idempotency key is derived from our payment id, so a
+ * retry (job re-run or admin double-click) can never create a second refund.
+ */
+export async function refundPaymentIntent(
+  paymentIntent: string,
+  opts?: { idempotencyKey?: string; reason?: string; paymentId?: string },
+) {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${process.env["STRIPE_SECRET_KEY"]!}`,
+    "Content-Type": "application/x-www-form-urlencoded",
+  };
+  if (opts?.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+
+  const res = await fetch(`${STRIPE_API}/refunds`, {
+    method: "POST",
+    headers,
+    body: form({
+      payment_intent: paymentIntent,
+      ...(opts?.reason ? { "metadata[buymybio_reason]": opts.reason } : {}),
+      ...(opts?.paymentId ? { "metadata[payment_id]": opts.paymentId } : {}),
+    }),
+  });
+  const json = (await res.json()) as Record<string, unknown>;
+  if (!res.ok) {
+    const err = json["error"] as { message?: string; code?: string } | undefined;
+    // Already refunded in Stripe: treat as success so state converges.
+    if (err?.code === "charge_already_refunded") return { id: null, status: "succeeded" };
+    throw new Error(err?.message || `Stripe refund error ${res.status}`);
+  }
+  if (json["status"] === "failed") {
+    throw new Error(`Stripe refund failed: ${String(json["failure_reason"] ?? "unknown")}`);
+  }
+  return json;
 }
 
 /** Verifies a Stripe webhook signature using Web Crypto (Workers-safe). */

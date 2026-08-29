@@ -84,7 +84,19 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
   const r = (result ?? {}) as Record<string, unknown>;
 
   if (!r["ok"]) {
-    return { status: "stale", reason: String(r["reason"] ?? "unknown"), paymentId: payment.id };
+    const reason = String(r["reason"] ?? "unknown");
+    const { recordEvent } = await import("./events.server");
+    await recordEvent("ownership_conflict", {
+      paymentId: payment.id,
+      listingId: payment.listing_id,
+      detail: { reason },
+    });
+    // The buyer paid but can never own this slot: refund automatically.
+    if (reason === "outbid" || reason === "listing_not_active" || reason === "amount_mismatch") {
+      const { refundPayment } = await import("./refunds.server");
+      await refundPayment(payment.id, "concurrent_purchase_conflict");
+    }
+    return { status: "stale", reason, paymentId: payment.id };
   }
 
   const { data: slugRow } = await db
@@ -131,6 +143,20 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
 
   const ownershipId = String(r["ownership_id"]);
 
+  const { recordEvent } = await import("./events.server");
+  await recordEvent("payment_succeeded", {
+    paymentId: payment.id,
+    listingId: payment.listing_id,
+    ownershipId,
+    detail: { amount_cents: payment.amount_cents },
+  });
+  await recordEvent("ownership_started", {
+    paymentId: payment.id,
+    listingId: payment.listing_id,
+    ownershipId,
+    detail: { status: "awaiting_activation" },
+  });
+
   // The buyer paid, but the creator has NOT delivered yet: start the 24-hour
   // activation window and void any earlier purchase that was never activated.
   try {
@@ -168,6 +194,42 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     } catch (e) {
       console.error("post-takeover rank lookup failed", e);
     }
+  }
+
+  const { data: ownershipRow } = await db
+    .from("ownerships")
+    .select("activation_deadline, bio_message")
+    .eq("id", ownershipId)
+    .maybeSingle();
+
+  try {
+    const {
+      sendBuyerAwaitingActivationEmail,
+      sendCreatorActionRequiredEmail,
+    } = await import("./email.server");
+    await sendBuyerAwaitingActivationEmail({
+      to: payment.email,
+      handle,
+      amountCents: payment.amount_cents,
+      message: (ownershipRow?.bio_message as string | null) ?? null,
+      destination: payment.destination_url,
+    });
+    if (listing) {
+      const { creatorEmail } = await import("./notify.server");
+      const to = await creatorEmail(listing.creator_id);
+      if (to)
+        await sendCreatorActionRequiredEmail({
+          to,
+          amountCents: payment.amount_cents,
+          message: (ownershipRow?.bio_message as string | null) ?? null,
+          destination: payment.destination_url,
+          deadline:
+            (ownershipRow?.activation_deadline as string | null) ??
+            new Date(Date.now() + 86_400_000).toISOString(),
+        });
+    }
+  } catch (e) {
+    console.error("activation email failure", e);
   }
 
   try {

@@ -29,7 +29,9 @@ export const Route = createFileRoute("/api/public/release-payouts")({
         const verification = await runPlacementSweep();
         const { releaseDuePayouts } = await import("@/lib/payouts.server");
         const summary = await releaseDuePayouts();
-        return Response.json({ activation, verification, payouts: summary });
+        const { processRefundQueue } = await import("@/lib/refunds.server");
+        const refunds = await processRefundQueue();
+        return Response.json({ activation, verification, payouts: summary, refunds });
       },
     },
   },

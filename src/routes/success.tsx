@@ -13,8 +13,8 @@ export const Route = createFileRoute("/success")({
   },
   head: () => ({
     meta: [
-      { title: "You own the bio — Buy My Bio" },
-      { name: "description", content: "Your takeover is confirmed. The bio link is yours." },
+      { title: "Purchase successful — Buy My Bio" },
+      { name: "description", content: "Your purchase is confirmed. The creator has 24 hours to activate your placement." },
       { property: "og:title", content: "I just bought the link in a bio" },
       {
         property: "og:description",
@@ -68,8 +68,15 @@ function Success() {
     <div className="mx-auto max-w-2xl px-5 py-16">
       <p className="label-xs">Confirmed</p>
       <h1 className="mt-2 text-[clamp(2.5rem,10vw,4.5rem)] leading-[0.88] font-semibold tracking-[-0.05em]">
-        {result.globalRank === 1 ? "You own the #1 bio." : "You own the bio"}
+        Purchase successful
       </h1>
+      <div className="panel mt-6 px-5 py-4">
+        <p className="font-semibold">Waiting for the creator to update their X bio.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Creators have up to 24 hours to activate a placement. We'll email you the moment we
+          verify it live — and if they don't activate it in time, your payment is refunded.
+        </p>
+      </div>
       {result.globalRank === 1 ? (
         <div className="mt-6 flex items-center gap-3 border-2 border-border bg-accent px-5 py-4 font-mono text-sm font-extrabold text-accent-foreground">
           <Trophy className="size-5" /> The most valuable sponsored X bio on Buy My Bio
@@ -117,7 +124,8 @@ function Success() {
       </div>
 
       <p className="mt-8 text-sm text-muted-foreground">
-        You'll get an email if someone outbids you, so you can take it back.
+        Once we verify it live, the slot is yours until somebody pays more — we'll email you if
+        someone outbids you, so you can take it back.
       </p>
     </div>
   );

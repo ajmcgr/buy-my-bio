@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getAdminData, adminAction } from "@/lib/admin.functions";
+import {
+  getAdminData,
+  adminAction,
+  getAdminTransactions,
+  adminTransactionAction,
+  type AdminTransaction,
+} from "@/lib/admin.functions";
 import { getSupabase } from "@/integrations/supabase/browser";
 import { money, hostOf } from "@/lib/format";
 
@@ -82,6 +88,8 @@ function Admin() {
           </div>
         ))}
       </div>
+
+      {token && <Transactions token={token} />}
 
       <h2 className="mt-10 text-lg font-extrabold">Creators</h2>
       <div className="panel mt-3 divide-y-2 divide-border">
@@ -220,5 +228,118 @@ function Admin() {
         ))}
       </div>
     </div>
+  );
+}
+
+
+const BUCKETS = [
+  ["attention", "Needs attention"],
+  ["awaiting", "Awaiting activation"],
+  ["active", "Active"],
+  ["pending_payout", "Pending payouts"],
+  ["refunded", "Refunded"],
+  ["failed", "Failed / non-compliant"],
+] as const;
+
+const when = (v: string | null) => (v ? new Date(v).toLocaleString() : "—");
+
+function Transactions({ token }: { token: string }) {
+  const load = useServerFn(getAdminTransactions);
+  const act = useServerFn(adminTransactionAction);
+  const [rows, setRows] = useState<AdminTransaction[] | null>(null);
+  const [tab, setTab] = useState<(typeof BUCKETS)[number][0]>("attention");
+  const [busy, setBusy] = useState<string | null>(null);
+  const [note, setNote] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    const res = await load({ data: { token } });
+    if (!("error" in res)) setRows(res.rows);
+  }, [load, token]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  async function run(action: string, paymentId: string) {
+    setBusy(`${action}:${paymentId}`);
+    const res = await act({ data: { token, action: action as never, paymentId } });
+    setBusy(null);
+    setNote("error" in res ? res.error : `${action}: ${res.result}`);
+    await refresh();
+  }
+
+  if (!rows) return <p className="mt-10 text-sm text-muted-foreground">Loading transactions…</p>;
+
+  const counts = Object.fromEntries(
+    BUCKETS.map(([id]) => [id, rows.filter((r) => r.bucket === id).length]),
+  ) as Record<string, number>;
+  const visible = rows.filter((r) => r.bucket === tab);
+
+  return (
+    <section className="mt-10">
+      <h2 className="text-lg font-extrabold">Transactions</h2>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {BUCKETS.map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setTab(id)}
+            className={`border-2 border-border px-3 py-1.5 text-xs font-bold ${
+              tab === id ? "bg-foreground text-background" : "hover:bg-accent"
+            }`}
+          >
+            {label} ({counts[id] ?? 0})
+          </button>
+        ))}
+      </div>
+      {note && <p className="mt-3 font-mono text-xs">{note}</p>}
+
+      <div className="panel mt-3 divide-y-2 divide-border">
+        {visible.length === 0 && (
+          <p className="px-4 py-6 text-sm text-muted-foreground">Nothing here.</p>
+        )}
+        {visible.map((t) => (
+          <div key={t.paymentId} className="px-4 py-4 text-sm">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-bold">{t.buyer}</span>
+              <span className="text-muted-foreground">{t.buyerEmail}</span>
+              <span className="font-mono">@{t.creator}</span>
+              <span className="font-mono font-bold">{money(t.amountCents)}</span>
+              {t.adminReview && (
+                <span className="bg-destructive px-1.5 py-0.5 font-mono text-[10px] text-destructive-foreground">
+                  ADMIN REVIEW
+                </span>
+              )}
+            </div>
+            <div className="mt-2 grid gap-x-6 gap-y-1 font-mono text-[11px] text-muted-foreground sm:grid-cols-2">
+              <span>payment: {t.paymentStatus}</span>
+              <span>ownership: {t.ownershipStatus ?? "—"} / {t.placementStatus ?? "—"}</span>
+              <span>activation deadline: {when(t.activationDeadline)}</span>
+              <span>first verified: {when(t.firstVerifiedAt)}</span>
+              <span>verification: {t.verificationStatus ?? "—"}{t.verificationError ? ` (${t.verificationError})` : ""}</span>
+              <span>payout: {t.payoutStatus ?? "—"} · release {when(t.releaseAt)}</span>
+              <span>transfer: {t.stripeTransferId ?? "—"}</span>
+              <span>
+                refund: {t.refundStatus}
+                {t.refundReason ? ` · ${t.refundReason}` : ""}
+                {t.stripeRefundId ? ` · ${t.stripeRefundId}` : ""}
+              </span>
+              {t.refundError && <span className="text-destructive">refund error: {t.refundError}</span>}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {["retry_refund", "retry_verification", "retry_payout", "clear_review"].map((a) => (
+                <button
+                  key={a}
+                  disabled={busy === `${a}:${t.paymentId}`}
+                  onClick={() => run(a, t.paymentId)}
+                  className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent disabled:opacity-40"
+                >
+                  {a.replace("_", " ")}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

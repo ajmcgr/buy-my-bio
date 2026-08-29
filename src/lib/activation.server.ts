@@ -41,7 +41,10 @@ export async function startActivationWindow(ownershipId: string, paidAtIso?: str
     .is("first_verified_at", null);
 }
 
-/** Flags a payment for the admin refund queue without inventing a refund flow. */
+/**
+ * Flags a payment for refund and immediately attempts the automatic Stripe
+ * refund. The queue picks up anything that fails here.
+ */
 export async function flagForRefund(paymentId: string, reason: string) {
   const db = admin();
   await db
@@ -54,6 +57,16 @@ export async function flagForRefund(paymentId: string, reason: string) {
       admin_notes: `refund required: ${reason}`,
     })
     .eq("id", paymentId);
+
+  const { recordEvent } = await import("./events.server");
+  await recordEvent("refund_queued", { paymentId, detail: { reason } });
+
+  try {
+    const { refundPayment, normalizeReason } = await import("./refunds.server");
+    await refundPayment(paymentId, normalizeReason(reason));
+  } catch (e) {
+    console.error("automatic refund attempt failed", paymentId, e);
+  }
 }
 
 async function killPayout(paymentId: string, reason: string) {
@@ -97,6 +110,13 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
     new Date(firstVerifiedAt).getTime() + holdDays() * 86_400_000,
   ).toISOString();
 
+  const { recordEvent } = await import("./events.server");
+  await recordEvent("placement_verified", {
+    paymentId,
+    ownershipId,
+    detail: { first_verified_at: firstVerifiedAt },
+  });
+
   await db
     .from("payouts")
     .update({
@@ -111,6 +131,64 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
     })
     .eq("payment_id", paymentId)
     .neq("status", "paid");
+
+  await notifyActivated(ownershipId, paymentId, releaseAt);
+}
+
+/** Tells the buyer they're live and the creator when they become payable. */
+async function notifyActivated(ownershipId: string, paymentId: string, releaseAt: string) {
+  try {
+    const db = admin();
+    const { data: payment } = await db
+      .from("payments")
+      .select("email, listing_id")
+      .eq("id", paymentId)
+      .maybeSingle();
+    if (!payment) return;
+    const { data: listing } = await db
+      .from("listings")
+      .select("creator_id, slug")
+      .eq("id", payment.listing_id)
+      .maybeSingle();
+    if (!listing) return;
+    const { data: creator } = await db
+      .from("creators")
+      .select("id, username, x_username, social_handle")
+      .eq("id", listing.creator_id)
+      .maybeSingle();
+    const handle =
+      (creator?.x_username as string | null) ??
+      (creator?.social_handle as string | null) ??
+      (creator?.username as string | null) ??
+      listing.slug;
+
+    const { sendPlacementVerifiedEmail } = await import("./email.server");
+    if (payment.email)
+      await sendPlacementVerifiedEmail({
+        to: String(payment.email),
+        audience: "buyer",
+        handle,
+      });
+
+    if (creator) {
+      const { creatorEmail } = await import("./notify.server");
+      const to = await creatorEmail(creator.id);
+      if (to)
+        await sendPlacementVerifiedEmail({
+          to,
+          audience: "creator",
+          handle,
+          eligibleDate: new Date(releaseAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+        });
+    }
+  } catch (e) {
+    console.error("activation notifications failed", e);
+  }
+  void ownershipId;
 }
 
 /** 24h elapsed with no successful verification. Creator earns nothing. */
