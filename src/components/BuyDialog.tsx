@@ -156,7 +156,7 @@ export function BuyDialog({
             onClick={() => {
               void trackEvent({ data: { name: "buy_clicked", listingId: view.listing.id } });
             }}
-            className="btn-ink btn-ink-hover w-full text-base disabled:opacity-40"
+            className="btn-ink btn-ink-hover w-full text-base disabled:cursor-not-allowed disabled:opacity-70"
           >
             {busy
               ? "Opening checkout…"
