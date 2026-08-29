@@ -130,8 +130,8 @@ function CreatorPage() {
         Sell your X bio
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Two steps. Connect your real X account, then put the Buy My Bio placement in your X profile.
-        Both must be verified before anyone can bid.
+        One step. Connect your real X account and your bio goes live on the marketplace. You never
+        have to change anything on X — sponsorships appear on your Buy My Bio profile only.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
@@ -140,24 +140,23 @@ function CreatorPage() {
         <p className="mt-10 text-sm text-muted-foreground">Loading…</p>
       ) : !session ? (
         <div className="panel mt-8 p-6">
-          <div className="label-xs">Step 1</div>
-          <h2 className="mt-1 text-xl font-extrabold">Connect X to verify your account</h2>
+          <div className="label-xs">Get listed</div>
+          <h2 className="mt-1 text-xl font-semibold">Connect X to verify your account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             You stay in control. Buy My Bio never edits your X profile — the connection is
-            read-only, used for identity and placement verification. We never post, DM, follow or
-            change anything on your account.
+            read-only, used only to verify your identity and pull your public profile. We never
+            post, DM, follow or change anything on your account.
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
-            You're listing <b>sponsored space</b> in your bio — not your account. When someone buys
-            your sponsored slot, you'll update your bio yourself. We'll verify when it's live. Every
-            placement is labelled “Sponsored:” so it's clearly disclosed advertising, and you can
-            remove one at any time (that cancels the related payout and refunds the buyer).
+            You're listing a <b>sponsored slot</b> on your Buy My Bio profile — not your account and
+            not your X bio. When someone buys it, their message goes live on buymybio.com instantly.
+            Every placement is labelled “Sponsored:” so it's clearly disclosed advertising.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
           </a>
           <p className="mt-3 font-mono text-xs text-muted-foreground">
-            Used for identity and placement verification.
+            Used for identity verification only.
           </p>
         </div>
       ) : (
@@ -184,7 +183,7 @@ function CreatorPage() {
 
           <div className="mt-4 flex flex-wrap gap-3">
             <Badge on={session.accountVerified} label="X account verified" />
-            <Badge on={session.bioVerified} label="X bio verified" />
+            <Badge on={session.bioVerified} label="Listing live" />
           </div>
 
           {session.bioVerified ? (
