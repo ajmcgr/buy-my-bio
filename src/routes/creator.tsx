@@ -3,8 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Share2 } from "lucide-react";
 import {
   getCreatorSession,
-  verifyMyBio,
-  activatePlacement,
   disconnectXAccount,
   type CreatorSession,
 } from "@/lib/creator.functions";
@@ -93,20 +91,6 @@ function CreatorPage() {
     }
   }, [loadPayouts]);
 
-  async function onActivate() {
-    if (!token) return;
-    setBusy(true);
-    setMessage(null);
-    const res = await activatePlacement({ data: { token } });
-    setBusy(false);
-    if ("ok" in res && res.ok) {
-      setMessage("Sponsorship verified live. The 7-day payout hold starts now.");
-      setSession(await getCreatorSession({ data: { token } }));
-    } else if ("error" in res) {
-      setMessage(res.error);
-    }
-  }
-
   async function onDisconnect(deleteData: boolean) {
     if (!token) return;
     const obligation = Boolean(session?.ownerMessage || session?.activation);
@@ -139,20 +123,6 @@ function CreatorPage() {
     );
   }
 
-
-  async function onVerify() {
-
-    if (!token) return;
-    setBusy(true);
-    setMessage(null);
-    const res = await verifyMyBio({ data: { token } });
-    if ("error" in res) setMessage(res.error);
-    else {
-      setMessage("Bio verified. Your listing is live.");
-      setSession(await getCreatorSession({ data: { token } }));
-    }
-    setBusy(false);
-  }
 
   return (
     <div className="mx-auto max-w-2xl px-5 py-14">
