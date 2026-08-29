@@ -272,7 +272,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
       <section className="pb-6 pt-4 sm:pb-8 sm:pt-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-xs font-bold text-primary">Buy My Bio</p>
+            <TrafficCounters />
             <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
               The most valuable bios on X.
             </h1>
