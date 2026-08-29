@@ -79,6 +79,24 @@ async function ensurePostTakeoverSettlement(opts: {
 }
 
 /**
+ * Buyer and creator notifications describe the live sponsorship, not payout
+ * bookkeeping. A payout retry must never suppress confirmation of an already
+ * active sponsor spot.
+ */
+async function hasActiveSponsorship(ownershipId: string, paymentId: string): Promise<boolean> {
+  const { data, error } = await admin()
+    .from("ownerships")
+    .select("status")
+    .eq("id", ownershipId)
+    .maybeSingle();
+  if (error) {
+    logSettlementFailure("notification_ownership_lookup", { paymentId, ownershipId }, error);
+    return false;
+  }
+  return data?.status === "active";
+}
+
+/**
  * Idempotent: verifies the Stripe session server-side, then applies the takeover
  * through a locking SQL function so only one owner can ever exist.
  */
@@ -266,7 +284,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       .eq("payment_id", payment.id)
       .maybeSingle();
     const { ensureSettlementEmails } = await import("./settlement-notifications.server");
-    const emailComplete = postSettlementComplete
+    const emailComplete = (await hasActiveSponsorship(own.id, payment.id))
       ? await ensureSettlementEmails({
           paymentId: payment.id,
           ownershipId: own.id,
@@ -443,7 +461,7 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     .eq("payment_id", payment.id)
     .maybeSingle();
   const { ensureSettlementEmails } = await import("./settlement-notifications.server");
-  const emailComplete = postSettlementComplete
+  const emailComplete = (await hasActiveSponsorship(ownershipId, payment.id))
     ? await ensureSettlementEmails({
         paymentId: payment.id,
         ownershipId,

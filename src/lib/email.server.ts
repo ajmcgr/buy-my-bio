@@ -2,6 +2,7 @@ import { SPONSOR_PREFIX } from "./placement";
 import { baseUrl } from "./db.server";
 
 const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@socialbid.co>";
+const LOGO_URL = `${baseUrl()}/social-bid-logo.png`;
 
 type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean };
 export type EmailSendResult = { sent: true; providerId: string | null };
@@ -62,7 +63,7 @@ function shell(
   return `<div style="background:#f6f7f9;padding:40px 16px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e6e8eb;border-radius:4px">
     <tr><td align="center" style="padding:36px 32px;border-bottom:1px solid #e6e8eb">
-      <div style="font-size:28px;line-height:1;font-weight:700;letter-spacing:-0.04em;color:#111418">Social Bid</div>
+      <img src="${LOGO_URL}" alt="Social Bid" width="180" style="display:block;width:180px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none" />
     </td></tr>
     <tr><td style="padding:40px 40px 44px;color:#1c1f23;font-size:17px;line-height:1.6">
       ${body}
