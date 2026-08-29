@@ -19,6 +19,13 @@ export const startCheckout = createServerFn({ method: "POST" })
     const { admin, baseUrl } = await import("./db.server");
     const { safeDestination, safeLogoUrl } = await import("./validate");
     const { createCheckoutSession } = await import("./stripe.server");
+    const {
+      CURRENT_PLACEMENT_FORMAT,
+      buildPlacementText,
+      normalizeFormat,
+      retainedBioText,
+      validatePlacement,
+    } = await import("./placement");
     const db = admin();
 
     if (!data.agreed) return { error: "You must accept the terms." };
@@ -29,7 +36,9 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     const { data: creator } = await db
       .from("creators")
-      .select("id, username, social_handle, x_username, x_account_verified, x_bio_verified, banned")
+      .select(
+        "id, username, social_handle, x_username, x_account_verified, x_bio_verified, x_bio_snapshot, banned",
+      )
       .eq("username", data.username.toLowerCase())
       .maybeSingle();
     if (!creator || creator.banned) return { error: "Listing unavailable." };
@@ -82,6 +91,29 @@ export const startCheckout = createServerFn({ method: "POST" })
       buyerId = created?.id;
     }
 
+    // Canonical sponsored placement + X bio length safety, enforced server-side.
+    const { data: currentOwner } = await db
+      .from("ownerships")
+      .select("bio_message, destination_url, placement_format")
+      .eq("listing_id", listing.id)
+      .eq("status", "active")
+      .maybeSingle();
+    const retainedChars = retainedBioText(creator.x_bio_snapshot as string | null, [
+      buildPlacementText(
+        (currentOwner?.bio_message as string | null) ?? null,
+        (currentOwner?.destination_url as string | null) ?? null,
+        normalizeFormat(currentOwner?.placement_format as string | null),
+      ),
+      (currentOwner?.bio_message as string | null) ?? null,
+      (currentOwner?.destination_url as string | null) ?? null,
+    ]).length;
+    const placement = validatePlacement({
+      message: data.bioMessage,
+      url: destination,
+      retainedChars,
+    });
+    if (!placement.ok) return { error: placement.error };
+
     const { data: payment, error: payErr } = await db
       .from("payments")
       .insert({
@@ -92,6 +124,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         email,
         company_name: data.companyName.trim(),
         bio_message: data.bioMessage.trim(),
+        placement_format: CURRENT_PLACEMENT_FORMAT,
         destination_url: destination,
         logo_url: logo,
         x_handle: data.xHandle ?? null,
