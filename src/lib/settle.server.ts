@@ -204,8 +204,8 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("email failure", e);
   }
 
-  // Hold the creator's share in escrow; released later by the payout job once
-  // the placement re-verifies on X.
+  // Record the creator's held share. It only becomes eligible once the
+  // placement is verified live on X (release_at = first_verified_at + 7 days).
   if (stripeLivemode) {
     try {
       const { recordPayout } = await import("./payouts.server");

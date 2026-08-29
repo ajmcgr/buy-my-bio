@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Share2 } from "lucide-react";
-import { getCreatorSession, verifyMyBio, type CreatorSession } from "@/lib/creator.functions";
+import {
+  getCreatorSession,
+  verifyMyBio,
+  activatePlacement,
+  type CreatorSession,
+} from "@/lib/creator.functions";
 import {
   getPayoutStatus,
   startPayoutOnboarding,
@@ -86,6 +91,20 @@ function CreatorPage() {
       loadPayouts(t);
     }
   }, [loadPayouts]);
+
+  async function onActivate() {
+    if (!token) return;
+    setBusy(true);
+    setMessage(null);
+    const res = await activatePlacement({ data: { token } });
+    setBusy(false);
+    if ("ok" in res && res.ok) {
+      setMessage("Sponsorship verified live. The 7-day payout hold starts now.");
+      setSession(await getCreatorSession({ data: { token } }));
+    } else if ("error" in res) {
+      setMessage(res.error);
+    }
+  }
 
   async function onVerify() {
     if (!token) return;
@@ -200,8 +219,16 @@ function CreatorPage() {
 
           {session.ownerMessage ? (
             <div className="panel mt-8 p-6">
-              <div className="label-xs">Sponsor's message</div>
-              <h2 className="mt-1 text-xl font-extrabold">Keep this in your X bio</h2>
+              <div className="label-xs">
+                {session.activation?.status === "awaiting_activation"
+                  ? "New bio owner"
+                  : "Sponsor's message"}
+              </div>
+              <h2 className="mt-1 text-xl font-extrabold">
+                {session.activation?.status === "awaiting_activation"
+                  ? "Update your X bio within 24 hours to activate this sponsorship"
+                  : "Keep this in your X bio"}
+              </h2>
               <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
                 {session.ownerMessage}
                 {session.ownerUrl ? ` ${session.ownerUrl}` : ""}
@@ -209,10 +236,48 @@ function CreatorPage() {
               <p className="mt-3 text-sm text-muted-foreground">
                 This is the exact message and link the current sponsor paid for. We re-read your
                 live X bio every day while this sponsor is the current owner. Each sale is paid
-                out 7 days after it was bought. If someone else pays more, just swap in the new
+                out 7 days after it was first verified live. If someone else pays more, just swap in the new
                 sponsor's placement — your earlier payouts stay on track. Removing a placement
                 while that sponsor still owns the slot cancels that payout.
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!session.ownerMessage) return;
+                    void navigator.clipboard.writeText(
+                      `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`,
+                    );
+                    setMessage("Placement copied.");
+                  }}
+                  className="btn-ghost"
+                >
+                  Copy placement
+                </button>
+                {session.activation?.status === "awaiting_activation" ? (
+                  <button
+                    type="button"
+                    onClick={onActivate}
+                    disabled={busy}
+                    className="btn-ink btn-ink-hover disabled:opacity-50"
+                  >
+                    {busy ? "Checking…" : "I've updated my bio — check now"}
+                  </button>
+                ) : null}
+              </div>
+              {session.activation?.status === "awaiting_activation" &&
+              session.activation.deadline ? (
+                <p className="mt-3 text-sm font-semibold">
+                  Activate by {new Date(session.activation.deadline).toLocaleString()}. If it isn't
+                  verified live by then, you don't earn this sale.
+                </p>
+              ) : null}
+              {session.activation?.firstVerifiedAt ? (
+                <p className="mt-3 font-mono text-xs text-muted-foreground">
+                  Verified live {new Date(session.activation.firstVerifiedAt).toLocaleString()} ·
+                  payout releases 7 days after this.
+                </p>
+              ) : null}
               {session.compliance?.status === "non_compliant" ? (
                 <p className="mt-3 border-2 border-destructive px-3 py-2 text-sm font-semibold text-destructive">
                   Your listing is suspended because this placement is missing from your X bio.
@@ -295,7 +360,7 @@ function errorCopy(code: string): string {
 function payoutLabel(status: string): string {
   switch (status) {
     case "pending":
-      return "Held in escrow";
+      return "Held until release";
     case "blocked":
       return "On hold — needs attention";
     case "paid":
@@ -358,7 +423,7 @@ function PayoutsPanel({
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             <div className="border-2 border-border px-4 py-3">
               <div className="font-mono text-[0.65rem] font-bold text-muted-foreground">
-                In escrow
+                On hold
               </div>
               <div className="mt-1 text-2xl font-extrabold">{money(status.pendingCents)}</div>
             </div>
