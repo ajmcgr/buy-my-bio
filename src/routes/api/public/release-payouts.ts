@@ -21,9 +21,13 @@ export const Route = createFileRoute("/api/public/release-payouts")({
         }
         if (diff !== 0) return new Response("Unauthorized", { status: 401 });
 
+        // Daily bio verification sweep first (during the hold AND after payout),
+        // then release everything that is still eligible.
+        const { runPlacementSweep } = await import("@/lib/verification.server");
+        const verification = await runPlacementSweep();
         const { releaseDuePayouts } = await import("@/lib/payouts.server");
         const summary = await releaseDuePayouts();
-        return Response.json(summary);
+        return Response.json({ verification, payouts: summary });
       },
     },
   },
