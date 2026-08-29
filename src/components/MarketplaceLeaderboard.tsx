@@ -202,6 +202,49 @@ function timeAgo(value: string) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+function SellYourBio() {
+  const [handle, setHandle] = useState("");
+  return (
+    <section
+      aria-labelledby="sell-heading"
+      className="mb-8 border-2 border-border bg-card px-4 py-5 sm:px-6 sm:py-6"
+    >
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h2 id="sell-heading" className="text-xl font-semibold">
+            Sell your X bio
+          </h2>
+          <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+            Connect your X account, add your BuyMyBio link to your bio, and let sponsors bid for the
+            slot.
+          </p>
+        </div>
+        <form
+          className="flex w-full max-w-md flex-col gap-2 sm:flex-row"
+          onSubmit={(e) => {
+            e.preventDefault();
+            window.location.href = "/api/public/x-start";
+          }}
+        >
+          <div className="flex min-w-0 flex-1 items-center gap-2 border-2 border-border bg-background px-3">
+            <span className="font-mono text-sm text-muted-foreground">@</span>
+            <input
+              value={handle}
+              onChange={(e) => setHandle(e.target.value.replace(/^@/, ""))}
+              placeholder="yourhandle"
+              aria-label="Your X handle"
+              className="min-w-0 flex-1 bg-transparent py-3 font-mono text-sm outline-none"
+            />
+          </div>
+          <button type="submit" className="btn-ink btn-ink-hover shrink-0 px-5 py-3 text-sm">
+            Connect X
+          </button>
+        </form>
+      </div>
+    </section>
+  );
+}
+
 export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot }) {
   const router = useRouter();
 
