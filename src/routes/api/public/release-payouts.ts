@@ -25,13 +25,17 @@ export const Route = createFileRoute("/api/public/release-payouts")({
         // then release everything that is still eligible.
         const { runActivationSweep } = await import("@/lib/activation.server");
         const activation = await runActivationSweep();
-        const { runPlacementSweep } = await import("@/lib/verification.server");
+        const { runPlacementSweep, resolveUnresolvedFinalVerifications } = await import(
+          "@/lib/verification.server"
+        );
         const verification = await runPlacementSweep();
+        // Settle transition verifications the X API couldn't answer earlier.
+        const transitions = await resolveUnresolvedFinalVerifications();
         const { releaseDuePayouts } = await import("@/lib/payouts.server");
         const summary = await releaseDuePayouts();
         const { processRefundQueue } = await import("@/lib/refunds.server");
         const refunds = await processRefundQueue();
-        return Response.json({ activation, verification, payouts: summary, refunds });
+        return Response.json({ activation, verification, transitions, payouts: summary, refunds });
       },
     },
   },

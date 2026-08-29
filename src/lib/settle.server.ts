@@ -80,8 +80,23 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("pre-takeover rank lookup failed", e);
   }
 
+  // Fresh X read of the OUTGOING owner's placement while they are still the
+  // current owner. Taken before the ownership row flips, persisted only if the
+  // takeover actually lands, so a row turning OUTBID never makes a payout
+  // eligible on its own.
+  let outgoing: Awaited<
+    ReturnType<typeof import("./verification.server").verifyOutgoingBeforeTakeover>
+  > = null;
+  try {
+    const { verifyOutgoingBeforeTakeover } = await import("./verification.server");
+    outgoing = await verifyOutgoingBeforeTakeover(payment.listing_id);
+  } catch (e) {
+    console.error("outgoing placement verification failed", e);
+  }
+
   const { data: result } = await db.rpc("apply_takeover", { _payment_id: payment.id });
   const r = (result ?? {}) as Record<string, unknown>;
+
 
   if (!r["ok"]) {
     const reason = String(r["reason"] ?? "unknown");
@@ -142,6 +157,20 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
   }
 
   const ownershipId = String(r["ownership_id"]);
+
+  // The transition happened: record the outgoing owner's final verification.
+  // A confirmed mismatch here is creator non-compliance (blocks that payout and
+  // refunds that buyer), never a legitimate outbid.
+  if (outgoing && outgoing.ownershipId !== ownershipId) {
+    try {
+      const { applyOutgoingVerification } = await import("./verification.server");
+      const outcome = await applyOutgoingVerification(outgoing);
+      await recordTransitionEvent(payment.id, outgoing.ownershipId, outcome);
+    } catch (e) {
+      console.error("applyOutgoingVerification failed", e);
+    }
+  }
+
 
   const { recordEvent } = await import("./events.server");
   await recordEvent("payment_succeeded", {
@@ -301,4 +330,22 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       ((r["previous"] as Record<string, unknown> | null)?.["company_name"] as string | undefined) ??
       null,
   };
+}
+
+/** Audit trail for the outgoing owner's final verification at a transition. */
+async function recordTransitionEvent(
+  newPaymentId: string,
+  outgoingOwnershipId: string,
+  outcome: string,
+) {
+  try {
+    const { recordEvent } = await import("./events.server");
+    await recordEvent("outgoing_final_verification", {
+      paymentId: newPaymentId,
+      ownershipId: outgoingOwnershipId,
+      detail: { outcome },
+    });
+  } catch (e) {
+    console.error("transition event failed", e);
+  }
 }

@@ -276,6 +276,21 @@ export async function sendListingSuspendedEmail(o: { to: string; reason: string 
   );
 }
 
+export async function sendPlacementMismatchWarningEmail(o: { to: string; reason: string }) {
+  await send(
+    o.to,
+    "Action needed: your sponsored placement doesn't match",
+    shell(`
+      ${h1("Restore your sponsored placement")}
+      ${p(`We just read your X bio and couldn't find the current owner's sponsored message and link (${o.reason}). Restore the exact message and link now — we'll check again shortly. If it's still missing, the sale is cancelled, the buyer is refunded and your listing is suspended.`)}
+      ${button(`${baseUrl()}/creator`, "Fix it now \u2192")}
+    `,
+      "You received this because you list your X bio on Buy My Bio.",
+    ),
+  );
+}
+
+
 export async function sendPayoutReleasedEmail(o: { to: string; amountCents: number }) {
   await send(
     o.to,
