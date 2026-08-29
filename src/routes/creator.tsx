@@ -266,3 +266,140 @@ function errorCopy(code: string): string {
       return "Something went wrong. Please try again.";
   }
 }
+
+function payoutLabel(status: string): string {
+  switch (status) {
+    case "pending":
+      return "Held in escrow";
+    case "blocked":
+      return "On hold — needs attention";
+    case "paid":
+      return "Paid out";
+    case "cancelled":
+      return "Cancelled (refunded)";
+    default:
+      return "Failed";
+  }
+}
+
+function PayoutsPanel({
+  token,
+  status,
+  onChange,
+}: {
+  token: string;
+  status: PayoutStatus | null;
+  onChange: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function onConnect() {
+    setBusy(true);
+    setError(null);
+    const res = await startPayoutOnboarding({ data: { token } });
+    if ("error" in res) {
+      setError(res.error);
+      setBusy(false);
+      return;
+    }
+    window.location.href = res.url;
+  }
+
+  async function onDashboard() {
+    setBusy(true);
+    const res = await payoutDashboardLink({ data: { token } });
+    setBusy(false);
+    if ("url" in res) window.open(res.url, "_blank", "noopener");
+    else setError(res.error);
+  }
+
+  return (
+    <div className="panel mt-8 p-6">
+      <div className="label-xs">Step 3</div>
+      <h2 className="mt-1 text-xl font-extrabold">Get paid</h2>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Buyers pay Buy My Bio. We hold your share for {status?.holdDays ?? 3} days, re-check that
+        the placement is still live in your X bio, then transfer it to your bank via Stripe.
+      </p>
+
+      {status ? (
+        <>
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Badge on={status.connected} label="Payout account created" />
+            <Badge on={status.payoutsEnabled} label="Payouts enabled" />
+          </div>
+
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <div className="border-2 border-border px-4 py-3">
+              <div className="font-mono text-[0.65rem] font-bold text-muted-foreground">
+                In escrow
+              </div>
+              <div className="mt-1 text-2xl font-extrabold">{money(status.pendingCents)}</div>
+            </div>
+            <div className="border-2 border-border px-4 py-3">
+              <div className="font-mono text-[0.65rem] font-bold text-muted-foreground">
+                Paid out
+              </div>
+              <div className="mt-1 text-2xl font-extrabold">{money(status.paidCents)}</div>
+            </div>
+          </div>
+
+          {status.items.length ? (
+            <ul className="mt-5 divide-y divide-border border-2 border-border">
+              {status.items.map((item) => (
+                <li key={item.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="min-w-0">
+                    <div className="font-mono text-sm font-bold">{money(item.amountCents)}</div>
+                    <div className="truncate text-xs text-muted-foreground">
+                      {payoutLabel(item.status)}
+                      {item.status === "pending"
+                        ? ` · releases ${new Date(item.holdUntil).toLocaleDateString()}`
+                        : ""}
+                      {item.status === "blocked" && item.note ? ` · ${item.note}` : ""}
+                    </div>
+                  </div>
+                  <div className="shrink-0 font-mono text-xs text-muted-foreground">
+                    of {money(item.grossCents)}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="mt-5 text-sm text-muted-foreground">
+              No takeovers yet. Payouts appear here the moment someone buys your bio.
+            </p>
+          )}
+
+          {error ? <p className="mt-4 text-sm font-medium text-destructive">{error}</p> : null}
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={onConnect}
+              disabled={busy || !status.configured}
+              className="btn-ink btn-ink-hover disabled:opacity-50"
+            >
+              {busy
+                ? "Opening Stripe…"
+                : status.payoutsEnabled
+                  ? "Update payout details"
+                  : status.connected
+                    ? "Finish payout setup"
+                    : "Set up payouts"}
+            </button>
+            {status.connected ? (
+              <button onClick={onDashboard} disabled={busy} className="btn-outline">
+                Stripe dashboard
+              </button>
+            ) : null}
+            <button onClick={onChange} className="btn-outline">
+              Refresh
+            </button>
+          </div>
+        </>
+      ) : (
+        <p className="mt-5 text-sm text-muted-foreground">Loading payouts…</p>
+      )}
+    </div>
+  );
+}
