@@ -4,6 +4,7 @@ import { Share2 } from "lucide-react";
 import {
   getCreatorSession,
   disconnectXAccount,
+  publishListing,
   type CreatorSession,
 } from "@/lib/creator.functions";
 import {
@@ -67,7 +68,7 @@ function CreatorPage() {
     const err = params.get("error");
     if (err) setMessage(errorCopy(err));
     const connected = params.get("connected");
-    if (connected && !err) setMessage(`X account verified — @${connected}`);
+    if (connected && !err) setMessage(`X account connected — @${connected}`);
     const stripeReturn = params.get("stripe");
     const fromUrl = params.get("t");
     if (fromUrl || stripeReturn) {
@@ -90,6 +91,20 @@ function CreatorPage() {
       loadPayouts(t);
     }
   }, [loadPayouts]);
+
+  async function onPublish() {
+    if (!token) return;
+    setBusy(true);
+    const res = await publishListing({ data: { token } });
+    setBusy(false);
+    if ("error" in res) {
+      setMessage(res.error);
+      return;
+    }
+    setMessage("Your profile is now listed on Buy My Bio.");
+    const next = await getCreatorSession({ data: { token } });
+    setSession(next);
+  }
 
   async function onDisconnect(deleteData: boolean) {
     if (!token) return;
@@ -130,8 +145,9 @@ function CreatorPage() {
         Sell your X bio
       </h1>
       <p className="mt-4 text-muted-foreground">
-        One step. Connect your real X account and your bio goes live on the marketplace. You never
-        have to change anything on X — sponsorships appear on your Buy My Bio profile only.
+        Connect your real X account to verify your identity, then choose when to list your profile
+        publicly. This sponsorship appears on BuyMyBio.com only — you are never required to edit
+        your X bio or take any action on X.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
@@ -149,8 +165,9 @@ function CreatorPage() {
           </p>
           <p className="mt-3 text-sm text-muted-foreground">
             You're listing a <b>sponsored slot</b> on your Buy My Bio profile — not your account and
-            not your X bio. When someone buys it, their message goes live on buymybio.com instantly.
-            Every placement is labelled “Sponsored:” so it's clearly disclosed advertising.
+            not your X bio. Payments are for sponsorship on BuyMyBio.com only. You are never
+            required to edit your X bio, post, follow, like, repost, reply or perform any other
+            action on X. Every placement is labelled “Sponsored on Buy My Bio”.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
@@ -181,9 +198,28 @@ function CreatorPage() {
             </div>
           </div>
 
+          {session.listingStatus !== "active" ? (
+            <div className="panel mt-6 p-6">
+              <div className="label-xs">Not listed yet</div>
+              <h2 className="mt-1 text-xl font-semibold">List my profile</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Connecting X does not list you publicly. Publish when you're ready — your profile
+                then appears in the marketplace and buyers can sponsor it. This sponsorship appears
+                on BuyMyBio.com only.
+              </p>
+              <button
+                onClick={onPublish}
+                disabled={busy}
+                className="btn-ink btn-ink-hover mt-5 disabled:opacity-50"
+              >
+                {busy ? "Working…" : "List my profile"}
+              </button>
+            </div>
+          ) : null}
+
           <div className="mt-4 flex flex-wrap gap-3">
-            <Badge on={session.accountVerified} label="X account verified" />
-            <Badge on={session.bioVerified} label="Listing live" />
+            <Badge on={session.accountVerified} label="X account connected" />
+            <Badge on={session.listingStatus === "active"} label="Listed publicly" />
           </div>
 
           {session.bioVerified ? (
@@ -234,7 +270,7 @@ function CreatorPage() {
 
           {session.ownerMessage ? (
             <div className="panel mt-8 p-6">
-              <div className="label-xs">Current sponsor</div>
+              <div className="label-xs">Sponsored on Buy My Bio</div>
               <h2 className="mt-1 text-xl font-semibold">
                 Your sponsored slot is live on Buy My Bio
               </h2>
@@ -385,7 +421,7 @@ function PayoutsPanel({
       <h2 className="mt-1 text-xl font-extrabold">Get paid</h2>
       <p className="mt-2 text-sm text-muted-foreground">
         Buyers pay Buy My Bio. We hold your share for {status?.holdDays ?? 3} days, re-check that
-        the placement is still live in your X bio, then transfer it to your bank via Stripe.
+        your sponsorship is live on BuyMyBio.com, then transfer it to your bank via Stripe.
       </p>
 
       {status ? (

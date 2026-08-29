@@ -119,6 +119,29 @@ export const getCreatorSession = createServerFn({ method: "POST" })
   });
 
 /**
+ * Explicit creator opt-in. Connecting X only verifies identity; a profile is
+ * never listed publicly until the creator clicks "List my profile".
+ */
+export const publishListing = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .handler(async ({ data }) => {
+    const { admin } = await import("./db.server");
+    const db = admin();
+    const { data: c } = await db
+      .from("creators")
+      .select("id, banned")
+      .eq("session_token", data.token)
+      .maybeSingle();
+    if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
+    const { error } = await db
+      .from("listings")
+      .update({ status: "active" })
+      .eq("creator_id", c.id);
+    if (error) return { error: "We couldn't publish your listing. Please try again." } as const;
+    return { ok: true } as const;
+  });
+
+/**
  * Re-reads the creator's live X profile and only flips BIO VERIFIED when the
  * required placement is actually present right now.
  */
