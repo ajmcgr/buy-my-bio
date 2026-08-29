@@ -4,6 +4,7 @@ import type { ListingView } from "@/lib/listing.functions";
 import { trackEvent } from "@/lib/listing.functions";
 import { BuyDialog } from "./BuyDialog";
 import { XIcon } from "./XIcon";
+import { Share2, Trophy } from "lucide-react";
 
 function ProfileCard({ view }: { view: ListingView }) {
   const c = view.creator;
@@ -17,7 +18,7 @@ function ProfileCard({ view }: { view: ListingView }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
             {c.x_bio_verified ? (
-      <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-accent-foreground">
+              <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-accent-foreground">
                 ✓ X bio verified
               </span>
             ) : null}
@@ -93,6 +94,49 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
         Highest bidder owns the message + link until they're outbid.
       </p>
 
+      <div className="mt-8 grid border-2 border-border bg-foreground text-background sm:grid-cols-3">
+        <div className="px-5 py-4 sm:border-r sm:border-background/25">
+          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+            Global rank
+          </div>
+          <div className="mt-1 flex items-center gap-2 text-2xl font-extrabold">
+            {view.globalRank === 1 ? <Trophy className="size-5 text-accent" /> : null}
+            {view.globalRank ? `#${view.globalRank} most valuable` : "Unranked"}
+          </div>
+        </div>
+        <div className="border-t border-background/25 px-5 py-4 sm:border-t-0 sm:border-r">
+          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+            Bio value
+          </div>
+          <div className="mt-1 text-2xl font-extrabold">
+            {view.bioValueCents === null || view.bioValueCents === undefined
+              ? "—"
+              : money(view.bioValueCents)}
+          </div>
+        </div>
+        <div className="border-t border-background/25 px-5 py-4 sm:border-t-0">
+          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+            Owned by
+          </div>
+          <div className="mt-1 truncate text-2xl font-extrabold">
+            {owner?.company_name ?? "Unowned"}
+          </div>
+        </div>
+      </div>
+
+      {view.globalRank && view.bioValueCents !== null && view.bioValueCents !== undefined ? (
+        <a
+          href={`https://x.com/intent/post?text=${encodeURIComponent(
+            `@${view.creator.x_username ?? view.creator.social_handle}'s X bio is worth ${money(view.bioValueCents)} — currently #${view.globalRank} on @BuyMyBio.`,
+          )}&url=${encodeURIComponent(`https://buymybio.com/u/${view.creator.username}`)}`}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-3 inline-flex items-center gap-2 text-sm font-bold underline"
+        >
+          <Share2 className="size-4" /> Share this rank
+        </a>
+      ) : null}
+
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         <ProfileCard view={view} />
 
@@ -115,7 +159,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
 
           <div className="px-5 py-6">
-            <div className="label-xs">{owner ? "Current price" : "Starting price"}</div>
+            <div className="label-xs">{owner ? "Bio value" : "Starting price"}</div>
             <div className="text-[clamp(3rem,14vw,5.5rem)] leading-[0.85] font-semibold tracking-[-0.05em]">
               {money(owner ? owner.amount_cents : view.listing.starting_price_cents)}
             </div>
@@ -143,12 +187,13 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               onClick={() => setOpen(true)}
               className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-semibold tracking-tight"
             >
-              {owner ? "Take this X bio" : "Buy this X bio"} — {money(price)}
+              {owner ? `Steal${view.globalRank === 1 ? " #1" : " this X bio"}` : "Own this X bio"} —{" "}
+              {money(price)}
             </button>
             <div className="panel mt-6 px-5 py-5 text-sm">
               <p>
-                <span className="font-bold">What you get:</span> you're buying a sponsored message
-                + tracked link inside this creator's X bio.
+                <span className="font-bold">What you get:</span> you're buying a sponsored message +
+                tracked link inside this creator's X bio.
               </p>
               <p className="mt-2 text-muted-foreground">
                 <span className="font-bold text-foreground">What you don't get:</span> you are not
@@ -207,9 +252,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
         ))}
       </section>
-      <p className="mt-6 font-mono text-sm">
-        No deadline. No expiry. Highest bidder owns it.
-      </p>
+      <p className="mt-6 font-mono text-sm">No deadline. No expiry. Highest bidder owns it.</p>
 
       <BuyDialog view={view} open={open} onClose={() => setOpen(false)} />
     </div>

@@ -16,6 +16,9 @@ export type CreatorSession = {
   listingStatus: string | null;
   requiredPlacement: string;
   banned: boolean;
+  bioValueCents: number | null;
+  globalRank: number | null;
+  ownerName: string | null;
 };
 
 export const getCreatorSession = createServerFn({ method: "POST" })
@@ -40,6 +43,14 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       .eq("creator_id", c.id)
       .maybeSingle();
 
+    let marketRow = null;
+    if (c.x_account_verified && c.x_bio_verified) {
+      const { loadMarketplace } = await import("./marketplace.server");
+      const market = await loadMarketplace("new");
+      marketRow =
+        [...market.rows, ...market.unowned].find((row) => row.creator.id === c.id) ?? null;
+    }
+
     return {
       username: c.username,
       displayName: c.display_name,
@@ -53,6 +64,9 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       listingStatus: listing?.status ?? null,
       requiredPlacement: requiredPlacement(c.username),
       banned: Boolean(c.banned),
+      bioValueCents: marketRow?.bioValueCents ?? null,
+      globalRank: marketRow?.globalRank ?? null,
+      ownerName: marketRow?.owner?.company_name ?? null,
     };
   });
 
@@ -83,8 +97,7 @@ export const verifyMyBio = createServerFn({ method: "POST" })
     } catch (e) {
       console.error("bio verify lookup failed", e);
       return {
-        error:
-          "We couldn't read your X profile automatically. An admin will review it shortly.",
+        error: "We couldn't read your X profile automatically. An admin will review it shortly.",
       } as const;
     }
 

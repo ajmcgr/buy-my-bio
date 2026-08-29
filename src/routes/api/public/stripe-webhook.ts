@@ -28,9 +28,9 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         }
 
         if (event.type === "checkout.session.expired") {
-          const paymentId = (
-            event.data.object["metadata"] as Record<string, string> | null
-          )?.["payment_id"];
+          const paymentId = (event.data.object["metadata"] as Record<string, string> | null)?.[
+            "payment_id"
+          ];
           if (paymentId) {
             await admin()
               .from("payments")
@@ -43,10 +43,20 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
         if (event.type === "charge.refunded") {
           const pi = event.data.object["payment_intent"];
           if (pi) {
-            await admin()
+            const db = admin();
+            const { data: refundedPayment } = await db
               .from("payments")
               .update({ refund_status: "refunded" })
-              .eq("stripe_payment_intent", String(pi));
+              .eq("stripe_payment_intent", String(pi))
+              .select("id")
+              .maybeSingle();
+            if (refundedPayment) {
+              await db
+                .from("ownerships")
+                .update({ status: "ended", ended_at: new Date().toISOString() })
+                .eq("payment_id", refundedPayment.id)
+                .eq("status", "active");
+            }
           }
         }
 

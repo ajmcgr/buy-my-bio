@@ -18,9 +18,13 @@ async function send(to: string, subject: string, html: string) {
 
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 === 0 ? 0 : 2)}`;
 
-const LOGO = "https://buymybio.com/__l5e/assets-v1/e89eede8-c031-4ffa-987e-8e62a2749c4d/email-logo.png";
+const LOGO =
+  "https://buymybio.com/__l5e/assets-v1/e89eede8-c031-4ffa-987e-8e62a2749c4d/email-logo.png";
 
-function shell(body: string, footNote = "You received this because you bid on a bio at Buy My Bio.") {
+function shell(
+  body: string,
+  footNote = "You received this because you bid on a bio at Buy My Bio.",
+) {
   return `<div style="background:#f6f7f9;padding:40px 16px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e6e8eb;border-radius:4px">
     <tr><td align="center" style="padding:36px 32px;border-bottom:1px solid #e6e8eb">
@@ -83,6 +87,7 @@ export async function sendWinnerEmail(o: {
   destination: string;
   company: string;
   ownershipId: string;
+  globalRank?: number | null;
 }) {
   const link = `${baseUrl()}/u/${o.username}`;
   const share = `${baseUrl()}/own/${o.ownershipId}`;
@@ -91,12 +96,15 @@ export async function sendWinnerEmail(o: {
   )}&url=${encodeURIComponent(share)}`;
   await send(
     o.to,
-    `You own @${o.handle}'s bio.`,
+    o.globalRank === 1 ? `You own the #1 bio on X.` : `You own @${o.handle}'s bio.`,
     shell(`
-      ${h1("You own it \u{1F389}")}
+      ${h1(o.globalRank === 1 ? "You own the #1 bio." : "You own it \u{1F389}")}
       ${p(`Your bid went through — <b>@${o.handle}</b>'s bio now points to <b>${o.company}</b>, and it stays yours until somebody pays more.`)}
       ${facts([
         ["You paid", money(o.amountCents)],
+        ...(o.globalRank
+          ? ([["Global rank", `#${o.globalRank} most valuable`]] as Array<[string, string]>)
+          : []),
         ["Your startup", o.company],
         ["Destination", o.destination],
         ["Status", "Current owner"],
@@ -115,14 +123,21 @@ export async function sendOutbidEmail(o: {
   newPriceCents: number;
   duration: string;
   clicks: number;
+  lostNumberOne?: boolean;
+  newOwner?: string;
+  takeoverAmountCents?: number;
 }) {
   const link = `${baseUrl()}/u/${o.username}`;
   await send(
     o.to,
-    "You've been outbid.",
+    o.lostNumberOne ? "You lost the #1 bio." : "You've been outbid.",
     shell(`
-      ${h1("Someone paid more")}
-      ${p(`Your spot in <b>@${o.handle}</b>'s bio was just taken. You can take it back at the new price at any time.`)}
+      ${h1(o.lostNumberOne ? "You lost the #1 bio." : "Someone paid more")}
+      ${p(
+        o.lostNumberOne
+          ? `<b>${o.newOwner ?? "Someone"}</b> just stole @${o.handle} for ${money(o.takeoverAmountCents ?? 0)}. You can take #1 back at any time.`
+          : `Your spot in <b>@${o.handle}</b>'s bio was just taken. You can take it back at the new price at any time.`,
+      )}
       ${facts([
         ["You paid", money(o.paidCents)],
         ["New price", money(o.newPriceCents)],

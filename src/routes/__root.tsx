@@ -68,11 +68,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Buy My Bio — Sell your X bio" },
+      { title: "BuyMyBio — The Most Valuable Bios on X" },
       {
         name: "description",
-        content:
-          "Bid to own the link in someone's social media bio. Pay more than the current owner and it's yours until you're outbid.",
+        content: "See the most valuable X bios, who owns them, and how much it costs to take them.",
       },
       { property: "og:site_name", content: "Buy My Bio" },
       { property: "og:type", content: "website" },
@@ -208,27 +207,27 @@ function HamburgerMenu() {
 function SiteHeader() {
   return (
     <header>
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-5 py-4">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
         <Link to="/" className="flex items-center">
           <>
-            <img
-              src={logoAsset.url}
-              alt="Buy My Bio"
-              className="h-11 w-auto sm:h-12 dark:hidden"
-            />
+            <img src={logoAsset.url} alt="Buy My Bio" className="h-9 w-auto sm:h-12 dark:hidden" />
             <img
               src={logoWhiteAsset.url}
               alt="Buy My Bio"
-              className="hidden h-11 w-auto sm:h-12 dark:block"
+              className="hidden h-9 w-auto sm:h-12 dark:block"
             />
           </>
         </Link>
-        <nav className="flex items-center gap-4 text-sm font-medium sm:gap-6">
-          <Link to="/about" className="hover:underline">
-            About
+        <nav className="flex items-center gap-3 whitespace-nowrap text-xs font-bold sm:gap-6 sm:text-sm sm:font-medium">
+          <Link to="/" className="hidden hover:underline sm:inline">
+            Bios
+          </Link>
+          <Link to="/owners" className="hover:underline">
+            Owners
           </Link>
           <Link to="/creator" className="hover:underline">
-            Sell your X bio
+            <span className="sm:hidden">Sell</span>
+            <span className="hidden sm:inline">Sell your bio</span>
           </Link>
           <ThemeToggle />
           <HamburgerMenu />

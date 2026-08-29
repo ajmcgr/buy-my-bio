@@ -54,7 +54,7 @@ export function BuyDialog({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/60 p-4 sm:p-8">
       <div className="panel mx-auto w-full max-w-lg">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
-          <span className="label-xs">Take this X bio</span>
+          <span className="label-xs">{view.owner ? "Steal this X bio" : "Own this X bio"}</span>
           <button onClick={onClose} className="text-xl leading-none font-bold" aria-label="Close">
             ×
           </button>
@@ -66,17 +66,13 @@ export function BuyDialog({
             <div className="font-bold">{view.owner?.company_name ?? "Available"}</div>
           </div>
           <div className="px-5 py-4">
-            <div className="label-xs">Current price</div>
-            <div className="font-bold">
-              {view.owner ? money(view.owner.amount_cents) : "—"}
-            </div>
+            <div className="label-xs">{view.owner ? "Bio value" : "Starting price"}</div>
+            <div className="font-bold">{view.owner ? money(view.owner.amount_cents) : "—"}</div>
           </div>
         </div>
 
         <div className="border-b-2 border-border px-5 py-4 text-sm">
-          <p>
-            You're buying a sponsored message + tracked link inside this creator's X bio.
-          </p>
+          <p>You're buying a sponsored message + tracked link inside this creator's X bio.</p>
           <p className="mt-2 text-muted-foreground">
             You are not buying the X account, username, profile photo, banner, posts or access to
             the account.
@@ -119,7 +115,12 @@ export function BuyDialog({
               <label className="label-xs" htmlFor="logo">
                 Logo URL
               </label>
-              <input id="logo" name="logo" placeholder="https://.../logo.png" className="field mt-1" />
+              <input
+                id="logo"
+                name="logo"
+                placeholder="https://.../logo.png"
+                className="field mt-1"
+              />
             </div>
           </div>
 
@@ -155,7 +156,9 @@ export function BuyDialog({
             }}
             className="btn-ink btn-ink-hover w-full text-base disabled:opacity-40"
           >
-            {busy ? "Opening checkout…" : `Take this X bio — ${money(price)}`}
+            {busy
+              ? "Opening checkout…"
+              : `${view.owner ? `Steal${view.globalRank === 1 ? " #1" : " this X bio"}` : "Own this X bio"} — ${money(price)}`}
           </button>
         </form>
       </div>

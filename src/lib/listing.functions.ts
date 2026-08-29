@@ -11,6 +11,7 @@ export type OwnerView = {
   ended_at: string | null;
   click_count: number;
   status: string;
+  payment_id?: string | null;
 };
 
 export type ListingView = {
@@ -41,6 +42,8 @@ export type ListingView = {
   history: OwnerView[];
   requiredPriceCents: number;
   canBuy: boolean;
+  globalRank?: number | null;
+  bioValueCents?: number | null;
 };
 
 export const getListing = createServerFn({ method: "GET" })
@@ -48,55 +51,16 @@ export const getListing = createServerFn({ method: "GET" })
     z.object({ username: z.string().min(1).max(40) }).parse(input),
   )
   .handler(async ({ data }): Promise<ListingView | null> => {
-    const { publicDb } = await import("./db.server");
-    const { nextPriceCents } = await import("./format");
-    const db = publicDb();
-
-    const { data: creator } = await db
-      .from("creators")
-      .select(
-        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status, x_account_verified, x_bio_verified, x_username, x_profile_url, x_follower_count",
-      )
-      .eq("username", data.username.toLowerCase())
-      .maybeSingle();
-    if (!creator) return null;
-
-    const { data: listing } = await db
-      .from("listings")
-      .select("id, slug, status, starting_price_cents, minimum_increase_percentage")
-      .eq("creator_id", creator.id)
-      .maybeSingle();
-    if (!listing) return null;
-
-    const { data: owners } = await db
-      .from("ownerships")
-      .select(
-        "id, company_name, destination_url, logo_url, amount_cents, started_at, ended_at, click_count, status",
-      )
-      .eq("listing_id", listing.id)
-      .order("started_at", { ascending: false });
-
-    const all = (owners ?? []) as OwnerView[];
-    const owner = all.find((o) => o.status === "active") ?? null;
-    const history = all.filter((o) => o.status !== "active");
-    const requiredPriceCents = owner
-      ? nextPriceCents(owner.amount_cents, Number(listing.minimum_increase_percentage))
-      : listing.starting_price_cents;
-
-    return {
-      creator,
-      listing: {
-        ...listing,
-        minimum_increase_percentage: Number(listing.minimum_increase_percentage),
-      },
-      owner,
-      history,
-      requiredPriceCents,
-      canBuy:
-        listing.status === "active" &&
-        Boolean(creator.x_account_verified) &&
-        Boolean(creator.x_bio_verified),
-    } as ListingView;
+    const { loadMarketplace } = await import("./marketplace.server");
+    const market = await loadMarketplace("new");
+    const username = data.username.toLowerCase();
+    return (
+      [...market.rows, ...market.unowned].find(
+        (row, index, all) =>
+          row.creator.username.toLowerCase() === username &&
+          all.findIndex((candidate) => candidate.listing.id === row.listing.id) === index,
+      ) ?? null
+    );
   });
 
 export const getOwnership = createServerFn({ method: "GET" })

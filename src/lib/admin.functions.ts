@@ -15,23 +15,31 @@ export const getAdminData = createServerFn({ method: "POST" })
     const [creators, listings, payments, ownerships] = await Promise.all([
       db
         .from("creators")
-        .select("id, display_name, username, social_handle, verification_status, x_account_verified, x_bio_verified, x_bio_verified_method, banned, created_at")
+        .select(
+          "id, display_name, username, social_handle, verification_status, x_account_verified, x_bio_verified, x_bio_verified_method, banned, created_at",
+        )
         .order("created_at", { ascending: false })
         .limit(100),
       db.from("listings").select("id, creator_id, slug, status, starting_price_cents").limit(200),
       db
         .from("payments")
-        .select("id, company_name, email, amount_cents, status, flagged, created_at")
+        .select(
+          "id, company_name, email, amount_cents, status, refund_status, stripe_livemode, flagged, created_at",
+        )
         .order("created_at", { ascending: false })
         .limit(50),
       db
         .from("ownerships")
-        .select("id, company_name, destination_url, amount_cents, status, click_count, destination_disabled")
+        .select(
+          "id, company_name, destination_url, amount_cents, status, click_count, destination_disabled",
+        )
         .eq("status", "active")
         .limit(100),
     ]);
 
-    const paid = (payments.data ?? []).filter((p) => p.status === "paid" || p.status === "settled");
+    const paid = (payments.data ?? []).filter(
+      (p) => p.status === "applied" && p.stripe_livemode && p.refund_status !== "refunded",
+    );
     return {
       creators: creators.data ?? [],
       listings: listings.data ?? [],

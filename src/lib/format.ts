@@ -3,7 +3,10 @@ export function money(cents: number): string {
 }
 
 export function nextPriceCents(currentCents: number, pct: number): number {
-  return Math.ceil((currentCents * (1 + pct / 100)) / 100) * 100;
+  // Listings store percentage to two decimal places. Converting it to integer
+  // basis points avoids IEEE-754 drift (for example $8,200 + 10% becoming $9,021).
+  const percentageBasisPoints = Math.round(pct * 100);
+  return Math.ceil((currentCents * (10_000 + percentageBasisPoints)) / 1_000_000) * 100;
 }
 
 export function duration(from: string, to?: string | null): string {

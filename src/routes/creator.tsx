@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Share2 } from "lucide-react";
 import { getCreatorSession, verifyMyBio, type CreatorSession } from "@/lib/creator.functions";
+import { money } from "@/lib/format";
 
 export const Route = createFileRoute("/creator")({
   head: () => ({
@@ -89,9 +91,7 @@ function CreatorPage() {
         Both must be verified before anyone can bid.
       </p>
 
-      {message ? (
-        <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div>
-      ) : null}
+      {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
 
       {loading ? (
         <p className="mt-10 text-sm text-muted-foreground">Loading…</p>
@@ -133,6 +133,52 @@ function CreatorPage() {
             <Badge on={session.bioVerified} label="X bio verified" />
           </div>
 
+          {session.bioVerified ? (
+            <div className="mt-8 border-2 border-border bg-foreground text-background">
+              <div className="border-b border-background/25 px-5 py-3 font-mono text-xs font-bold uppercase tracking-[0.14em]">
+                Your bio
+              </div>
+              <div className="grid sm:grid-cols-3">
+                <div className="px-5 py-5 sm:border-r sm:border-background/25">
+                  <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+                    Bio value
+                  </div>
+                  <div className="mt-1 text-3xl font-extrabold">
+                    {session.bioValueCents === null ? "—" : money(session.bioValueCents)}
+                  </div>
+                </div>
+                <div className="border-t border-background/25 px-5 py-5 sm:border-t-0 sm:border-r">
+                  <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+                    Global rank
+                  </div>
+                  <div className="mt-1 text-3xl font-extrabold">
+                    {session.globalRank ? `#${session.globalRank}` : "Unranked"}
+                  </div>
+                </div>
+                <div className="border-t border-background/25 px-5 py-5 sm:border-t-0">
+                  <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+                    Owned by
+                  </div>
+                  <div className="mt-1 truncate text-xl font-extrabold">
+                    {session.ownerName ?? "Unowned"}
+                  </div>
+                </div>
+              </div>
+              {session.globalRank && session.bioValueCents !== null ? (
+                <a
+                  href={`https://x.com/intent/post?text=${encodeURIComponent(
+                    `My X bio is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank} on @BuyMyBio.`,
+                  )}&url=${encodeURIComponent(`https://buymybio.com/u/${session.username}`)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 border-t border-background/25 px-5 py-4 font-extrabold hover:bg-background/10"
+                >
+                  <Share2 className="size-4" /> Share my rank
+                </a>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="panel mt-8 p-6">
             <div className="label-xs">Step 2</div>
             <h2 className="mt-1 text-xl font-extrabold">Add this to your X bio</h2>
@@ -140,8 +186,8 @@ function CreatorPage() {
               {session.requiredPlacement}
             </div>
             <p className="mt-3 text-sm text-muted-foreground">
-              Paste it into your X bio or website field, save your profile, then verify. If we
-              can't read it automatically, an admin will confirm it manually.
+              Paste it into your X bio or website field, save your profile, then verify. If we can't
+              read it automatically, an admin will confirm it manually.
             </p>
             <button
               onClick={onVerify}

@@ -16,6 +16,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as CreatorRouteImport } from './routes/creator'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as OwnersRouteImport } from './routes/owners'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
@@ -57,6 +58,11 @@ const CreatorRoute = CreatorRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OwnersRoute = OwnersRouteImport.update({
+  id: '/owners',
+  path: '/owners',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
   '/faq': typeof FaqRoute
+  '/owners': typeof OwnersRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -119,6 +126,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
   '/faq': typeof FaqRoute
+  '/owners': typeof OwnersRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -136,6 +144,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/creator': typeof CreatorRoute
   '/faq': typeof FaqRoute
+  '/owners': typeof OwnersRoute
   '/privacy': typeof PrivacyRoute
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
@@ -154,6 +163,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/creator'
     | '/faq'
+    | '/owners'
     | '/privacy'
     | '/success'
     | '/terms'
@@ -170,6 +180,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/creator'
     | '/faq'
+    | '/owners'
     | '/privacy'
     | '/success'
     | '/terms'
@@ -186,6 +197,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/creator'
     | '/faq'
+    | '/owners'
     | '/privacy'
     | '/success'
     | '/terms'
@@ -203,6 +215,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   CreatorRoute: typeof CreatorRoute
   FaqRoute: typeof FaqRoute
+  OwnersRoute: typeof OwnersRoute
   PrivacyRoute: typeof PrivacyRoute
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
@@ -261,6 +274,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/owners': {
+      id: '/owners'
+      path: '/owners'
+      fullPath: '/owners'
+      preLoaderRoute: typeof OwnersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -323,6 +343,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   CreatorRoute: CreatorRoute,
   FaqRoute: FaqRoute,
+  OwnersRoute: OwnersRoute,
   PrivacyRoute: PrivacyRoute,
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,
