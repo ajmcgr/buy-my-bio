@@ -68,7 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Buy My Bio — What’s your bio worth?" },
+      { title: "Buy My Bio — How much are you worth on X?" },
       {
         name: "description",
         content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
@@ -76,7 +76,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:site_name", content: "Buy My Bio" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Buy My Bio — What’s your bio worth?" },
+      { name: "twitter:title", content: "How much are you worth on X?" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
