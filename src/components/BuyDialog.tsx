@@ -71,13 +71,14 @@ export function BuyDialog({
           </div>
         </div>
 
-        <div className="border-b-2 border-border px-5 py-4 text-sm">
+        <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
           <p>You're buying a sponsored message + tracked link inside this creator's X bio.</p>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-foreground/75">
             You are not buying the X account, username, profile photo, banner, posts or access to
             the account.
           </p>
         </div>
+
 
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
           <div>
