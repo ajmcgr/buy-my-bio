@@ -401,9 +401,12 @@ function CreatorPage() {
             <h2 className="mt-1 text-xl font-extrabold">Disconnect your X account</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               This unlinks @{session.handle}, removes your bio from the marketplace and signs you
-              out. You can reconnect any time. You can't disconnect while a sponsorship is live or a
-              payout is still being held.
+              out. You can reconnect any time. Disconnecting X will stop your listing from accepting
+              new buyers. It does not cancel any current sponsorship or pending payout obligations —
+              those continue under the existing verification and payout rules, and past transaction
+              records are kept.
             </p>
+
             <div className="mt-6 flex flex-wrap gap-3">
               <button
                 onClick={() => onDisconnect(false)}
