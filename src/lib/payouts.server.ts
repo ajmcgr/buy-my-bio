@@ -28,6 +28,10 @@ export async function recordPayout(opts: {
   grossCents: number;
 }) {
   const db = admin();
+  // `hold_until` is NOT NULL in the base schema. Website-only settlement
+  // fulfils the placement immediately, and markActivated below confirms this
+  // same hold window before any transfer can become due.
+  const initialHoldUntil = new Date(Date.now() + holdDays() * 86_400_000).toISOString();
 
   const { data: listing } = await db
     .from("listings")
@@ -51,7 +55,7 @@ export async function recordPayout(opts: {
     fee_cents: feeCents,
     amount_cents: netCents,
     fee_percentage: feePct,
-    hold_until: null,
+    hold_until: initialHoldUntil,
     release_at: null,
     first_verified_at: null,
     payout_status: "not_eligible",
