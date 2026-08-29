@@ -158,6 +158,20 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
 
   const ownershipId = String(r["ownership_id"]);
 
+  // The transition happened: record the outgoing owner's final verification.
+  // A confirmed mismatch here is creator non-compliance (blocks that payout and
+  // refunds that buyer), never a legitimate outbid.
+  if (outgoing && outgoing.ownershipId !== ownershipId) {
+    try {
+      const { applyOutgoingVerification } = await import("./verification.server");
+      const outcome = await applyOutgoingVerification(outgoing);
+      await recordTransitionEvent(payment.id, outgoing.ownershipId, outcome);
+    } catch (e) {
+      console.error("applyOutgoingVerification failed", e);
+    }
+  }
+
+
   const { recordEvent } = await import("./events.server");
   await recordEvent("payment_succeeded", {
     paymentId: payment.id,
