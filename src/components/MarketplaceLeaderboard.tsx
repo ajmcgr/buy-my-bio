@@ -46,7 +46,7 @@ function TrafficCounters() {
   if (!traffic) return <p className="font-mono text-xs font-bold text-primary">&nbsp;</p>;
 
   return (
-    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs font-bold text-primary">
+    <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-xs font-bold text-primary">
       <span>{traffic.pageviews.toLocaleString()} page views</span>
       <span className="inline-flex items-center gap-1.5 text-muted-foreground">
         <span className="relative flex h-2 w-2">
@@ -311,8 +311,8 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 sm:px-5">
       <section className="pb-6 pt-4 sm:pb-8 sm:pt-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="flex flex-col items-center">
             <TrafficCounters />
             <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
               The most valuable bios on X.
@@ -325,6 +325,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
             <Radio className="size-3.5 text-primary" /> Live market · {market.ownedCount} owned
           </div>
         </div>
+
       </section>
 
       <SellYourBio />
