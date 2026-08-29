@@ -152,6 +152,7 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
       "id, listing_id, payment_id, bio_message, destination_url, last_verification_attempt_at",
     )
     .eq("status", "active")
+    .not("first_verified_at", "is", null)
     .limit(limit);
 
   for (const o of ownerships ?? []) {
@@ -261,7 +262,11 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
     };
     await db
       .from("ownerships")
-      .update({ ...failPatch, placement_end_reason: "seller_removed" })
+      .update({
+        ...failPatch,
+        placement_status: "non_compliant",
+        placement_end_reason: "seller_removed",
+      })
       .eq("id", o.id);
     if (payout) {
       await db
@@ -269,7 +274,11 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
         .update({
           ...failPatch,
           ...(payout.status === "pending" || payout.status === "blocked"
-            ? { status: "cancelled", last_error: `verification_failed: ${result.reason}` }
+            ? {
+                status: "cancelled",
+                payout_status: "blocked",
+                last_error: `verification_failed: ${result.reason}`,
+              }
             : {}),
         })
         .eq("id", payout.id);
