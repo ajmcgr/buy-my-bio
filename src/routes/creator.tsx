@@ -140,6 +140,13 @@ function CreatorPage() {
           <p className="mt-2 text-sm text-muted-foreground">
             We use X sign-in to confirm you own the account. Buyers never need an account.
           </p>
+          <p className="mt-3 text-sm text-muted-foreground">
+            You're listing <b>sponsored space</b> in your bio — not your account. You keep full
+            control of your profile, and every placement you add is labelled “Sponsored:” so it's
+            clearly disclosed as advertising and stays within X's rules. You're responsible for
+            following X's Terms of Service on your own account, and you can remove a placement at
+            any time (that cancels the related payout and refunds the buyer).
+          </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
           </a>
