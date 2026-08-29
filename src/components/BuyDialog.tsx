@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { startCheckout } from "@/lib/checkout.functions";
 import { uploadSponsorImage } from "@/lib/sponsor-image.functions";
@@ -32,9 +32,15 @@ export function BuyDialog({
   const [link, setLink] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const price = view.requiredPriceCents;
+  const minimumBidDollars = Math.ceil(price / 100);
+  const [bidDollars, setBidDollars] = useState(() => String(minimumBidDollars));
+
+  useEffect(() => {
+    if (open) setBidDollars(String(minimumBidDollars));
+  }, [open, minimumBidDollars]);
 
   if (!open) return null;
-  const price = view.requiredPriceCents;
   const retainedChars = view.retainedBioChars ?? 0;
   const limit = messageCharLimit(retainedChars, link);
   const preview = buildPlacementText(
@@ -42,6 +48,10 @@ export function BuyDialog({
     link.trim() || "https://yourlink.com",
   );
   const overLimit = message.trim().length > limit;
+  const enteredBidDollars = /^\d+$/.test(bidDollars) ? Number(bidDollars) : Number.NaN;
+  const bidIsValid =
+    Number.isSafeInteger(enteredBidDollars) && enteredBidDollars >= minimumBidDollars;
+  const bidCents = bidIsValid ? enteredBidDollars * 100 : price;
 
   function chooseImage(file: File | null) {
     if (!file) return;
@@ -81,6 +91,11 @@ export function BuyDialog({
     setError(null);
     const f = new FormData(e.currentTarget);
     const msg = message.trim();
+    if (!bidIsValid) {
+      setError(`Enter a whole-dollar bid of at least ${money(price)}.`);
+      setBusy(false);
+      return;
+    }
     const destination = safeDestination(link);
     if (!destination) {
       setError("Enter a valid public domain, such as yourstartup.com.");
@@ -104,6 +119,7 @@ export function BuyDialog({
           email: String(f.get("email") ?? ""),
           xHandle: String(f.get("xhandle") ?? "") || null,
           logoUrl,
+          bidCents,
           agreed,
           creatorToken:
             typeof window === "undefined" ? null : localStorage.getItem("bmb_creator_token"),
@@ -272,9 +288,23 @@ export function BuyDialog({
 
           <div className="border-2 border-border bg-accent px-4 py-3">
             <div className="label-xs !text-accent-foreground/70">Your bid</div>
-            <div className="text-4xl font-extrabold tracking-tight text-accent-foreground">
-              {money(price)}
+            <div className="mt-1 flex items-center gap-2 text-accent-foreground">
+              <span className="text-4xl font-extrabold tracking-tight">$</span>
+              <input
+                id="bid"
+                name="bid"
+                required
+                inputMode="numeric"
+                pattern="[0-9]*"
+                value={bidDollars}
+                onChange={(event) => setBidDollars(event.target.value)}
+                aria-describedby="bid-minimum"
+                className="min-w-0 flex-1 border-2 border-border bg-background px-3 py-1 text-4xl font-extrabold tracking-tight text-foreground outline-none focus:ring-2 focus:ring-foreground"
+              />
             </div>
+            <p id="bid-minimum" className="mt-2 text-xs text-accent-foreground/75">
+              Minimum bid: {money(price)}
+            </p>
           </div>
 
           <div className="border-2 border-border px-4 py-3 text-sm text-foreground">
@@ -309,7 +339,9 @@ export function BuyDialog({
 
           <button
             type="submit"
-            disabled={busy || !agreed || message.trim().length < 3 || overLimit || limit <= 0}
+            disabled={
+              busy || !agreed || !bidIsValid || message.trim().length < 3 || overLimit || limit <= 0
+            }
             onClick={() => {
               void trackEvent({ data: { name: "buy_clicked", listingId: view.listing.id } });
             }}
@@ -317,7 +349,7 @@ export function BuyDialog({
           >
             {busy
               ? "Opening checkout…"
-              : `${view.owner ? `Place bid${view.globalRank === 1 ? " for #1" : ""}` : "Sponsor this creator"} — ${money(price)}`}
+              : `${view.owner ? `Place bid${view.globalRank === 1 ? " for #1" : ""}` : "Sponsor this creator"} — ${money(bidCents)}`}
           </button>
         </form>
       </div>

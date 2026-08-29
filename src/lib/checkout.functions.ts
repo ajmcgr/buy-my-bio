@@ -9,6 +9,12 @@ const schema = z.object({
   email: z.string().email().max(160),
   xHandle: z.string().max(40).optional().nullable(),
   logoUrl: z.string().max(400).optional().nullable(),
+  bidCents: z
+    .number()
+    .finite()
+    .int()
+    .positive()
+    .refine((value) => value % 100 === 0, "Bid must be a whole-dollar amount."),
   agreed: z.boolean(),
   creatorToken: z.string().max(200).optional().nullable(),
 });
@@ -76,8 +82,14 @@ export const startCheckout = createServerFn({ method: "POST" })
 
     // SERVER-SIDE price. Never trust the browser.
     const { data: required } = await db.rpc("required_price_cents", { _listing_id: listing.id });
-    const amountCents = Number(required);
-    if (!amountCents || amountCents < 100) return { error: "Could not price this takeover." };
+    const requiredCents = Number(required);
+    if (!Number.isSafeInteger(requiredCents) || requiredCents < 100)
+      return { error: "Could not price this takeover." };
+
+    // The browser suggests a bid, but the current server-side minimum is authoritative.
+    const amountCents = data.bidCents;
+    if (!Number.isSafeInteger(amountCents) || amountCents < requiredCents)
+      return { error: `Your bid must be at least $${(requiredCents / 100).toFixed(2)}.` };
 
     // buyer record
     const email = data.email.trim().toLowerCase();
@@ -111,7 +123,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         listing_id: listing.id,
         buyer_id: buyerId,
         amount_cents: amountCents,
-        quoted_min_cents: amountCents,
+        quoted_min_cents: requiredCents,
         email,
         company_name: data.companyName.trim(),
         bio_message: data.bioMessage.trim(),
@@ -143,7 +155,7 @@ export const startCheckout = createServerFn({ method: "POST" })
       await db.from("analytics_events").insert({
         name: "checkout_started",
         listing_id: listing.id,
-        props: { amount_cents: amountCents },
+        props: { amount_cents: amountCents, quoted_min_cents: requiredCents },
       });
       return { url: session["url"] as string, amountCents };
     } catch (e) {
