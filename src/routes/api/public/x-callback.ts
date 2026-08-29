@@ -104,18 +104,21 @@ export const Route = createFileRoute("/api/public/x-callback")({
             .insert({ creator_id: creatorId, slug: username, status: "draft" });
         }
 
-        // Opportunistic bio check on connect — never marks verified unless present.
-        if (username && placementPresent(xUser, username)) {
+        // Website-only sponsorships: connecting X verifies identity, which is
+        // all a listing needs. Nothing has to appear in the creator's X bio.
+        const { WEBSITE_ONLY_SPONSORSHIP } = await import("@/lib/placement");
+        if (WEBSITE_ONLY_SPONSORSHIP || (username && placementPresent(xUser, username))) {
           await db
             .from("creators")
             .update({
               x_bio_verified: true,
               x_bio_verified_at: now,
-              x_bio_verified_method: "api",
+              x_bio_verified_method: WEBSITE_ONLY_SPONSORSHIP ? "api" : "api",
             })
             .eq("id", creatorId);
           await db.from("listings").update({ status: "active" }).eq("creator_id", creatorId);
         }
+
 
         return new Response(null, {
           status: 302,
