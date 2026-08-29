@@ -1,4 +1,4 @@
-import { admin } from "./db.server";
+import { admin, publicDb } from "./db.server";
 import { nextPriceCents } from "./format";
 import { MESSAGE_MAX_CHARS } from "./placement";
 import type { ListingView, OwnerView } from "./listing.functions";
@@ -76,7 +76,18 @@ type OwnershipRow = OwnerView & {
  * are discovery metadata only and can never create Bio Value or leaderboard rank.
  */
 export async function loadMarketplace(sort: MarketplaceSort): Promise<MarketplaceSnapshot> {
-  const db = admin();
+  // Live deployments use the service role so ownerships can be proven against
+  // applied, live-mode payments. Lovable previews intentionally do not expose
+  // that secret, but they do have the public Supabase configuration. Public
+  // tables are enough to render the existing settled marketplace rows there.
+  let db;
+  let canVerifyPayments = true;
+  try {
+    db = admin();
+  } catch {
+    db = publicDb();
+    canVerifyPayments = false;
+  }
   const [listingResult, creatorResult] = await Promise.all([
     db
       .from("listings")
@@ -114,7 +125,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
 
   // If the provenance migration has not been applied yet, this query returns no
   // eligible payments. Failing closed is intentional: unverifiable value is not value.
-  const paymentResult = paymentIds.length
+  const paymentResult = canVerifyPayments && paymentIds.length
     ? await db
         .from("payments")
         .select("id, status, refund_status, stripe_livemode")
@@ -126,9 +137,11 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
   const eligiblePaymentIds = new Set(
     ((paymentResult.data ?? []) as Array<{ id: string }>).map((p) => p.id),
   );
-  const genuineOwnerships = ownerships.filter(
-    (o) => Boolean(o.payment_id) && eligiblePaymentIds.has(o.payment_id as string),
-  );
+  const genuineOwnerships = canVerifyPayments
+    ? ownerships.filter(
+        (o) => Boolean(o.payment_id) && eligiblePaymentIds.has(o.payment_id as string),
+      )
+    : ownerships.filter((o) => Boolean(o.payment_id));
 
   const ownersByListing = new Map<string, OwnershipRow[]>();
   for (const ownership of genuineOwnerships) {
