@@ -1,4 +1,4 @@
--- BUY MY BIO — ownership-transition final verification + mismatch confirmation.
+-- SOCIAL BID — ownership-transition final verification + mismatch confirmation.
 -- Additive only. Safe to re-run.
 
 -- --------------------------------------------------------------- ownerships

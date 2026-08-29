@@ -253,7 +253,7 @@ function AddYourBio() {
             Add your bio
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Connect X to add your profile and let anyone sponsor it on Buy My Bio.
+            Connect X to add your profile and let anyone sponsor it on Social Bid.
           </p>
         </div>
         <form
@@ -422,8 +422,8 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
             <a
               className="mt-4 flex items-center gap-2 text-sm font-bold underline"
               href={`https://x.com/intent/post?text=${encodeURIComponent(
-                `@${handleOf(numberOne)} has the #1 creator sponsorship on Buy My Bio at ${money(numberOne.bioValueCents ?? 0)}.`,
-              )}&url=${encodeURIComponent(`https://buymybio.com/u/${numberOne.creator.username}`)}`}
+                `@${handleOf(numberOne)} has the #1 creator sponsorship on Social Bid at ${money(numberOne.bioValueCents ?? 0)}.`,
+              )}&url=${encodeURIComponent(`https://socialbid.co/u/${numberOne.creator.username}`)}`}
               target="_blank"
               rel="noreferrer"
             >

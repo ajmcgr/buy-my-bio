@@ -41,7 +41,7 @@ export async function createCheckoutSession(opts: {
       "line_items[0][quantity]": 1,
       "line_items[0][price_data][currency]": "usd",
       "line_items[0][price_data][unit_amount]": opts.amountCents,
-      "line_items[0][price_data][product_data][name]": `Sponsor @${opts.creatorHandle} on Buy My Bio`,
+      "line_items[0][price_data][product_data][name]": `Sponsor @${opts.creatorHandle} on Social Bid`,
       "line_items[0][price_data][product_data][description]":
         "Your sponsor spot stays live until someone pays more.",
       customer_email: opts.email,
@@ -134,9 +134,9 @@ export async function createConnectAccount(opts: { email?: string | null; userna
     form({
       type: "express",
       "capabilities[transfers][requested]": "true",
-      "business_profile[name]": `Buy My Bio — ${opts.username}`,
+      "business_profile[name]": `Social Bid — ${opts.username}`,
       "business_profile[product_description]":
-        "Sponsored placement on a Buy My Bio creator profile",
+        "Sponsored placement on a Social Bid creator profile",
       "metadata[buymybio_username]": opts.username,
       ...(opts.email ? { email: opts.email } : {}),
     }),

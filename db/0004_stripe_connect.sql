@@ -1,4 +1,4 @@
--- BUY MY BIO — Stripe Connect payouts (escrow-style hold, then transfer)
+-- SOCIAL BID — Stripe Connect payouts (escrow-style hold, then transfer)
 -- Run after 0003_marketplace_integrity.sql in the Supabase SQL editor.
 
 alter table public.creators

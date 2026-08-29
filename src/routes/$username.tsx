@@ -6,15 +6,15 @@ export const Route = createFileRoute("/$username")({
   },
   head: () => ({
     meta: [
-      { title: "Creator profile — Buy My Bio" },
+      { title: "Creator profile — Social Bid" },
       {
         name: "description",
-        content: "View and sponsor this creator on Buy My Bio.",
+        content: "View and sponsor this creator on Social Bid.",
       },
-      { property: "og:title", content: "Creator profile — Buy My Bio" },
+      { property: "og:title", content: "Creator profile — Social Bid" },
       {
         property: "og:description",
-        content: "View and sponsor this creator on Buy My Bio.",
+        content: "View and sponsor this creator on Social Bid.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

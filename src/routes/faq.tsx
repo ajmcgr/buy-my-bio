@@ -3,13 +3,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "FAQ — Buy My Bio" },
+      { title: "FAQ — Social Bid" },
       {
         name: "description",
         content:
-          "Sponsor a creator on BuyMyBio.com. Your message and tracked link stay in the sponsor spot until somebody pays more.",
+          "Sponsor a creator on SocialBid.co. Your message and tracked link stay in the sponsor spot until somebody pays more.",
       },
-      { property: "og:title", content: "Buy My Bio FAQ" },
+      { property: "og:title", content: "Social Bid FAQ" },
       {
         property: "og:description",
         content: "Pay more than the current sponsor to take the sponsorship spot. No deadline.",
@@ -22,12 +22,12 @@ export const Route = createFileRoute("/faq")({
 });
 
 const faqs: [string, string][] = [
-  ["What is Buy My Bio?", "Buy My Bio lets people sponsor creator profiles on BuyMyBio.com."],
+  ["What is Social Bid?", "Social Bid lets people sponsor creator profiles on SocialBid.co."],
   [
     "How does sponsorship work?",
     "Pay the current price to take the sponsor spot. Your message and link go live immediately and stay until somebody pays more.",
   ],
-  ["Where does my sponsor appear?", "On the creator's profile on BuyMyBio.com."],
+  ["Where does my sponsor appear?", "On the creator's profile on SocialBid.co."],
   [
     "How long does a sponsorship last?",
     "Until somebody pays more. There is no fixed sponsorship period and no deadline.",
@@ -42,7 +42,7 @@ const faqs: [string, string][] = [
   ],
   [
     "Do I need to change anything on X?",
-    "No. Sponsorships appear on BuyMyBio.com only. You do not need to change your X profile or take any action on X.",
+    "No. Sponsorships appear on SocialBid.co only. You do not need to change your X profile or take any action on X.",
   ],
   [
     "How long can my sponsored message be?",
@@ -50,7 +50,7 @@ const faqs: [string, string][] = [
   ],
   [
     "Is a placement labelled as an ad?",
-    "Yes. Buy My Bio generates the \u201CSponsored:\u201D label automatically and buyers can't remove or reword it.",
+    "Yes. Social Bid generates the \u201CSponsored:\u201D label automatically and buyers can't remove or reword it.",
   ],
   [
     "What isn't allowed in a sponsored message?",
@@ -83,7 +83,7 @@ function FAQPage() {
           ],
           [
             "2. Get featured",
-            "Your \u201CSponsored:\u201D message + tracked link goes live instantly on the creator's Buy My Bio profile and stays until someone pays more.",
+            "Your \u201CSponsored:\u201D message + tracked link goes live instantly on the creator's Social Bid profile and stays until someone pays more.",
           ],
           [
             "3. Get outbid",

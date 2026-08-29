@@ -85,7 +85,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
             .select("id, x_user_id")
             .eq("username", username)
             .maybeSingle();
-          // Another Buy My Bio creator already holds this handle / X account.
+          // Another Social Bid creator already holds this handle / X account.
           if (clash) return fail(clash.x_user_id ? "x_already_connected" : "handle_taken");
 
           const { data: created, error } = await db
@@ -106,7 +106,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
         // X is the trusted identity proof. Bind it once to an internal user so
         // creator-only server checks never need browser-supplied handles/tokens.
         if (!existing?.user_id && creatorId) {
-          const email = `x-${xUser.id}@creator.buymybio.invalid`;
+          const email = `x-${xUser.id}@creator.socialbid.invalid`;
           const { data: user, error } = await db.auth.admin.createUser({
             email,
             email_confirm: true,

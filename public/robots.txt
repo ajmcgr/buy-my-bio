@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /auth
 Disallow: /success
 
-Sitemap: https://buymybio.com/sitemap.xml
+Sitemap: https://socialbid.co/sitemap.xml

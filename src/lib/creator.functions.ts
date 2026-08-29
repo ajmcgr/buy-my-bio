@@ -24,7 +24,7 @@ export type CreatorSession = {
   ownerName: string | null;
   ownerMessage: string | null;
   ownerUrl: string | null;
-  /** Exact sponsored message shown on the creator's Buy My Bio profile. */
+  /** Exact sponsored message shown on the creator's Social Bid profile. */
   ownerPlacement: string | null;
   compliance: { status: string; reason: string | null } | null;
   activation: {
@@ -160,7 +160,7 @@ const disconnectIn = z.object({
 });
 
 /**
- * Disconnect the creator's X account (and optionally delete their Buy My Bio data).
+ * Disconnect the creator's X account (and optionally delete their Social Bid data).
  *
  * Disconnecting is always allowed, but it NEVER cancels an obligation:
  * - the profile remains publicly listed but cannot accept new sponsorships,

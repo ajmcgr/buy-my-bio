@@ -15,9 +15,9 @@ export const Route = createFileRoute("/admin")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Admin — Buy My Bio" },
-      { name: "description", content: "Internal dashboard for Buy My Bio." },
-      { property: "og:title", content: "Admin — Buy My Bio" },
+      { title: "Admin — Social Bid" },
+      { name: "description", content: "Internal dashboard for Social Bid." },
+      { property: "og:title", content: "Admin — Social Bid" },
       { property: "og:description", content: "Internal dashboard." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

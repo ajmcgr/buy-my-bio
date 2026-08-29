@@ -1,5 +1,5 @@
--- BUY MY BIO — X (Twitter) creator verification
--- Run after 0001_buymybio.sql in the Supabase SQL editor.
+-- SOCIAL BID — X (Twitter) creator verification
+-- Run after the initial schema migration in the Supabase SQL editor.
 
 alter table public.creators
   add column if not exists x_user_id text unique,

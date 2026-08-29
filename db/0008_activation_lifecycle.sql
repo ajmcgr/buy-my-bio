@@ -1,4 +1,4 @@
--- BUY MY BIO — purchase / activation / payout state separation.
+-- SOCIAL BID — purchase / activation / payout state separation.
 -- Additive + backfill only. Safe to re-run. No data is deleted.
 
 -- ---------------------------------------------------------------- ownerships

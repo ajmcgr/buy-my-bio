@@ -19,15 +19,15 @@ import { money } from "@/lib/format";
 export const Route = createFileRoute("/creator")({
   head: () => ({
     meta: [
-      { title: "Add Your Profile — Buy My Bio" },
+      { title: "Add Your Profile — Social Bid" },
       {
         name: "description",
-        content: "Connect X, list your profile, and let anyone sponsor you on BuyMyBio.com.",
+        content: "Connect X, list your profile, and let anyone sponsor you on SocialBid.co.",
       },
-      { property: "og:title", content: "Add Your Profile — Buy My Bio" },
+      { property: "og:title", content: "Add Your Profile — Social Bid" },
       {
         property: "og:description",
-        content: "Connect X to confirm your identity, then list your profile on Buy My Bio.",
+        content: "Connect X to confirm your identity, then list your profile on Social Bid.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -100,7 +100,7 @@ function CreatorPage() {
       setMessage(res.error);
       return;
     }
-    setMessage("Your profile is now listed on Buy My Bio.");
+    setMessage("Your profile is now listed on Social Bid.");
     const next = await getCreatorSession({ data: { token } });
     setSession(next);
   }
@@ -111,8 +111,8 @@ function CreatorPage() {
     const obligationWarning =
       "Disconnecting X will keep your profile in the rankings but stop it from accepting new sponsors. It does not cancel any current sponsorship or pending payout obligations.";
     const warn = deleteData
-      ? "Disconnect X and delete your Buy My Bio data? This can't be undone."
-      : "Disconnect your X account from Buy My Bio?";
+      ? "Disconnect X and delete your Social Bid data? This can't be undone."
+      : "Disconnect your X account from Social Bid?";
     if (!window.confirm(obligation ? `${obligationWarning}\n\n${warn}` : warn)) return;
     setBusy(true);
     setMessage(null);
@@ -143,7 +143,7 @@ function CreatorPage() {
         Add your profile
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Connect X to confirm your identity, then list your profile on BuyMyBio.com.
+        Connect X to confirm your identity, then list your profile on SocialBid.co.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
@@ -156,7 +156,7 @@ function CreatorPage() {
           <h2 className="mt-1 text-xl font-semibold">Connect X to confirm your account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Your connection confirms your identity and imports your public profile. Sponsorships
-            appear on BuyMyBio.com.
+            appear on SocialBid.co.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
@@ -193,7 +193,7 @@ function CreatorPage() {
               <h2 className="mt-1 text-xl font-semibold">List my profile</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Connecting X does not list you publicly. Publish when you're ready, then buyers can
-                sponsor your profile on BuyMyBio.com.
+                sponsor your profile on SocialBid.co.
               </p>
               <button
                 onClick={onPublish}
@@ -244,8 +244,8 @@ function CreatorPage() {
               {session.globalRank && session.bioValueCents !== null ? (
                 <a
                   href={`https://x.com/intent/post?text=${encodeURIComponent(
-                    `My sponsorship on Buy My Bio is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank}.`,
-                  )}&url=${encodeURIComponent(`https://buymybio.com/u/${session.username}`)}`}
+                    `My sponsorship on Social Bid is now worth ${money(session.bioValueCents)}.\n\nCurrently #${session.globalRank}.`,
+                  )}&url=${encodeURIComponent(`https://socialbid.co/u/${session.username}`)}`}
                   target="_blank"
                   rel="noreferrer"
                   className="flex items-center justify-center gap-2 border-t border-background/25 px-5 py-4 font-extrabold hover:bg-background/10"
@@ -258,9 +258,9 @@ function CreatorPage() {
 
           {session.ownerMessage ? (
             <div className="panel mt-8 p-6">
-              <div className="label-xs">Sponsored on Buy My Bio</div>
+              <div className="label-xs">Sponsored on Social Bid</div>
               <h2 className="mt-1 text-xl font-semibold">
-                Your sponsored slot is live on Buy My Bio
+                Your sponsored slot is live on Social Bid
               </h2>
               <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
                 {session.ownerPlacement ??
@@ -312,7 +312,7 @@ function CreatorPage() {
                 {" "}
                 — live at{" "}
                 <a className="underline" href={`/u/${session.username}`}>
-                  buymybio.com/u/{session.username}
+                  socialbid.co/u/{session.username}
                 </a>
               </>
             ) : null}
@@ -332,7 +332,7 @@ function errorCopy(code: string): string {
     case "x_callback_error":
       return "X returned an error during sign-in. Please try again.";
     case "x_already_connected":
-      return "That X account is already connected to another Buy My Bio creator.";
+      return "That X account is already connected to another Social Bid creator.";
     case "missing_code":
       return "That sign-in didn't complete. Please connect again.";
     case "creator_create_failed":
@@ -400,7 +400,7 @@ function PayoutsPanel({
       <div className="label-xs">Step 3</div>
       <h2 className="mt-1 text-xl font-extrabold">Get paid</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Buyers pay Buy My Bio. We hold your share for 7 days, then transfer it to your bank via
+        Buyers pay Social Bid. We hold your share for 7 days, then transfer it to your bank via
         Stripe.
       </p>
 

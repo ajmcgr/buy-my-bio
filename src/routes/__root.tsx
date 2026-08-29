@@ -14,8 +14,6 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicConfig } from "../lib/public-config.functions";
 import { initSupabase } from "../integrations/supabase/browser";
-import logoAsset from "../assets/logo-trans.png.asset.json";
-import logoWhiteAsset from "../assets/logo-white.png.asset.json";
 
 function NotFoundComponent() {
   return (
@@ -68,12 +66,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Buy My Bio — How much are you worth on X?" },
+      { title: "Social Bid — How much are you worth on X?" },
       {
         name: "description",
-        content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
+        content:
+          "Add your X profile and let sponsors decide what you’re worth. Sponsors compete for the top sponsorship spot on Social Bid.",
       },
-      { property: "og:site_name", content: "Buy My Bio" },
+      { property: "og:site_name", content: "Social Bid" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "How much are you worth on X?" },
@@ -100,7 +99,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       {
         src: "https://analytics.ahrefs.com/analytics.js",
-        "data-key": "N8DF+07OZVFCpj/L6EQilg",
+        "data-key": "oIsUcSTyxi09HHhjFi94dQ",
         async: true,
       },
       {
@@ -215,14 +214,11 @@ function SiteHeader() {
     <header>
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
         <Link to="/" className="flex items-center">
-          <>
-            <img src={logoAsset.url} alt="Buy My Bio" className="h-9 w-auto sm:h-12 dark:hidden" />
-            <img
-              src={logoWhiteAsset.url}
-              alt="Buy My Bio"
-              className="hidden h-9 w-auto sm:h-12 dark:block"
-            />
-          </>
+          <img
+            src="/social-bid-logo.png"
+            alt="Social Bid"
+            className="h-9 w-auto dark:invert sm:h-12"
+          />
         </Link>
         <nav className="flex items-center gap-3 whitespace-nowrap text-xs font-bold sm:gap-6 sm:text-sm sm:font-medium">
           <Link to="/" className="hidden hover:underline sm:inline">
@@ -272,7 +268,7 @@ function SiteFooter() {
           .
         </span>
         <span className="max-w-2xl text-muted-foreground/80">
-          Buy My Bio is not affiliated with or endorsed by X.
+          Social Bid is not affiliated with or endorsed by X.
         </span>
       </div>
     </footer>

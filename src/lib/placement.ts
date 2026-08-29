@@ -1,8 +1,8 @@
 /**
  * Canonical sponsored placement.
  *
- * Buy My Bio sells the SPONSOR SPOT on a creator's Buy My Bio profile. The
- * sponsorship is displayed on buymybio.com only — creators are never asked to
+ * Social Bid sells the SPONSOR SPOT on a creator's Social Bid profile. The
+ * sponsorship is displayed on socialbid.co only — creators are never asked to
  * edit their X bio or take any action on X. X is used for authentication and
  * identity/profile data only.
  *
@@ -76,7 +76,7 @@ export function retainedBioText(
  * already takes up space.
  */
 export function messageCharLimit(retainedChars: number, url: string | null | undefined): number {
-  // Website-only sponsorships live on buymybio.com, so the creator's X bio
+  // Website-only sponsorships live on socialbid.co, so the creator's X bio
   // length is irrelevant: every buyer gets the full message allowance.
   if (WEBSITE_ONLY_SPONSORSHIP) return MESSAGE_MAX_CHARS;
   const retained = Math.max(0, retainedChars);

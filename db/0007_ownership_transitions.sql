@@ -1,4 +1,4 @@
--- BUY MY BIO — ownership transition tracking.
+-- SOCIAL BID — ownership transition tracking.
 -- A legitimate outbid ends the previous placement normally and must NEVER
 -- cancel that buyer's creator payout. Safe to re-run.
 

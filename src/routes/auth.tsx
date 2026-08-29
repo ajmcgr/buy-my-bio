@@ -5,9 +5,9 @@ import { getSupabase } from "@/integrations/supabase/browser";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign In — Buy My Bio" },
-      { name: "description", content: "Sign in to manage your Buy My Bio listing." },
-      { property: "og:title", content: "Sign In — Buy My Bio" },
+      { title: "Sign In — Social Bid" },
+      { name: "description", content: "Sign in to manage your Social Bid listing." },
+      { property: "og:title", content: "Sign In — Social Bid" },
       { property: "og:description", content: "Sign in to manage your listing." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },

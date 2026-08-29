@@ -1,7 +1,7 @@
 import { SPONSOR_PREFIX } from "./placement";
 import { baseUrl } from "./db.server";
 
-const FROM = "Buy My Bio <noreply@buymybio.com>";
+const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@buymybio.com>";
 
 async function send(to: string, subject: string, html: string) {
   const key = process.env["RESEND_API_KEY"];
@@ -19,17 +19,14 @@ async function send(to: string, subject: string, html: string) {
 
 const money = (c: number) => `$${(c / 100).toFixed(c % 100 === 0 ? 0 : 2)}`;
 
-const LOGO =
-  "https://buymybio.com/__l5e/assets-v1/e89eede8-c031-4ffa-987e-8e62a2749c4d/email-logo.png";
-
 function shell(
   body: string,
-  footNote = "You received this because you sponsored a creator on Buy My Bio.",
+  footNote = "You received this because you sponsored a creator on Social Bid.",
 ) {
   return `<div style="background:#f6f7f9;padding:40px 16px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e6e8eb;border-radius:4px">
     <tr><td align="center" style="padding:36px 32px;border-bottom:1px solid #e6e8eb">
-      <img src="${LOGO}" alt="Buy My Bio" width="180" style="display:block;width:180px;max-width:60%;height:auto" />
+      <div style="font-size:28px;line-height:1;font-weight:700;letter-spacing:-0.04em;color:#111418">Social Bid</div>
     </td></tr>
     <tr><td style="padding:40px 40px 44px;color:#1c1f23;font-size:17px;line-height:1.6">
       ${body}
@@ -93,14 +90,14 @@ export async function sendWinnerEmail(o: {
   const link = `${baseUrl()}/u/${o.username}`;
   const share = `${baseUrl()}/own/${o.ownershipId}`;
   const tweet = `https://x.com/intent/post?text=${encodeURIComponent(
-    `I just sponsored @${o.handle} on Buy My Bio for ${money(o.amountCents)}.`,
+    `I just sponsored @${o.handle} on Social Bid for ${money(o.amountCents)}.`,
   )}&url=${encodeURIComponent(share)}`;
   await send(
     o.to,
-    o.globalRank === 1 ? `You hold the #1 sponsorship on Buy My Bio.` : `You sponsor @${o.handle}.`,
+    o.globalRank === 1 ? `You hold the #1 sponsorship on Social Bid.` : `You sponsor @${o.handle}.`,
     shell(`
       ${h1(o.globalRank === 1 ? "You hold the #1 sponsorship." : "Your sponsorship is live \u{1F389}")}
-      ${p(`Your payment went through — <b>${o.company}</b> now sponsors <b>@${o.handle}</b> on Buy My Bio, and the spot stays yours until somebody pays more.`)}
+      ${p(`Your payment went through — <b>${o.company}</b> now sponsors <b>@${o.handle}</b> on Social Bid, and the spot stays yours until somebody pays more.`)}
       ${facts([
         ["You paid", money(o.amountCents)],
         ...(o.globalRank
@@ -137,7 +134,7 @@ export async function sendOutbidEmail(o: {
       ${p(
         o.lostNumberOne
           ? `<b>${o.newOwner ?? "Someone"}</b> just took the #1 sponsorship for @${o.handle} at ${money(o.takeoverAmountCents ?? 0)}. You can take #1 back at any time.`
-          : `Your sponsor spot on <b>@${o.handle}</b>'s Buy My Bio profile was just taken. You can take it back at the new price at any time.`,
+          : `Your sponsor spot on <b>@${o.handle}</b>'s Social Bid profile was just taken. You can take it back at the new price at any time.`,
       )}
       ${facts([
         ["You paid", money(o.paidCents)],
@@ -163,7 +160,7 @@ const REFUND_COPY: Record<string, { title: string; body: string }> = {
   },
   creator_removed_active_placement: {
     title: "Placement was removed",
-    body: "Your sponsored placement was removed from Buy My Bio, so your payment has been refunded.",
+    body: "Your sponsored placement was removed from Social Bid, so your payment has been refunded.",
   },
   concurrent_purchase_conflict: {
     title: "Your purchase couldn't be completed",
@@ -198,15 +195,15 @@ export async function sendBuyerAwaitingActivationEmail(o: {
 }) {
   await send(
     o.to,
-    "Your sponsorship is live on Buy My Bio",
+    "Your sponsorship is live on Social Bid",
     shell(`
       ${h1("Purchase successful")}
-      ${p(`You sponsored <b>@${o.handle}</b> on Buy My Bio. Your placement is published on BuyMyBio.com only.`)}
+      ${p(`You sponsored <b>@${o.handle}</b> on Social Bid. Your placement is published on SocialBid.co only.`)}
       ${facts([
         ["You paid", money(o.amountCents)],
         ["Your placement", o.message ? `${SPONSOR_PREFIX} ${o.message}` : "\u2014"],
         ["Your link", o.destination],
-        ["Status", "Live on Buy My Bio"],
+        ["Status", "Live on Social Bid"],
       ])}
     `),
   );
@@ -221,20 +218,20 @@ export async function sendCreatorActionRequiredEmail(o: {
 }) {
   await send(
     o.to,
-    "New sponsor on your Buy My Bio profile",
+    "New sponsor on your Social Bid profile",
     shell(
       `
       ${h1("You have a new sponsor")}
-      ${p("Somebody just sponsored your Buy My Bio profile. Their message and link are live now.")}
+      ${p("Somebody just sponsored your Social Bid profile. Their message and link are live now.")}
       ${facts([
         ["Sponsorship", money(o.amountCents)],
         ["Sponsored message", o.message ? `${SPONSOR_PREFIX} ${o.message}` : "\u2014"],
         ["Destination", o.destination],
-        ["Status", "Live on Buy My Bio"],
+        ["Status", "Live on Social Bid"],
       ])}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Buy My Bio.",
+      "You received this because you listed your profile on Social Bid.",
     ),
   );
 }
@@ -253,8 +250,8 @@ export async function sendPlacementVerifiedEmail(o: {
       ${h1(buyer ? "Your sponsorship is live" : "Your profile has a new sponsor")}
       ${p(
         buyer
-          ? `Your sponsored spot on <b>@${o.handle}</b>'s Buy My Bio profile is active. It's yours until somebody pays more.`
-          : `The sponsorship is live on your Buy My Bio profile.${
+          ? `Your sponsored spot on <b>@${o.handle}</b>'s Social Bid profile is active. It's yours until somebody pays more.`
+          : `The sponsorship is live on your Social Bid profile.${
               o.eligibleDate ? ` Eligible for payout after ${o.eligibleDate}.` : ""
             }`,
       )}
@@ -270,10 +267,10 @@ export async function sendListingSuspendedEmail(o: { to: string; reason: string 
     shell(
       `
       ${h1("Listing suspended")}
-      ${p(`Your Buy My Bio listing was suspended (${o.reason}). Open your dashboard for details.`)}
+      ${p(`Your Social Bid listing was suspended (${o.reason}). Open your dashboard for details.`)}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Buy My Bio.",
+      "You received this because you listed your profile on Social Bid.",
     ),
   );
 }
@@ -285,10 +282,10 @@ export async function sendPlacementMismatchWarningEmail(o: { to: string; reason:
     shell(
       `
       ${h1("Review your sponsored placement")}
-      ${p(`Your Buy My Bio placement needs review (${o.reason}). Open your dashboard for details.`)}
+      ${p(`Your Social Bid placement needs review (${o.reason}). Open your dashboard for details.`)}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Buy My Bio.",
+      "You received this because you listed your profile on Social Bid.",
     ),
   );
 }
@@ -304,7 +301,7 @@ export async function sendPayoutReleasedEmail(o: { to: string; amountCents: numb
       ${facts([["Amount", money(o.amountCents)]])}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Buy My Bio.",
+      "You received this because you listed your profile on Social Bid.",
     ),
   );
 }

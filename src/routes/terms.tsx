@@ -3,12 +3,12 @@ import { createFileRoute } from "@tanstack/react-router";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of Service — Buy My Bio" },
+      { title: "Terms of Service — Social Bid" },
       {
         name: "description",
-        content: "The rules for sponsoring creator profiles on Buy My Bio.",
+        content: "The rules for sponsoring creator profiles on Social Bid.",
       },
-      { property: "og:title", content: "Terms of Service — Buy My Bio" },
+      { property: "og:title", content: "Terms of Service — Social Bid" },
       { property: "og:description", content: "The rules for sponsoring creator profiles." },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
@@ -18,12 +18,12 @@ export const Route = createFileRoute("/terms")({
     <article className="mx-auto max-w-2xl space-y-4 px-5 py-14 text-sm leading-relaxed">
       <h1 className="text-3xl font-extrabold">Terms of Service</h1>
       <p>
-        Buy My Bio lets buyers purchase a <b>disclosed sponsor spot</b> on a creator's Buy My Bio
+        Social Bid lets buyers purchase a <b>disclosed sponsor spot</b> on a creator's Social Bid
         profile. Your message and tracked link remain on that profile until another buyer pays more.
         There is no minimum sponsorship period or guaranteed duration.
       </p>
       <p>
-        Sponsorships are displayed and managed on BuyMyBio.com only. Nothing is published on X, and
+        Sponsorships are displayed and managed on SocialBid.co only. Nothing is published on X, and
         creators do not need to take any action on X.
       </p>
       <p>
@@ -32,13 +32,13 @@ export const Route = createFileRoute("/terms")({
       </p>
       <p>
         Sponsored messages must be honest advertising. You may not impersonate the creator, Buy My
-        Bio or any other person or brand, or misrepresent the placement as a personal endorsement.
+        Bid or any other person or brand, or misrepresent the placement as a personal endorsement.
       </p>
       <p>
-        Placements must comply with applicable advertising rules. Buy My Bio may suspend a listing
+        Placements must comply with applicable advertising rules. Social Bid may suspend a listing
         or cancel a placement that breaches those rules.
       </p>
-      <p>Buy My Bio is not affiliated with or endorsed by X.</p>
+      <p>Social Bid is not affiliated with or endorsed by X.</p>
       <p>
         All payments are final except where two payments race for the same takeover; the losing
         payment is refunded in full and automatically.

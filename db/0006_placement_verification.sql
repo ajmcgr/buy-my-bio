@@ -1,4 +1,4 @@
--- BUY MY BIO — continuous placement verification (7-day payout hold)
+-- SOCIAL BID — continuous placement verification (7-day payout hold)
 -- Safe to re-run. Preserves all existing data.
 
 -- Buyer's sponsored URL is stored on payments/ownerships as destination_url

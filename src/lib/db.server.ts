@@ -57,5 +57,5 @@ export function publicDb(): SupabaseClient {
 }
 
 export function baseUrl(): string {
-  return (process.env["APP_BASE_URL"] || "https://buymybio.com").replace(/\/$/, "");
+  return (process.env["APP_BASE_URL"] || "https://socialbid.co").replace(/\/$/, "");
 }

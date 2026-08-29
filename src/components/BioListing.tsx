@@ -45,9 +45,9 @@ function ProfileCard({ view }: { view: ListingView }) {
           <p className="mt-3 text-sm">{c.bio}</p>
           <div className="mt-4">
             <div className="inline-block border-2 border-border bg-accent px-3 py-1.5 font-mono text-sm font-bold">
-              buymybio.com/{c.username}
+              socialbid.co/{c.username}
             </div>
-            <div className="label-xs mt-2">↑ This creator's Buy My Bio profile</div>
+            <div className="label-xs mt-2">↑ This creator's Social Bid profile</div>
           </div>
         </div>
       </div>
@@ -87,9 +87,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
         </h1>
       )}
 
-      <p className="mt-5 text-2xl font-bold sm:text-3xl">Sponsor this creator on Buy My Bio.</p>
+      <p className="mt-5 text-2xl font-bold sm:text-3xl">Sponsor this creator on Social Bid.</p>
       <p className="mt-1 text-base text-muted-foreground sm:text-lg">
-        Your message + link stays on this Buy My Bio page until somebody pays more.
+        Your message + link stays on this Social Bid page until somebody pays more.
       </p>
 
       <div className="mt-8 grid border-2 border-border bg-foreground text-background sm:grid-cols-3">
@@ -119,8 +119,8 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
       {view.globalRank && view.bioValueCents !== null && view.bioValueCents !== undefined ? (
         <a
           href={`https://x.com/intent/post?text=${encodeURIComponent(
-            `@${view.creator.x_username ?? view.creator.social_handle}'s sponsorship on Buy My Bio is now worth ${money(view.bioValueCents)} — currently #${view.globalRank}.`,
-          )}&url=${encodeURIComponent(`https://buymybio.com/u/${view.creator.username}`)}`}
+            `@${view.creator.x_username ?? view.creator.social_handle}'s sponsorship on Social Bid is now worth ${money(view.bioValueCents)} — currently #${view.globalRank}.`,
+          )}&url=${encodeURIComponent(`https://socialbid.co/u/${view.creator.username}`)}`}
           target="_blank"
           rel="noreferrer"
           className="mt-3 inline-flex items-center gap-2 text-sm font-bold underline"
@@ -134,7 +134,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
         <div className="panel flex flex-col justify-between">
           <div className="border-b-2 border-border px-5 py-4">
-            <div className="label-xs">Sponsored on Buy My Bio</div>
+            <div className="label-xs">Sponsored on Social Bid</div>
             <div className="mt-1 flex items-center gap-3">
               {owner?.logo_url && (
                 <img
@@ -149,7 +149,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               </span>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Sponsorship appears on BuyMyBio.com only.
+              Sponsorship appears on SocialBid.co only.
             </p>
           </div>
 
@@ -190,7 +190,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
             <div className="panel mt-6 px-5 py-5 text-sm">
               <p>
                 <span className="font-bold">What you get:</span> your sponsored message and tracked
-                link on this creator's Buy My Bio profile until somebody pays more.
+                link on this creator's Social Bid profile until somebody pays more.
               </p>
             </div>
           </>
@@ -235,7 +235,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
       <section className="mt-20 grid gap-6 sm:grid-cols-3">
         {[
           ["1. Sponsor", "Pay the current price for the creator's sponsor spot."],
-          ["2. Get featured", "Your message + link appears on the creator's Buy My Bio profile."],
+          ["2. Get featured", "Your message + link appears on the creator's Social Bid profile."],
           ["3. Get outbid", "Someone pays more and their sponsorship replaces yours."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">

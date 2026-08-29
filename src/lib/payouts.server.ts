@@ -6,7 +6,7 @@
  * the platform until ALL of the following are true at release time:
  *   - the hold window has elapsed
  *   - the payment is still `applied` and not refunded, live-mode
- *   - the sponsorship was created on BuyMyBio.com
+ *   - the sponsorship was created on SocialBid.co
  *   - the creator's connected account has transfers enabled
  */
 
@@ -213,7 +213,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
 
   const now = new Date().toISOString();
 
-  // Website-only sponsorships are fulfilled on buymybio.com at purchase time.
+  // Website-only sponsorships are fulfilled on socialbid.co at purchase time.
   // Payment, ownership and the live placement are the only conditions, so no
   // X read gates the money — being outbid later never invalidates this payout.
   if (WEBSITE_ONLY_SPONSORSHIP) {

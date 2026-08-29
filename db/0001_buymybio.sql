@@ -1,4 +1,4 @@
--- BUY MY BIO — initial schema
+-- SOCIAL BID — initial schema
 -- Paste this into the Supabase SQL editor for project qfqowhetrxritoyjzzcz.
 
 create extension if not exists pgcrypto;
