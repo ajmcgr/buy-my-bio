@@ -91,11 +91,13 @@ function Admin() {
             <div key={c.id} className="flex flex-wrap items-center gap-3 px-4 py-3 text-sm">
               <span className="font-bold">{c.display_name}</span>
               <span className="font-mono text-muted-foreground">@{c.social_handle}</span>
-              <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase">
+              <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px]">
                 {c.x_account_verified ? "account verified" : "account unverified"}
               </span>
-              <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px] uppercase">
-                {c.x_bio_verified ? `bio verified (${c.x_bio_verified_method ?? "api"})` : "bio unverified"}
+              <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px]">
+                {c.x_bio_verified
+                  ? `bio verified (${c.x_bio_verified_method ?? "api"})`
+                  : "bio unverified"}
               </span>
               {c.banned && (
                 <span className="bg-destructive px-1.5 py-0.5 font-mono text-[10px] text-destructive-foreground">
@@ -129,7 +131,10 @@ function Admin() {
                 {listing && (
                   <button
                     onClick={() =>
-                      run(listing.status === "active" ? "pause_listing" : "activate_listing", listing.id)
+                      run(
+                        listing.status === "active" ? "pause_listing" : "activate_listing",
+                        listing.id,
+                      )
                     }
                     className="border-2 border-border px-2 py-1 text-xs font-bold hover:bg-accent"
                   >
@@ -169,7 +174,7 @@ function Admin() {
             <span className="truncate font-bold">{p.company_name}</span>
             <span className="truncate text-muted-foreground">{p.email}</span>
             <span>{money(p.amount_cents)}</span>
-            <span className="text-right font-mono text-xs uppercase">
+            <span className="text-right font-mono text-xs">
               {p.flagged ? "flagged · " : ""}
               {p.status}
             </span>

@@ -18,7 +18,7 @@ function ProfileCard({ view }: { view: ListingView }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
             {c.x_bio_verified ? (
-              <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold uppercase text-accent-foreground">
+              <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold text-accent-foreground">
                 ✓ X bio verified
               </span>
             ) : null}
@@ -96,18 +96,14 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
       <div className="mt-8 grid border-2 border-border bg-foreground text-background sm:grid-cols-3">
         <div className="px-5 py-4 sm:border-r sm:border-background/25">
-          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
-            Global rank
-          </div>
+          <div className="font-mono text-[0.65rem] font-bold text-background/60">Global rank</div>
           <div className="mt-1 flex items-center gap-2 text-2xl font-extrabold">
             {view.globalRank === 1 ? <Trophy className="size-5 text-accent" /> : null}
             {view.globalRank ? `#${view.globalRank} most valuable` : "Unranked"}
           </div>
         </div>
         <div className="border-t border-background/25 px-5 py-4 sm:border-t-0 sm:border-r">
-          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
-            Bio value
-          </div>
+          <div className="font-mono text-[0.65rem] font-bold text-background/60">Bio value</div>
           <div className="mt-1 text-2xl font-extrabold">
             {view.bioValueCents === null || view.bioValueCents === undefined
               ? "—"
@@ -115,9 +111,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
         </div>
         <div className="border-t border-background/25 px-5 py-4 sm:border-t-0">
-          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
-            Owned by
-          </div>
+          <div className="font-mono text-[0.65rem] font-bold text-background/60">Owned by</div>
           <div className="mt-1 truncate text-2xl font-extrabold">
             {owner?.company_name ?? "Unowned"}
           </div>

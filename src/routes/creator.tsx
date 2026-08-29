@@ -30,7 +30,7 @@ const STORAGE_KEY = "bmb_creator_token";
 function Badge({ on, label }: { on: boolean; label: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-2 border-2 border-border px-3 py-1.5 font-mono text-xs font-bold uppercase ${
+      className={`inline-flex items-center gap-2 border-2 border-border px-3 py-1.5 font-mono text-xs font-bold ${
         on ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
       }`}
     >
@@ -135,12 +135,12 @@ function CreatorPage() {
 
           {session.bioVerified ? (
             <div className="mt-8 border-2 border-border bg-foreground text-background">
-              <div className="border-b border-background/25 px-5 py-3 font-mono text-xs font-bold uppercase tracking-[0.14em]">
+              <div className="border-b border-background/25 px-5 py-3 font-mono text-xs font-bold">
                 Your bio
               </div>
               <div className="grid sm:grid-cols-3">
                 <div className="px-5 py-5 sm:border-r sm:border-background/25">
-                  <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+                  <div className="font-mono text-[0.65rem] font-bold text-background/60">
                     Bio value
                   </div>
                   <div className="mt-1 text-3xl font-extrabold">
@@ -148,7 +148,7 @@ function CreatorPage() {
                   </div>
                 </div>
                 <div className="border-t border-background/25 px-5 py-5 sm:border-t-0 sm:border-r">
-                  <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+                  <div className="font-mono text-[0.65rem] font-bold text-background/60">
                     Global rank
                   </div>
                   <div className="mt-1 text-3xl font-extrabold">
@@ -156,7 +156,7 @@ function CreatorPage() {
                   </div>
                 </div>
                 <div className="border-t border-background/25 px-5 py-5 sm:border-t-0">
-                  <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-background/60">
+                  <div className="font-mono text-[0.65rem] font-bold text-background/60">
                     Owned by
                   </div>
                   <div className="mt-1 truncate text-xl font-extrabold">

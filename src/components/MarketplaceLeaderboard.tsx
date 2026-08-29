@@ -86,12 +86,10 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
   return (
     <article className="relative overflow-hidden border-x-2 border-b-2 border-border bg-card">
       <div className="flex items-center justify-between gap-3 border-b-2 border-border bg-accent px-4 py-3 text-accent-foreground sm:px-6">
-        <div className="flex items-center gap-2 font-mono text-xs font-extrabold uppercase tracking-[0.14em]">
+        <div className="flex items-center gap-2 font-mono text-xs font-extrabold">
           <Trophy className="size-4" /> #1 most valuable bio
         </div>
-        <span className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em]">
-          The trophy
-        </span>
+        <span className="font-mono text-[0.65rem] font-bold">The trophy</span>
       </div>
       <div className="grid lg:grid-cols-[1.25fr_0.9fr]">
         <div className="p-5 sm:p-7">
@@ -117,30 +115,24 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
           ) : null}
         </div>
         <div className="border-t-2 border-border bg-foreground p-5 text-background lg:border-t-0 lg:border-l-2 lg:p-7">
-          <div className="font-mono text-[0.65rem] font-bold uppercase tracking-[0.14em] text-background/60">
-            Bio value
-          </div>
+          <div className="font-mono text-[0.65rem] font-bold text-background/60">Bio value</div>
           <div className="mt-1 text-[clamp(3.25rem,9vw,6rem)] leading-none font-extrabold tracking-[-0.06em]">
             {money(row.bioValueCents ?? 0)}
           </div>
           <div className="mt-6 grid grid-cols-2 gap-5 border-t border-background/30 pt-5">
             <div>
-              <div className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.12em] text-background/60">
-                Owned by
-              </div>
+              <div className="font-mono text-[0.6rem] font-bold text-background/60">Owned by</div>
               <div className="mt-1 truncate font-extrabold">{row.owner?.company_name}</div>
             </div>
             <div>
-              <div className="font-mono text-[0.6rem] font-bold uppercase tracking-[0.12em] text-background/60">
-                Next price
-              </div>
+              <div className="font-mono text-[0.6rem] font-bold text-background/60">Next price</div>
               <div className="mt-1 font-extrabold">{money(row.requiredPriceCents)}</div>
             </div>
           </div>
           <div className="mt-6 [&_.btn-ink]:border-accent [&_.btn-ink]:bg-accent [&_.btn-ink]:text-accent-foreground">
             <TakeoverButton row={row} prominent />
           </div>
-          <p className="mt-3 text-center font-mono text-[0.65rem] uppercase tracking-[0.08em] text-background/60">
+          <p className="mt-3 text-center font-mono text-[0.65rem] text-background/60">
             Pay more → value rises → rank holds or climbs
           </p>
         </div>
@@ -163,9 +155,7 @@ function LeaderboardRow({ row, position }: { row: MarketplaceRow; position: numb
         <div className="mt-0.5 text-xl font-extrabold">
           {money(owned ? row.bioValueCents! : row.listing.starting_price_cents)}
         </div>
-        {!owned ? (
-          <div className="mt-0.5 font-mono text-[0.65rem] font-bold uppercase">Unowned</div>
-        ) : null}
+        {!owned ? <div className="mt-0.5 font-mono text-[0.65rem] font-bold">Unowned</div> : null}
       </div>
       <div className="min-w-0">
         <div className="label-xs">Owned by</div>
@@ -188,7 +178,7 @@ function ActivityLine({ item }: { item: MarketplaceActivity }) {
       <Link
         to="/u/$username"
         params={{ username: item.username }}
-        className="font-mono text-xs font-bold uppercase tracking-[0.06em] hover:underline"
+        className="font-mono text-xs font-bold hover:underline"
       >
         {copy}
       </Link>
@@ -239,17 +229,15 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
       <section className="pb-6 pt-4 sm:pb-8 sm:pt-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-xs font-bold uppercase tracking-[0.16em] text-primary">
-              Buy My Bio
-            </p>
-            <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em] uppercase">
+            <p className="font-mono text-xs font-bold text-primary">Buy My Bio</p>
+            <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
               The most valuable bios on X.
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
               Buy a sponsored slot. Keep it until somebody pays more.
             </p>
           </div>
-          <div className="flex shrink-0 items-center gap-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="flex shrink-0 items-center gap-2 font-mono text-[0.65rem] font-bold text-muted-foreground">
             <Radio className="size-3.5 text-primary" /> Live market · {market.ownedCount} owned
           </div>
         </div>
@@ -258,7 +246,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
       <section aria-labelledby="leaderboard-heading">
         <div className="flex flex-col gap-4 border-2 border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
-            <h2 id="leaderboard-heading" className="text-lg font-extrabold uppercase">
+            <h2 id="leaderboard-heading" className="text-lg font-extrabold">
               Who has the most valuable X bio?
             </h2>
             <p className="text-xs text-muted-foreground">
@@ -274,7 +262,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
                   key={sort.value}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`shrink-0 px-3 py-2 font-mono text-[0.65rem] font-bold uppercase tracking-[0.08em] ${
+                  className={`shrink-0 px-3 py-2 font-mono text-[0.65rem] font-bold ${
                     active ? "bg-foreground text-background" : "bg-muted hover:bg-accent"
                   }`}
                 >
@@ -310,7 +298,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         <section className="mt-12" aria-labelledby="unowned-heading">
           <div className="mb-3 flex items-end justify-between gap-4">
             <div>
-              <h2 id="unowned-heading" className="text-xl font-extrabold uppercase">
+              <h2 id="unowned-heading" className="text-xl font-extrabold">
                 Unowned bios
               </h2>
               <p className="text-xs text-muted-foreground">
@@ -332,9 +320,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
       <section className="mt-12 grid gap-4 lg:grid-cols-[1fr_18rem]">
         <div className="border-2 border-border bg-card px-4 sm:px-5">
           <div className="flex items-center justify-between border-b-2 border-border py-4">
-            <h2 className="font-mono text-xs font-extrabold uppercase tracking-[0.14em]">
-              Live activity
-            </h2>
+            <h2 className="font-mono text-xs font-extrabold">Live activity</h2>
             <span className="size-2 animate-pulse rounded-full bg-primary" />
           </div>
           {market.activity.length ? (

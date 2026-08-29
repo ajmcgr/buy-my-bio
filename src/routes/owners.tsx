@@ -42,8 +42,8 @@ function OwnersPage() {
 
   return (
     <div className="mx-auto max-w-5xl px-5 py-10 sm:py-14">
-      <p className="font-mono text-xs font-bold uppercase tracking-[0.14em] text-primary">Owners</p>
-      <h1 className="mt-2 text-[clamp(2.5rem,8vw,5rem)] leading-[0.88] font-extrabold tracking-[-0.05em] uppercase">
+      <p className="font-mono text-xs font-bold text-primary">Owners</p>
+      <h1 className="mt-2 text-[clamp(2.5rem,8vw,5rem)] leading-[0.88] font-extrabold tracking-[-0.05em]">
         Who owns X?
       </h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">
@@ -53,7 +53,7 @@ function OwnersPage() {
 
       {numberOne?.owner ? (
         <section className="mt-9 border-2 border-border bg-accent p-5 text-accent-foreground sm:p-7">
-          <div className="flex items-center gap-2 font-mono text-xs font-extrabold uppercase tracking-[0.14em]">
+          <div className="flex items-center gap-2 font-mono text-xs font-extrabold">
             <Trophy className="size-4" /> Owns the #1 bio
           </div>
           <div className="mt-5 grid gap-5 sm:grid-cols-[1fr_auto] sm:items-end">
@@ -86,7 +86,7 @@ function OwnersPage() {
       ) : null}
 
       <section className="mt-10" aria-labelledby="owner-rankings">
-        <h2 id="owner-rankings" className="mb-3 text-xl font-extrabold uppercase">
+        <h2 id="owner-rankings" className="mb-3 text-xl font-extrabold">
           Owner rankings
         </h2>
         {owners.length ? (

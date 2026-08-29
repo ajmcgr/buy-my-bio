@@ -71,13 +71,11 @@ function Success() {
         {result.globalRank === 1 ? "You own the #1 bio." : "You own the bio"}
       </h1>
       {result.globalRank === 1 ? (
-        <div className="mt-6 flex items-center gap-3 border-2 border-border bg-accent px-5 py-4 font-mono text-sm font-extrabold uppercase tracking-[0.12em] text-accent-foreground">
+        <div className="mt-6 flex items-center gap-3 border-2 border-border bg-accent px-5 py-4 font-mono text-sm font-extrabold text-accent-foreground">
           <Trophy className="size-5" /> The most valuable sponsored X bio on BuyMyBio
         </div>
       ) : result.globalRank ? (
-        <p className="mt-4 font-mono text-sm font-bold uppercase">
-          Now #{result.globalRank} most valuable
-        </p>
+        <p className="mt-4 font-mono text-sm font-bold">Now #{result.globalRank} most valuable</p>
       ) : null}
       <div className="panel mt-8 divide-y-2 divide-border">
         <div className="px-5 py-4">
