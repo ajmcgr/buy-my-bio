@@ -331,3 +331,21 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       null,
   };
 }
+
+/** Audit trail for the outgoing owner's final verification at a transition. */
+async function recordTransitionEvent(
+  newPaymentId: string,
+  outgoingOwnershipId: string,
+  outcome: string,
+) {
+  try {
+    const { recordEvent } = await import("./events.server");
+    await recordEvent("outgoing_final_verification", {
+      paymentId: newPaymentId,
+      ownershipId: outgoingOwnershipId,
+      detail: { outcome },
+    });
+  } catch (e) {
+    console.error("transition event failed", e);
+  }
+}
