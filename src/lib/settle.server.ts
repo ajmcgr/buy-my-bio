@@ -1,4 +1,6 @@
 import { admin } from "./db.server";
+import { WEBSITE_ONLY_SPONSORSHIP } from "./placement";
+
 import { retrieveSession } from "./stripe.server";
 import { sendOutbidEmail, sendWinnerEmail, humanDuration } from "./email.server";
 import { nextPriceCents } from "./format";
