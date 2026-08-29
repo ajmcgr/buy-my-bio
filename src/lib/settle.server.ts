@@ -194,6 +194,22 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("email failure", e);
   }
 
+  // Hold the creator's share in escrow; released later by the payout job once
+  // the placement re-verifies on X.
+  if (stripeLivemode) {
+    try {
+      const { recordPayout } = await import("./payouts.server");
+      await recordPayout({
+        paymentId: payment.id,
+        listingId: payment.listing_id,
+        ownershipId,
+        grossCents: payment.amount_cents,
+      });
+    } catch (e) {
+      console.error("recordPayout failed", e);
+    }
+  }
+
   await db.from("analytics_events").insert({
     name: "checkout_completed",
     listing_id: payment.listing_id,
