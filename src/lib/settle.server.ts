@@ -234,35 +234,38 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     .eq("id", ownershipId)
     .maybeSingle();
 
-  try {
-    const {
-      sendBuyerAwaitingActivationEmail,
-      sendCreatorActionRequiredEmail,
-    } = await import("./email.server");
-    await sendBuyerAwaitingActivationEmail({
-      to: payment.email,
-      handle,
-      amountCents: payment.amount_cents,
-      message: (ownershipRow?.bio_message as string | null) ?? null,
-      destination: payment.destination_url,
-    });
-    if (listing) {
-      const { creatorEmail } = await import("./notify.server");
-      const to = await creatorEmail(listing.creator_id);
-      if (to)
-        await sendCreatorActionRequiredEmail({
-          to,
-          amountCents: payment.amount_cents,
-          message: (ownershipRow?.bio_message as string | null) ?? null,
-          destination: payment.destination_url,
-          deadline:
-            (ownershipRow?.activation_deadline as string | null) ??
-            new Date(Date.now() + 86_400_000).toISOString(),
-        });
+  if (!WEBSITE_ONLY_SPONSORSHIP) {
+    try {
+      const {
+        sendBuyerAwaitingActivationEmail,
+        sendCreatorActionRequiredEmail,
+      } = await import("./email.server");
+      await sendBuyerAwaitingActivationEmail({
+        to: payment.email,
+        handle,
+        amountCents: payment.amount_cents,
+        message: (ownershipRow?.bio_message as string | null) ?? null,
+        destination: payment.destination_url,
+      });
+      if (listing) {
+        const { creatorEmail } = await import("./notify.server");
+        const to = await creatorEmail(listing.creator_id);
+        if (to)
+          await sendCreatorActionRequiredEmail({
+            to,
+            amountCents: payment.amount_cents,
+            message: (ownershipRow?.bio_message as string | null) ?? null,
+            destination: payment.destination_url,
+            deadline:
+              (ownershipRow?.activation_deadline as string | null) ??
+              new Date(Date.now() + 86_400_000).toISOString(),
+          });
+      }
+    } catch (e) {
+      console.error("activation email failure", e);
     }
-  } catch (e) {
-    console.error("activation email failure", e);
   }
+
 
   try {
     await sendWinnerEmail({
