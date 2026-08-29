@@ -100,7 +100,7 @@ function Admin() {
               <span className="font-bold">{c.display_name}</span>
               <span className="font-mono text-muted-foreground">@{c.social_handle}</span>
               <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px]">
-                {c.x_account_verified ? "account verified" : "account unverified"}
+                {c.x_account_verified ? "X account connected" : "X account not connected"}
               </span>
               <span className="bg-secondary px-1.5 py-0.5 font-mono text-[10px]">
                 {c.x_bio_verified

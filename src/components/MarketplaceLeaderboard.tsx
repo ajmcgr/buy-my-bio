@@ -92,7 +92,7 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
         <div className="flex items-center gap-1.5 truncate font-mono text-xs text-muted-foreground sm:text-sm">
           <XIcon className="size-3" />
           <span>@{handle}</span>
-          {row.creator.x_account_verified ? <span aria-label="Verified X account">✓</span> : null}
+          {row.creator.x_account_verified ? <span aria-label="X account connected">✓</span> : null}
         </div>
         {large && row.creator.x_follower_count ? (
           <div className="mt-1 text-xs text-muted-foreground">
@@ -148,7 +148,7 @@ function TrophyCard({ row }: { row: MarketplaceRow }) {
               className="mt-5 flex items-center justify-between gap-4 border-2 border-border bg-background px-4 py-3 text-sm hover:bg-muted"
             >
               <span>
-                <span className="label-xs block">Sponsored by</span>
+                <span className="label-xs block">Sponsored on Buy My Bio</span>
                 <span className="font-extrabold">{row.owner.company_name}</span>
               </span>
               <ArrowUpRight className="size-4 shrink-0" />

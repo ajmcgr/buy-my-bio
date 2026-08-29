@@ -19,7 +19,7 @@ function ProfileCard({ view }: { view: ListingView }) {
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
             {c.x_bio_verified ? (
               <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold text-accent-foreground">
-                ✓ X bio verified
+                ✓ X account connected
               </span>
             ) : null}
           </div>
@@ -47,7 +47,7 @@ function ProfileCard({ view }: { view: ListingView }) {
             <div className="inline-block border-2 border-border bg-accent px-3 py-1.5 font-mono text-sm font-bold">
               buymybio.com/{c.username}
             </div>
-            <div className="label-xs mt-2">↑ The tracked link in this X bio</div>
+            <div className="label-xs mt-2">↑ This creator's Buy My Bio profile</div>
           </div>
         </div>
       </div>
@@ -136,7 +136,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
 
         <div className="panel flex flex-col justify-between">
           <div className="border-b-2 border-border px-5 py-4">
-            <div className="label-xs">Current owner</div>
+            <div className="label-xs">Sponsored on Buy My Bio</div>
             <div className="mt-1 flex items-center gap-3">
               {owner?.logo_url && (
                 <img
@@ -186,8 +186,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
             </button>
             <div className="panel mt-6 px-5 py-5 text-sm">
               <p>
-                <span className="font-bold">What you get:</span> you're buying a sponsored message +
-                tracked link inside this creator's X bio.
+                <span className="font-bold">What you get:</span> you're buying a sponsored message
+                + tracked link on this creator's Buy My Bio profile. This sponsorship appears on
+                BuyMyBio.com only.
               </p>
               <p className="mt-2 text-muted-foreground">
                 <span className="font-bold text-foreground">What you don't get:</span> you are not
@@ -201,7 +202,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
             <p className="font-bold">This bio isn't accepting buyers right now.</p>
             <p className="mt-1 text-sm text-muted-foreground">
               {!view.creator.x_bio_verified
-                ? "This creator's X bio hasn't been verified yet."
+                ? "This creator hasn't listed their profile yet."
                 : "The listing is paused."}
             </p>
           </div>

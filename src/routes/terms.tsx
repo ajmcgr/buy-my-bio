@@ -18,10 +18,11 @@ export const Route = createFileRoute("/terms")({
     <article className="mx-auto max-w-2xl space-y-4 px-5 py-14 text-sm leading-relaxed">
       <h1 className="text-3xl font-extrabold">Terms of Service</h1>
       <p>
-        Buy My Bio sells <b>disclosed sponsored placements</b> in creators' X bios. Buying a
-        placement gives you the right to have your sponsored message and tracked link displayed in
-        that creator's bio until another buyer pays more. There is no minimum ownership period and
-        no guaranteed duration.
+        Buy My Bio sells <b>disclosed sponsored placements</b> on creator profiles hosted on
+        BuyMyBio.com. Buying a placement gives you the right to have your sponsored message and
+        tracked link displayed on that creator's Buy My Bio profile until another buyer pays more.
+        Payments are for sponsorship on BuyMyBio.com only, and nothing is published on X. There is
+        no minimum ownership period and no guaranteed duration.
       </p>
       <p>
         You are not buying an X account. No sale transfers ownership of, credentials for, or any
@@ -30,8 +31,9 @@ export const Route = createFileRoute("/terms")({
         related payout and refunds the buyer.
       </p>
       <p>
-        Every placement is published with a mandatory “Sponsored:” label, which Buy My Bio
-        generates and verifies. Buyers may not remove, alter or obscure that label, and a placement
+        Every placement is published and labelled “Sponsored on Buy My Bio”, which Buy My Bio
+        generates and verifies. Creators are never required to edit their X bio, post, follow,
+        like, repost, reply or perform any other action on X. Buyers may not remove, alter or obscure that label, and a placement
         without it is treated as non-compliant.
       </p>
       <p>
@@ -42,9 +44,8 @@ export const Route = createFileRoute("/terms")({
         untrue.
       </p>
       <p>
-        Placements must fit within X's bio character limit and must comply with X's Terms of
-        Service and advertising rules. Creators are responsible for compliance on their own
-        accounts; Buy My Bio may suspend a listing or cancel a placement that breaches those rules.
+        Placements must comply with applicable advertising rules. Buy My Bio may suspend a listing
+        or cancel a placement that breaches those rules.
       </p>
       <p>
         Buy My Bio is an independent service and is not affiliated with, endorsed by, or sponsored
