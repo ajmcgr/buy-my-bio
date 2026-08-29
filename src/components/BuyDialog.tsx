@@ -4,6 +4,7 @@ import { startCheckout } from "@/lib/checkout.functions";
 import { uploadSponsorImage } from "@/lib/sponsor-image.functions";
 import { trackEvent } from "@/lib/listing.functions";
 import { money } from "@/lib/format";
+import { safeDestination } from "@/lib/validate";
 import type { ListingView } from "@/lib/listing.functions";
 import {
   MESSAGE_MAX_CHARS,
@@ -80,12 +81,13 @@ export function BuyDialog({
     setError(null);
     const f = new FormData(e.currentTarget);
     const msg = message.trim();
-    if (!/^https?:\/\/\S+\.\S+/i.test(link.trim())) {
-      setError("Your link must be a valid http:// or https:// URL.");
+    const destination = safeDestination(link);
+    if (!destination) {
+      setError("Enter a valid public domain, such as yourstartup.com.");
       setBusy(false);
       return;
     }
-    const check = validatePlacement({ message: msg, url: link.trim(), retainedChars });
+    const check = validatePlacement({ message: msg, url: destination, retainedChars });
     if (!check.ok) {
       setError(check.error);
       setBusy(false);
@@ -98,7 +100,7 @@ export function BuyDialog({
           username: view.creator.username,
           companyName: String(f.get("company") ?? ""),
           bioMessage: msg,
-          destinationUrl: link.trim(),
+          destinationUrl: destination,
           email: String(f.get("email") ?? ""),
           xHandle: String(f.get("xhandle") ?? "") || null,
           logoUrl,
@@ -198,14 +200,17 @@ export function BuyDialog({
               id="destination"
               name="destination"
               required
-              type="url"
+              type="text"
+              inputMode="url"
+              autoCapitalize="none"
               value={link}
               onChange={(e) => setLink(e.target.value)}
-              placeholder="https://yourstartup.com"
+              placeholder="yourstartup.com"
               className="field mt-1"
             />
             <p className="mt-1 text-xs text-muted-foreground">
-              Your link is shown with your message on the creator's Buy My Bio profile.
+              Your link is shown with your message on the creator's Buy My Bio profile. We'll add
+              https:// automatically.
             </p>
           </div>
 

@@ -25,7 +25,7 @@ export const startCheckout = createServerFn({ method: "POST" })
     if (!data.agreed) return { error: "You must accept the terms." };
 
     const destination = safeDestination(data.destinationUrl);
-    if (!destination) return { error: "Destination must be a valid public https:// URL." };
+    if (!destination) return { error: "Destination must be a valid public domain." };
     const logo = safeLogoUrl(data.logoUrl ?? null);
 
     const { data: creator } = await db
