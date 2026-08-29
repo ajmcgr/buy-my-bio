@@ -265,6 +265,16 @@ function SiteFooter() {
           >
             Alex
           </a>
+          . Inspired by{" "}
+          <a
+            href="https://x.com/jonathan_wilke"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium underline"
+          >
+            Jonathan
+          </a>
+          .
         </span>
       </div>
     </footer>
