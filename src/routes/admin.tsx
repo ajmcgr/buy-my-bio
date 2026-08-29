@@ -167,6 +167,44 @@ function Admin() {
         ))}
       </div>
 
+      <h2 className="mt-10 text-lg font-extrabold">Payouts & verification</h2>
+      <div className="panel mt-3 divide-y-2 divide-border">
+        {data.payouts.map((p) => (
+          <div key={p.id} className="grid gap-1 px-4 py-3 text-sm sm:grid-cols-4 sm:items-center">
+            <span className="font-bold">{money(p.amount_cents)}</span>
+            <span className="font-mono text-xs">{p.status}</span>
+            <span className="font-mono text-xs">
+              bio: {p.bio_verification_status}
+              {p.last_bio_verified_at
+                ? ` · ok ${new Date(p.last_bio_verified_at).toLocaleDateString()}`
+                : ""}
+            </span>
+            <span className="truncate text-xs text-muted-foreground sm:text-right">
+              {p.verification_failure_reason ?? p.last_verification_error ?? p.last_error ?? "—"}
+            </span>
+          </div>
+        ))}
+        {data.payouts.length === 0 && (
+          <div className="px-4 py-3 text-sm text-muted-foreground">No payouts yet.</div>
+        )}
+      </div>
+
+      <h2 className="mt-10 text-lg font-extrabold">Placement violations</h2>
+      <div className="panel mt-3 divide-y-2 divide-border">
+        {data.violations.map((v) => (
+          <div key={v.id} className="flex flex-wrap gap-3 px-4 py-3 text-sm">
+            <span className="font-mono text-xs">{v.phase}</span>
+            <span className="font-bold">{v.reason}</span>
+            <span className="ml-auto text-xs text-muted-foreground">
+              {new Date(v.created_at).toLocaleString()}
+            </span>
+          </div>
+        ))}
+        {data.violations.length === 0 && (
+          <div className="px-4 py-3 text-sm text-muted-foreground">None recorded.</div>
+        )}
+      </div>
+
       <h2 className="mt-10 text-lg font-extrabold">Recent payments</h2>
       <div className="panel mt-3 divide-y-2 divide-border">
         {data.payments.map((p) => (
