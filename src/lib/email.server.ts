@@ -107,7 +107,7 @@ export async function sendWinnerEmail(o: {
         ["Destination", o.destination],
         ["Status", "Current sponsor"],
       ])}
-      ${button(link, "See your listing \u2192")}
+      ${button(link, "View your profile \u2192")}
       ${textLink(tweet, "Share it on X \u2192")}
     `),
   );
@@ -231,7 +231,7 @@ export async function sendCreatorActionRequiredEmail(o: {
       ])}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Social Bid.",
+      "You received this because you added your profile to Social Bid.",
     ),
   );
 }
@@ -255,7 +255,7 @@ export async function sendPlacementVerifiedEmail(o: {
               o.eligibleDate ? ` Eligible for payout after ${o.eligibleDate}.` : ""
             }`,
       )}
-      ${button(`${baseUrl()}/u/${o.handle}`, "View the listing \u2192")}
+      ${button(`${baseUrl()}/u/${o.handle}`, "View the profile \u2192")}
     `),
   );
 }
@@ -263,14 +263,14 @@ export async function sendPlacementVerifiedEmail(o: {
 export async function sendListingSuspendedEmail(o: { to: string; reason: string }) {
   await send(
     o.to,
-    "Your listing is suspended",
+    "Your profile is suspended",
     shell(
       `
-      ${h1("Listing suspended")}
-      ${p(`Your Social Bid listing was suspended (${o.reason}). Open your dashboard for details.`)}
+      ${h1("Profile suspended")}
+      ${p(`Your Social Bid profile was suspended (${o.reason}). Open your dashboard for details.`)}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Social Bid.",
+      "You received this because you added your profile to Social Bid.",
     ),
   );
 }
@@ -285,7 +285,7 @@ export async function sendPlacementMismatchWarningEmail(o: { to: string; reason:
       ${p(`Your Social Bid placement needs review (${o.reason}). Open your dashboard for details.`)}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Social Bid.",
+      "You received this because you added your profile to Social Bid.",
     ),
   );
 }
@@ -301,7 +301,7 @@ export async function sendPayoutReleasedEmail(o: { to: string; amountCents: numb
       ${facts([["Amount", money(o.amountCents)]])}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
-      "You received this because you listed your profile on Social Bid.",
+      "You received this because you added your profile to Social Bid.",
     ),
   );
 }

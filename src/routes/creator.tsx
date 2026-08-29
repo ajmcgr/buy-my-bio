@@ -22,12 +22,12 @@ export const Route = createFileRoute("/creator")({
       { title: "Add Your Profile — Social Bid" },
       {
         name: "description",
-        content: "Connect X, list your profile, and let anyone sponsor you on SocialBid.co.",
+        content: "Connect X, add your profile, and let anyone sponsor you on SocialBid.co.",
       },
       { property: "og:title", content: "Add Your Profile — Social Bid" },
       {
         property: "og:description",
-        content: "Connect X to confirm your identity, then list your profile on Social Bid.",
+        content: "Connect X to confirm your identity, then add your profile to Social Bid.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -67,7 +67,7 @@ function CreatorPage() {
     const err = params.get("error");
     if (err) setMessage(errorCopy(err));
     const connected = params.get("connected");
-    if (connected && !err) setMessage(`X account connected — @${connected}`);
+    if (connected && !err) setMessage(`X connected — @${connected}`);
     const stripeReturn = params.get("stripe");
     const fromUrl = params.get("t");
     if (fromUrl || stripeReturn) {
@@ -112,7 +112,7 @@ function CreatorPage() {
       "Disconnecting X will keep your profile in the rankings but stop it from accepting new sponsors. It does not cancel any current sponsorship or pending payout obligations.";
     const warn = deleteData
       ? "Disconnect X and delete your Social Bid data? This can't be undone."
-      : "Disconnect your X account from Social Bid?";
+      : "Disconnect X from Social Bid?";
     if (!window.confirm(obligation ? `${obligationWarning}\n\n${warn}` : warn)) return;
     setBusy(true);
     setMessage(null);
@@ -128,12 +128,12 @@ function CreatorPage() {
     setPayouts(null);
     setMessage(
       res.deleted
-        ? "Your X account is disconnected and your data has been deleted."
+        ? "X is disconnected and your data has been deleted."
         : "hasObligation" in res && res.hasObligation
-          ? "Your X account is disconnected and your listing no longer accepts new buyers. Your current sponsorship and any held payout continue under the existing rules."
+          ? "X is disconnected and your profile no longer accepts new sponsors. Your current sponsorship and any held payout continue under the existing rules."
           : "retained" in res && res.retained
-            ? "Your X account is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect. Past transaction records are retained."
-            : "Your X account is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect.",
+            ? "X is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect. Past transaction records are retained."
+            : "X is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect.",
     );
   }
 
@@ -143,7 +143,7 @@ function CreatorPage() {
         Add your profile
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Connect X to confirm your identity, then list your profile on SocialBid.co.
+        Connect X to confirm your identity, then add your profile to SocialBid.co.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
@@ -152,8 +152,8 @@ function CreatorPage() {
         <p className="mt-10 text-sm text-muted-foreground">Loading…</p>
       ) : !session ? (
         <div className="panel mt-8 p-6">
-          <div className="label-xs">Get listed</div>
-          <h2 className="mt-1 text-xl font-semibold">Connect X to confirm your account</h2>
+          <div className="label-xs">Add your profile</div>
+          <h2 className="mt-1 text-xl font-semibold">Connect X to confirm your identity</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Your connection confirms your identity and imports your public profile. Sponsorships
             appear on SocialBid.co.
@@ -189,36 +189,36 @@ function CreatorPage() {
 
           {!session.publiclyListed ? (
             <div className="panel mt-6 p-6">
-              <div className="label-xs">Not listed yet</div>
-              <h2 className="mt-1 text-xl font-semibold">List my profile</h2>
+              <div className="label-xs">Not live yet</div>
+              <h2 className="mt-1 text-xl font-semibold">Add my profile</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Connecting X does not list you publicly. Publish when you're ready, then buyers can
-                sponsor your profile on SocialBid.co.
+                Connecting X does not add you publicly. Publish when you're ready, then sponsors can
+                sponsor you on SocialBid.co.
               </p>
               <button
                 onClick={onPublish}
                 disabled={busy}
                 className="btn-ink btn-ink-hover mt-5 disabled:opacity-50"
               >
-                {busy ? "Working…" : "List my profile"}
+                {busy ? "Working…" : "Add my profile"}
               </button>
             </div>
           ) : null}
 
           <div className="mt-4 flex flex-wrap gap-3">
-            <Badge on={session.accountVerified} label="X account connected" />
-            <Badge on={session.publiclyListed} label="Listed publicly" />
+            <Badge on={session.accountVerified} label="X connected" />
+            <Badge on={session.publiclyListed} label="Profile live" />
           </div>
 
           {session.bioVerified ? (
             <div className="mt-8 border-2 border-border bg-foreground text-background">
               <div className="border-b border-background/25 px-5 py-3 font-mono text-xs font-bold">
-                Your bio
+                Your profile
               </div>
               <div className="grid sm:grid-cols-3">
                 <div className="px-5 py-5 sm:border-r sm:border-background/25">
                   <div className="font-mono text-[0.65rem] font-bold text-background/60">
-                    Bio value
+                    Sponsorship value
                   </div>
                   <div className="mt-1 text-3xl font-extrabold">
                     {session.bioValueCents === null ? "—" : money(session.bioValueCents)}
@@ -237,7 +237,7 @@ function CreatorPage() {
                     Sponsored by
                   </div>
                   <div className="mt-1 truncate text-xl font-extrabold">
-                    {session.ownerName ?? "Unowned"}
+                    {session.ownerName ?? "No current sponsor"}
                   </div>
                 </div>
               </div>
@@ -279,11 +279,11 @@ function CreatorPage() {
 
           <div className="panel mt-8 p-6">
             <div className="label-xs">Account</div>
-            <h2 className="mt-1 text-xl font-extrabold">Disconnect your X account</h2>
+            <h2 className="mt-1 text-xl font-extrabold">Disconnect X</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               This unlinks @{session.handle} and signs you out. Your profile stays permanently in
-              the rankings, but its sponsor is hidden and nobody can bid until you reconnect and
-              list it again. Existing payment and payout records remain intact.
+              the rankings, but its sponsor is hidden and nobody can bid until you reconnect and add
+              it again. Existing payment and payout records remain intact.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -305,7 +305,7 @@ function CreatorPage() {
           </div>
 
           <p className="mt-6 text-sm text-muted-foreground">
-            Listing status:{" "}
+            Profile status:{" "}
             <span className="font-mono font-bold">{session.listingStatus ?? "none"}</span>
             {session.bioVerified ? (
               <>
@@ -332,7 +332,7 @@ function errorCopy(code: string): string {
     case "x_callback_error":
       return "X returned an error during sign-in. Please try again.";
     case "x_already_connected":
-      return "That X account is already connected to another Social Bid creator.";
+      return "That X profile is already connected to another Social Bid creator.";
     case "missing_code":
       return "That sign-in didn't complete. Please connect again.";
     case "creator_create_failed":

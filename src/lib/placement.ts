@@ -117,7 +117,7 @@ export function validatePlacement(input: {
       ok: false,
       error:
         limit < MESSAGE_MAX_CHARS
-          ? `This creator has ${limit} characters of bio space available. Shorten your message to ${limit} characters.`
+          ? `This sponsor spot has ${limit} characters available. Shorten your message to ${limit} characters.`
           : `Your message must be ${MESSAGE_MAX_CHARS} characters or fewer.`,
       limit,
     };

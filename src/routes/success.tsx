@@ -55,13 +55,13 @@ function Success() {
         </h1>
         <p className="mt-3 text-muted-foreground">
           {testMode
-            ? "This was a Stripe test-mode checkout, so it cannot create a sponsorship or public Bio Value."
+            ? "This was a Stripe test-mode checkout, so it cannot create a sponsorship or public sponsorship value."
             : stale
               ? "The price moved before your payment landed. You'll be refunded automatically — no charge sticks."
               : "We're still confirming your payment. This page updates within a minute."}
         </p>
         <Link to="/" className="btn-ink btn-ink-hover mt-8">
-          Back to the listing
+          Back to rankings
         </Link>
       </div>
     );
@@ -126,7 +126,7 @@ function Success() {
           {result.globalRank === 1 ? "Share the #1 win" : "Share on X"}
         </a>
         <Link to="/u/$username" params={{ username: result.slug }} className="btn-outline-ink">
-          View the listing
+          View the profile
         </Link>
       </div>
 

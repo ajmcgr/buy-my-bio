@@ -87,7 +87,7 @@ function FAQPage() {
           ],
           [
             "3. Get outbid",
-            "Someone pays more, they take over, and you get an email with the new price.",
+            "Someone places a higher bid, and you get an email with the new price.",
           ],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">

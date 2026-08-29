@@ -232,7 +232,7 @@ function SiteHeader() {
           </Link>
           <Link to="/creator" className="hover:underline">
             <span className="sm:hidden">Add</span>
-            <span className="hidden sm:inline">Add your bio</span>
+            <span className="hidden sm:inline">Add your profile</span>
           </Link>
           <ThemeToggle />
           <HamburgerMenu />

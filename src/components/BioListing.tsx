@@ -19,7 +19,7 @@ function ProfileCard({ view }: { view: ListingView }) {
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>
             {c.x_account_verified ? (
               <span className="inline-flex items-center gap-1 border-2 border-border bg-accent px-2 py-0.5 font-mono text-[0.65rem] font-bold text-accent-foreground">
-                ✓ X account connected
+                ✓ X connected
               </span>
             ) : null}
           </div>
@@ -101,7 +101,9 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
         </div>
         <div className="border-t border-background/25 px-5 py-4 sm:border-t-0 sm:border-r">
-          <div className="font-mono text-[0.65rem] font-bold text-background/60">Bio value</div>
+          <div className="font-mono text-[0.65rem] font-bold text-background/60">
+            Sponsorship value
+          </div>
           <div className="mt-1 text-2xl font-extrabold">
             {view.bioValueCents === null || view.bioValueCents === undefined
               ? "—"
@@ -154,7 +156,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
           </div>
 
           <div className="px-5 py-6">
-            <div className="label-xs">{owner ? "Bio value" : "Starting price"}</div>
+            <div className="label-xs">{owner ? "Sponsorship value" : "Starting price"}</div>
             <div className="text-[clamp(3rem,14vw,5.5rem)] leading-[0.85] font-semibold tracking-[-0.05em]">
               {money(owner ? owner.amount_cents : view.listing.starting_price_cents)}
             </div>
@@ -183,14 +185,14 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               className="btn-ink btn-ink-hover w-full py-6 text-[clamp(1.25rem,4.5vw,2rem)] font-semibold tracking-tight"
             >
               {owner
-                ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}`
+                ? `Place bid${view.globalRank === 1 ? " for #1" : ""}`
                 : "Sponsor this creator"}{" "}
               — {money(price)}
             </button>
             <div className="panel mt-6 px-5 py-5 text-sm">
               <p>
                 <span className="font-bold">What you get:</span> your sponsored message and tracked
-                link on this creator's Social Bid profile until somebody pays more.
+                link in this creator's sponsorship spot on Social Bid until somebody pays more.
               </p>
             </div>
           </>
@@ -200,7 +202,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
             <p className="mt-1 text-sm text-muted-foreground">
               {!view.creator.x_account_verified
                 ? "This creator has disconnected X. Their ranking entry remains permanent."
-                : "The listing is paused."}
+                : "This profile is paused."}
             </p>
           </div>
         )}

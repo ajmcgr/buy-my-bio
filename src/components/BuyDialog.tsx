@@ -125,7 +125,7 @@ export function BuyDialog({
       <div className="panel mx-auto w-full max-w-lg">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
           <span className="label-xs !text-foreground">
-            {view.owner ? "Take over this sponsorship" : "Sponsor this creator"}
+            {view.owner ? "Place bid" : "Sponsor this creator"}
           </span>
           <button
             onClick={onClose}
@@ -144,7 +144,7 @@ export function BuyDialog({
             </div>
           </div>
           <div className="px-5 py-4">
-            <div className="label-xs">{view.owner ? "Bio value" : "Starting price"}</div>
+            <div className="label-xs">{view.owner ? "Current bid" : "Starting price"}</div>
             <div className="font-bold text-foreground">
               {view.owner ? money(view.owner.amount_cents) : "—"}
             </div>
@@ -153,13 +153,13 @@ export function BuyDialog({
 
         <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
           <p>
-            You're buying the <b>sponsor spot</b> on this creator's Social Bid profile. Your message
-            and link stay there until somebody pays more.
+            You're sponsoring this creator on Social Bid. Your message and link stay in the
+            <b> sponsorship spot</b> until somebody pays more.
           </p>
           <p className="mt-2 text-foreground/75">
             Your placement is always published with a “{SPONSOR_PREFIX}” label so it's clear to
             everyone that it's paid advertising. Your message must not imply that you own, run or
-            are employed by the account, and must not impersonate the creator or anyone else.
+            are employed by the creator, and must not impersonate the creator or anyone else.
           </p>
         </div>
 
@@ -271,7 +271,7 @@ export function BuyDialog({
           </div>
 
           <div className="border-2 border-border bg-accent px-4 py-3">
-            <div className="label-xs !text-accent-foreground/70">Your takeover price</div>
+            <div className="label-xs !text-accent-foreground/70">Your bid</div>
             <div className="text-4xl font-extrabold tracking-tight text-accent-foreground">
               {money(price)}
             </div>
@@ -279,7 +279,7 @@ export function BuyDialog({
 
           <div className="border-2 border-border px-4 py-3 text-sm text-foreground">
             <p className="font-semibold">
-              You'll hold this sponsored spot until somebody pays more.
+              Your sponsorship spot stays live until somebody pays more.
             </p>
             <p className="mt-1 text-muted-foreground">
               Your sponsored message goes live on this creator's Social Bid profile immediately
@@ -317,7 +317,7 @@ export function BuyDialog({
           >
             {busy
               ? "Opening checkout…"
-              : `${view.owner ? `Take over${view.globalRank === 1 ? " #1" : " this sponsorship"}` : "Sponsor this creator"} — ${money(price)}`}
+              : `${view.owner ? `Place bid${view.globalRank === 1 ? " for #1" : ""}` : "Sponsor this creator"} — ${money(price)}`}
           </button>
         </form>
       </div>

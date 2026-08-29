@@ -6,9 +6,9 @@ export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
       { title: "Sign In — Social Bid" },
-      { name: "description", content: "Sign in to manage your Social Bid listing." },
+      { name: "description", content: "Sign in to manage your Social Bid profile." },
       { property: "og:title", content: "Sign In — Social Bid" },
-      { property: "og:description", content: "Sign in to manage your listing." },
+      { property: "og:description", content: "Sign in to manage your profile." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "robots", content: "noindex" },

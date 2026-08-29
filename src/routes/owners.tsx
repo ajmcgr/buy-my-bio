@@ -47,7 +47,7 @@ function OwnersPage() {
         Top sponsors
       </h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">
-        The brands holding the most valuable sponsorships, ranked by genuine current Bio Value.
+        The brands sponsoring the most valuable profiles, ranked by current sponsorship value.
       </p>
 
       {numberOne?.owner ? (
@@ -67,7 +67,7 @@ function OwnersPage() {
               </Link>
             </div>
             <div className="sm:text-right">
-              <div className="label-xs !text-accent-foreground/60">Bio value</div>
+              <div className="label-xs !text-accent-foreground/60">Sponsorship value</div>
               <div className="text-4xl font-extrabold">{money(numberOne.bioValueCents ?? 0)}</div>
             </div>
           </div>
@@ -112,7 +112,7 @@ function OwnersPage() {
                   </div>
                 </div>
                 <div className="sm:text-right">
-                  <div className="label-xs">Total Bio Value</div>
+                  <div className="label-xs">Total sponsorship value</div>
                   <div className="text-xl font-extrabold">{money(owner.totalValueCents)}</div>
                 </div>
               </div>

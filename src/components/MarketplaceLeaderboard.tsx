@@ -90,7 +90,7 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
           ) : (
             <span>@{handle}</span>
           )}
-          {row.creator.x_account_verified ? <span aria-label="X account connected">✓</span> : null}
+          {row.creator.x_account_verified ? <span aria-label="X connected">✓</span> : null}
         </div>
         {large && row.creator.x_follower_count ? (
           <div className="mt-1 text-xs text-muted-foreground">
@@ -137,7 +137,7 @@ function SponsorDetails({ row }: { row: MarketplaceRow }) {
 
 function TakeoverButton({ row, prominent = false }: { row: MarketplaceRow; prominent?: boolean }) {
   const [open, setOpen] = useState(false);
-  const verb = row.owner ? "Take over" : "Sponsor";
+  const verb = row.owner ? "Place bid" : "Sponsor";
   return (
     <>
       <button
@@ -181,7 +181,7 @@ function LeaderboardRow({
       <CreatorIdentity row={row} />
       <div>
         <div className="label-xs">
-          {!row.canBuy ? "Sponsorship" : owned ? "Bio value" : "Starting price"}
+          {!row.canBuy ? "Sponsorship" : owned ? "Sponsorship value" : "Starting price"}
         </div>
         <div className="mt-0.5 text-xl font-extrabold">
           {!row.canBuy
@@ -240,7 +240,7 @@ function timeAgo(value: string) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-function AddYourBio() {
+function AddYourProfile() {
   const [handle, setHandle] = useState("");
   return (
     <section
@@ -250,7 +250,7 @@ function AddYourBio() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 id="add-heading" className="text-xl font-semibold">
-            Add your bio
+            Add your profile
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
             Connect X to add your profile and let anyone sponsor it on Social Bid.
@@ -319,7 +319,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         </div>
       </section>
 
-      <AddYourBio />
+      <AddYourProfile />
 
       <section aria-labelledby="leaderboard-heading">
         <div className="flex flex-col gap-4 border-2 border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
@@ -380,11 +380,11 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
                 Unsponsored profiles
               </h2>
               <p className="text-xs text-muted-foreground">
-                Starting prices are not Bio Value and do not affect the rankings.
+                Starting prices are not sponsorship value and do not affect the rankings.
               </p>
             </div>
             <Link to="/creator" className="hidden text-sm font-bold underline sm:block">
-              List yours
+              Add yours
             </Link>
           </div>
           <div className="border-t-2 border-border">
@@ -416,7 +416,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
             to="/creator"
             className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold underline"
           >
-            Add your bio <ArrowUpRight className="size-4" />
+            Add your profile <ArrowUpRight className="size-4" />
           </Link>
           {numberOne ? (
             <a

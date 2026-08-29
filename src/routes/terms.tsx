@@ -35,7 +35,7 @@ export const Route = createFileRoute("/terms")({
         Bid or any other person or brand, or misrepresent the placement as a personal endorsement.
       </p>
       <p>
-        Placements must comply with applicable advertising rules. Social Bid may suspend a listing
+        Placements must comply with applicable advertising rules. Social Bid may suspend a profile
         or cancel a placement that breaches those rules.
       </p>
       <p>Social Bid is not affiliated with or endorsed by X.</p>
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/terms")({
         phishing, scams, and hate speech are prohibited and will be disabled without refund.
       </p>
       <p>
-        Creators may pause a listing or reject a destination. If a listing is permanently removed
+        Creators may pause a profile or reject a destination. If a profile is permanently removed
         while your sponsorship is active, you'll receive a pro-rated refund at our discretion.
       </p>
       <p>Payments are processed by Stripe. We never store card details.</p>

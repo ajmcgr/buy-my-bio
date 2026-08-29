@@ -27,7 +27,7 @@ export const Route = createFileRoute("/u/$username")({
   component: CreatorProfile,
   errorComponent: () => (
     <div className="mx-auto max-w-xl px-5 py-24 text-center">
-      <h1 className="text-3xl font-extrabold">Couldn't load this bio.</h1>
+      <h1 className="text-3xl font-extrabold">Couldn't load this profile.</h1>
     </div>
   ),
   notFoundComponent: () => (
