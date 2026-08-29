@@ -94,3 +94,79 @@ export async function verifyStripeSignature(payload: string, header: string | nu
   // reject events older than 5 minutes
   return Math.abs(Date.now() / 1000 - Number(t)) < 300;
 }
+
+/* ------------------------------------------------------------------ Connect */
+
+/** Creates an Express connected account for a creator payout destination. */
+export async function createConnectAccount(opts: { email?: string | null; username: string }) {
+  return stripe(
+    "/accounts",
+    form({
+      type: "express",
+      "capabilities[transfers][requested]": "true",
+      "business_profile[name]": `BuyMyBio — ${opts.username}`,
+      "business_profile[product_description]": "Sponsored placement in an X bio",
+      "metadata[buymybio_username]": opts.username,
+      ...(opts.email ? { email: opts.email } : {}),
+    }),
+  );
+}
+
+/** Hosted onboarding/refresh link for a connected account. */
+export async function createAccountLink(accountId: string, base: string) {
+  return stripe(
+    "/account_links",
+    form({
+      account: accountId,
+      refresh_url: `${base}/creator?stripe=refresh`,
+      return_url: `${base}/creator?stripe=return`,
+      type: "account_onboarding",
+    }),
+  );
+}
+
+export async function retrieveAccount(accountId: string) {
+  return stripe(`/accounts/${accountId}`, undefined, "GET");
+}
+
+/** Express dashboard link so a creator can see their own payouts. */
+export async function createLoginLink(accountId: string) {
+  return stripe(`/accounts/${accountId}/login_links`);
+}
+
+export async function retrievePaymentIntent(id: string) {
+  return stripe(`/payment_intents/${id}`, undefined, "GET");
+}
+
+/** Transfers held funds to a connected account. Idempotent per payout id. */
+export async function createTransfer(opts: {
+  amountCents: number;
+  destination: string;
+  sourceTransaction?: string | null;
+  payoutId: string;
+  paymentId: string;
+}) {
+  const res = await fetch(`${STRIPE_API}/transfers`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${process.env["STRIPE_SECRET_KEY"]!}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Idempotency-Key": `bmb_payout_${opts.payoutId}`,
+    },
+    body: form({
+      amount: opts.amountCents,
+      currency: "usd",
+      destination: opts.destination,
+      transfer_group: `bmb_${opts.paymentId}`,
+      "metadata[payout_id]": opts.payoutId,
+      "metadata[payment_id]": opts.paymentId,
+      ...(opts.sourceTransaction ? { source_transaction: opts.sourceTransaction } : {}),
+    }),
+  });
+  const json = (await res.json()) as Record<string, unknown>;
+  if (!res.ok) {
+    const err = json["error"] as { message?: string } | undefined;
+    throw new Error(err?.message || `Stripe transfer error ${res.status}`);
+  }
+  return json;
+}
