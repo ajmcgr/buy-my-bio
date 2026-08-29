@@ -198,6 +198,14 @@ export function BuyDialog({
             <div className="text-4xl font-extrabold tracking-tight text-accent-foreground">{money(price)}</div>
           </div>
 
+          <div className="border-2 border-border px-4 py-3 text-sm text-foreground">
+            <p className="font-semibold">You'll own this sponsored slot until somebody pays more.</p>
+            <p className="mt-1 text-muted-foreground">
+              The creator has up to 24 hours to activate your placement. If they don't, your
+              payment will be refunded.
+            </p>
+          </div>
+
           <label className="flex items-start gap-3 text-sm text-foreground">
             <input
               type="checkbox"
