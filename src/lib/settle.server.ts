@@ -127,11 +127,36 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
   const actualPaidCents = Number(session["amount_total"]);
   const paymentIntent = (session["payment_intent"] as string) ?? null;
   const stripeLivemode = session["livemode"] === true;
+  // A promotion may reduce the Checkout total, but a $0 session must never
+  // acquire a paid sponsorship spot. There is no collected payment to settle,
+  // refund, or use for the creator's 80% payout.
+  const zeroTotalCheckout =
+    Number.isInteger(amountSubtotalCents) &&
+    Number.isInteger(actualPaidCents) &&
+    amountSubtotalCents === payment.amount_cents &&
+    actualPaidCents === 0;
+
+  if (zeroTotalCheckout) {
+    await db
+      .from("payments")
+      .update({
+        status: "paid",
+        stripe_payment_intent: paymentIntent,
+        stripe_livemode: stripeLivemode,
+        actual_paid_cents: 0,
+        paid_at: new Date().toISOString(),
+        flagged: true,
+        admin_notes: "zero-total Checkout session is not eligible for sponsorship settlement",
+      })
+      .eq("id", payment.id);
+    return { status: "payment_error", reason: "zero_total_not_eligible", paymentId: payment.id };
+  }
+
   const validStripeAmounts =
     Number.isInteger(amountSubtotalCents) &&
     Number.isInteger(actualPaidCents) &&
     amountSubtotalCents === payment.amount_cents &&
-    actualPaidCents >= 0 &&
+    actualPaidCents > 0 &&
     actualPaidCents <= amountSubtotalCents;
 
   if (!validStripeAmounts) {
