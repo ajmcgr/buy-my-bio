@@ -174,10 +174,16 @@
   width: 100%;
   border: 2px solid var(--color-border);
   background: var(--color-card);
+  color: var(--color-foreground);
   padding: 0.75rem 0.875rem;
   font-size: 1rem;
   outline: none;
+  &::placeholder {
+    color: color-mix(in oklch, var(--color-foreground) 55%, var(--color-card));
+    opacity: 1;
+  }
   &:focus {
     background: color-mix(in oklch, var(--color-accent) 22%, var(--color-card));
   }
 }
+
