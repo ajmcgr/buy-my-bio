@@ -19,6 +19,7 @@ export type CreatorSession = {
   bioValueCents: number | null;
   globalRank: number | null;
   ownerName: string | null;
+  ownerMessage: string | null;
 };
 
 export const getCreatorSession = createServerFn({ method: "POST" })
@@ -39,7 +40,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
 
     const { data: listing } = await db
       .from("listings")
-      .select("status")
+      .select("id, status")
       .eq("creator_id", c.id)
       .maybeSingle();
 
@@ -49,6 +50,17 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       const market = await loadMarketplace("new");
       marketRow =
         [...market.rows, ...market.unowned].find((row) => row.creator.id === c.id) ?? null;
+    }
+
+    let ownerMessage: string | null = null;
+    if (listing) {
+      const { data: ownership } = await db
+        .from("ownerships")
+        .select("bio_message")
+        .eq("status", "active")
+        .eq("listing_id", listing.id)
+        .maybeSingle();
+      ownerMessage = (ownership?.bio_message as string | null) ?? null;
     }
 
     return {
@@ -67,6 +79,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       bioValueCents: marketRow?.bioValueCents ?? null,
       globalRank: marketRow?.globalRank ?? null,
       ownerName: marketRow?.owner?.company_name ?? null,
+      ownerMessage,
     };
   });
 

@@ -32,6 +32,7 @@ export function BuyDialog({
         data: {
           username: view.creator.username,
           companyName: String(f.get("company") ?? ""),
+          bioMessage: String(f.get("biomessage") ?? ""),
           destinationUrl: String(f.get("destination") ?? ""),
           email: String(f.get("email") ?? ""),
           xHandle: String(f.get("xhandle") ?? "") || null,
@@ -54,8 +55,12 @@ export function BuyDialog({
     <div className="fixed inset-0 z-50 overflow-y-auto bg-foreground/60 p-4 sm:p-8">
       <div className="panel mx-auto w-full max-w-lg">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
-          <span className="label-xs">{view.owner ? "Steal this X bio" : "Own this X bio"}</span>
-          <button onClick={onClose} className="text-xl leading-none font-bold" aria-label="Close">
+          <span className="label-xs !text-foreground">{view.owner ? "Steal this X bio" : "Own this X bio"}</span>
+          <button
+            onClick={onClose}
+            className="text-2xl leading-none font-bold text-foreground hover:opacity-70"
+            aria-label="Close"
+          >
             ×
           </button>
         </div>
@@ -63,11 +68,13 @@ export function BuyDialog({
         <div className="grid grid-cols-2 border-b-2 border-border">
           <div className="border-r-2 border-border px-5 py-4">
             <div className="label-xs">Current owner</div>
-            <div className="font-bold">{view.owner?.company_name ?? "Available"}</div>
+            <div className="font-bold text-foreground">{view.owner?.company_name ?? "Available"}</div>
           </div>
           <div className="px-5 py-4">
             <div className="label-xs">{view.owner ? "Bio value" : "Starting price"}</div>
-            <div className="font-bold">{view.owner ? money(view.owner.amount_cents) : "—"}</div>
+            <div className="font-bold text-foreground">
+              {view.owner ? money(view.owner.amount_cents) : "—"}
+            </div>
           </div>
         </div>
 
@@ -81,6 +88,24 @@ export function BuyDialog({
 
 
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
+          <div>
+            <label className="label-xs" htmlFor="biomessage">
+              Your message / link in the bio *
+            </label>
+            <input
+              id="biomessage"
+              name="biomessage"
+              required
+              minLength={3}
+              maxLength={160}
+              placeholder="Sponsored by YourStartup — yourstartup.com"
+              className="field mt-1"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              This exact text must stay live in the creator's X bio. We re-read the bio through
+              the X API before releasing their payout.
+            </p>
+          </div>
           <div>
             <label className="label-xs" htmlFor="company">
               Startup / Brand name *
@@ -127,7 +152,7 @@ export function BuyDialog({
 
           <div className="border-2 border-border bg-accent px-4 py-3">
             <div className="label-xs !text-accent-foreground/70">Your takeover price</div>
-            <div className="text-4xl font-extrabold tracking-tight">{money(price)}</div>
+            <div className="text-4xl font-extrabold tracking-tight text-accent-foreground">{money(price)}</div>
           </div>
 
           <label className="flex items-start gap-3 text-sm text-foreground">

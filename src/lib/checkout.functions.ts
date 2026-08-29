@@ -4,6 +4,7 @@ import { z } from "zod";
 const schema = z.object({
   username: z.string().min(1).max(40),
   companyName: z.string().min(1).max(80),
+  bioMessage: z.string().min(3).max(160),
   destinationUrl: z.string().min(3).max(400),
   email: z.string().email().max(160),
   xHandle: z.string().max(40).optional().nullable(),
@@ -73,6 +74,7 @@ export const startCheckout = createServerFn({ method: "POST" })
         quoted_min_cents: amountCents,
         email,
         company_name: data.companyName.trim(),
+        bio_message: data.bioMessage.trim(),
         destination_url: destination,
         logo_url: logo,
         x_handle: data.xHandle ?? null,

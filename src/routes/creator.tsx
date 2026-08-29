@@ -198,6 +198,21 @@ function CreatorPage() {
             </div>
           ) : null}
 
+          {session.ownerMessage ? (
+            <div className="panel mt-8 p-6">
+              <div className="label-xs">Sponsor's message</div>
+              <h2 className="mt-1 text-xl font-extrabold">Keep this in your X bio</h2>
+              <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
+                {session.ownerMessage}
+              </div>
+              <p className="mt-3 text-sm text-muted-foreground">
+                This is the exact text the current sponsor paid for. We re-read your live X bio
+                before releasing your payout — if it's missing, the payout stays on hold until you
+                restore it.
+              </p>
+            </div>
+          ) : null}
+
           <div className="panel mt-8 p-6">
             <div className="label-xs">Step 2</div>
             <h2 className="mt-1 text-xl font-extrabold">Add this to your X bio</h2>

@@ -14,6 +14,29 @@ import { admin } from "./db.server";
 
 const DEFAULT_HOLD_DAYS = 3;
 
+/** Loose text match: case-insensitive, whitespace/punctuation tolerant. */
+function normalizeBioText(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/https?:\/\//g, "")
+    .replace(/[\u2018\u2019\u201c\u201d]/g, "'")
+    .replace(/[^a-z0-9'@.\/_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function bioContainsMessage(
+  profile: { description: string; url: string | null; expandedUrls: string[] },
+  message: string,
+): boolean {
+  const needle = normalizeBioText(message);
+  if (!needle) return false;
+  const haystack = normalizeBioText(
+    [profile.description, profile.url ?? "", ...profile.expandedUrls].join(" "),
+  );
+  return haystack.includes(needle);
+}
+
 function holdDays(): number {
   const raw = Number(process.env["PAYOUT_HOLD_DAYS"]);
   return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_HOLD_DAYS;
@@ -135,7 +158,9 @@ export async function releaseOne(payoutId: string): Promise<string> {
 
   const { data: payment } = await db
     .from("payments")
-    .select("id, status, refund_status, stripe_livemode, stripe_payment_intent, flagged")
+    .select(
+      "id, status, refund_status, stripe_livemode, stripe_payment_intent, flagged, bio_message",
+    )
     .eq("id", payout.payment_id)
     .maybeSingle();
   if (!payment) return block(payoutId, "payment_missing");
@@ -186,7 +211,12 @@ export async function releaseOne(payoutId: string): Promise<string> {
     const { lookupPublicProfile, placementPresent } = await import("./x-app.server");
     try {
       const profile = await lookupPublicProfile(String(creator.x_user_id));
-      const present = placementPresent(profile, creator.username);
+      // What the buyer paid for is THEIR message being live in the bio. Only
+      // fall back to the buymybio.com placement when no message was supplied.
+      const buyerMessage = String((payment as { bio_message?: string | null }).bio_message ?? "");
+      const present = buyerMessage.trim()
+        ? bioContainsMessage(profile, buyerMessage)
+        : placementPresent(profile, creator.username);
       await db
         .from("creators")
         .update({
@@ -195,7 +225,13 @@ export async function releaseOne(payoutId: string): Promise<string> {
           ...(present ? {} : { x_bio_verified: false }),
         })
         .eq("id", creator.id);
-      if (!present) return block(payoutId, "placement_missing_on_x");
+      if (!present)
+        return block(
+          payoutId,
+          String((payment as { bio_message?: string | null }).bio_message ?? "").trim()
+            ? "buyer_message_missing_on_x"
+            : "placement_missing_on_x",
+        );
     } catch (e) {
       return block(payoutId, `x_lookup_failed: ${String(e)}`);
     }
