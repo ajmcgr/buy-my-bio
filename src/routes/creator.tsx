@@ -188,7 +188,7 @@ function CreatorPage() {
             </div>
           </div>
 
-          {session.listingStatus !== "active" ? (
+          {!session.publiclyListed ? (
             <div className="panel mt-6 p-6">
               <div className="label-xs">Not listed yet</div>
               <h2 className="mt-1 text-xl font-semibold">List my profile</h2>
@@ -208,7 +208,7 @@ function CreatorPage() {
 
           <div className="mt-4 flex flex-wrap gap-3">
             <Badge on={session.accountVerified} label="X account connected" />
-            <Badge on={session.listingStatus === "active"} label="Listed publicly" />
+            <Badge on={session.publiclyListed} label="Listed publicly" />
           </div>
 
           {session.bioVerified ? (

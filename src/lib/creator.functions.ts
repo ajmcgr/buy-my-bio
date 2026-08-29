@@ -15,6 +15,8 @@ export type CreatorSession = {
   bioVerified: boolean;
   bioVerifiedMethod: string | null;
   listingStatus: string | null;
+  /** True only when this creator is in the same public marketplace dataset as the homepage. */
+  publiclyListed: boolean;
   requiredPlacement: string;
   banned: boolean;
   bioValueCents: number | null;
@@ -48,32 +50,34 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!c) return null;
 
+    // Keep this lookup for dashboard-only metadata, but do not use it to decide
+    // whether the profile is public. The marketplace snapshot below is the
+    // canonical public-listing definition used by the homepage.
     const { data: listing } = await db
       .from("listings")
       .select("id, status, compliance_status, non_compliant_reason")
       .eq("creator_id", c.id)
       .maybeSingle();
 
-    let marketRow = null;
-    if (listing) {
-      const { loadMarketplace } = await import("./marketplace.server");
-      const market = await loadMarketplace("new");
-      marketRow =
-        [...market.rows, ...market.unowned].find((row) => row.creator.id === c.id) ?? null;
-    }
+    const { loadMarketplace } = await import("./marketplace.server");
+    const market = await loadMarketplace("new");
+    const marketRow =
+      [...market.rows, ...market.unowned].find((row) => row.creator.id === c.id) ?? null;
+    const listingId = marketRow?.listing.id ?? listing?.id ?? null;
+    const listingStatus = marketRow?.listing.status ?? listing?.status ?? null;
 
     let ownerMessage: string | null = null;
     let ownerFormat: string | null = null;
     let ownerUrl: string | null = null;
     let activation: CreatorSession["activation"] = null;
-    if (listing) {
+    if (listingId) {
       const { data: ownership } = await db
         .from("ownerships")
         .select(
           "bio_message, destination_url, placement_format, placement_status, activation_deadline, first_verified_at",
         )
         .eq("status", "active")
-        .eq("listing_id", listing.id)
+        .eq("listing_id", listingId)
         .maybeSingle();
       ownerMessage = (ownership?.bio_message as string | null) ?? null;
       ownerFormat = (ownership?.placement_format as string | null) ?? null;
@@ -97,7 +101,12 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       accountVerified: Boolean(c.x_account_verified),
       bioVerified: Boolean(c.x_bio_verified),
       bioVerifiedMethod: c.x_bio_verified_method ?? null,
-      listingStatus: listing?.status ?? null,
+      listingStatus,
+      // This is deliberately derived from loadMarketplace rather than a
+      // dashboard-only flag or the direct listings lookup above. It guarantees
+      // that the homepage, marketplace and creator dashboard share one public
+      // listing definition.
+      publiclyListed: Boolean(marketRow),
       requiredPlacement: requiredPlacement(c.username),
       banned: Boolean(c.banned),
       bioValueCents: marketRow?.bioValueCents ?? null,
@@ -134,8 +143,14 @@ export const publishListing = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
     if (!c.x_account_verified) return { error: "Connect X before listing your profile." } as const;
-    const { error } = await db.from("listings").update({ status: "active" }).eq("creator_id", c.id);
-    if (error) return { error: "We couldn't publish your listing. Please try again." } as const;
+    const { data: listing, error } = await db
+      .from("listings")
+      .update({ status: "active" })
+      .eq("creator_id", c.id)
+      .select("id, status")
+      .maybeSingle();
+    if (error || !listing || listing.status !== "active")
+      return { error: "We couldn't publish your listing. Please try again." } as const;
     return { ok: true } as const;
   });
 
