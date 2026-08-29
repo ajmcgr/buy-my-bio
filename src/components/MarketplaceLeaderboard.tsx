@@ -243,6 +243,8 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         </div>
       </section>
 
+      <SellYourBio />
+
       <section aria-labelledby="leaderboard-heading">
         <div className="flex flex-col gap-4 border-2 border-border bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
           <div>
