@@ -6,7 +6,7 @@
  * the platform until ALL of the following are true at release time:
  *   - the hold window has elapsed
  *   - the payment is still `applied` and not refunded, live-mode
- *   - the creator's X bio still contains the required BuyMyBio placement
+ *   - the creator's X bio still contains the required Buy My Bio placement
  *   - the creator's connected account has transfers enabled
  */
 

@@ -43,7 +43,7 @@ export async function createCheckoutSession(opts: {
       "line_items[0][price_data][unit_amount]": opts.amountCents,
       "line_items[0][price_data][product_data][name]": `Ownership of @${opts.creatorHandle}'s bio link`,
       "line_items[0][price_data][product_data][description]":
-        "You own the destination of the BuyMyBio link until someone pays more.",
+        "You own the destination of the Buy My Bio link until someone pays more.",
       customer_email: opts.email,
       "metadata[payment_id]": opts.paymentId,
       "payment_intent_data[metadata][payment_id]": opts.paymentId,
@@ -104,7 +104,7 @@ export async function createConnectAccount(opts: { email?: string | null; userna
     form({
       type: "express",
       "capabilities[transfers][requested]": "true",
-      "business_profile[name]": `BuyMyBio — ${opts.username}`,
+      "business_profile[name]": `Buy My Bio — ${opts.username}`,
       "business_profile[product_description]": "Sponsored placement in an X bio",
       "metadata[buymybio_username]": opts.username,
       ...(opts.email ? { email: opts.email } : {}),

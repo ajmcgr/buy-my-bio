@@ -86,7 +86,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
             .select("id, x_user_id")
             .eq("username", username)
             .maybeSingle();
-          // Another BuyMyBio creator already holds this handle / X account.
+          // Another Buy My Bio creator already holds this handle / X account.
           if (clash) return fail(clash.x_user_id ? "x_already_connected" : "handle_taken");
 
           const { data: created, error } = await db

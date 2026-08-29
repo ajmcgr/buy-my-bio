@@ -11,12 +11,12 @@ export const Route = createFileRoute("/")({
   loader: async ({ deps }) => await getMarketplace({ data: { sort: deps.sort } }),
   head: () => ({
     meta: [
-      { title: "BuyMyBio — The Most Valuable Bios on X" },
+      { title: "Buy My Bio — The Most Valuable Bios on X" },
       {
         name: "description",
         content: "See the most valuable X bios, who owns them, and how much it costs to take them.",
       },
-      { property: "og:title", content: "BuyMyBio — The Most Valuable Bios on X" },
+      { property: "og:title", content: "Buy My Bio — The Most Valuable Bios on X" },
       {
         property: "og:description",
         content: "See the most valuable X bios, who owns them, and how much it costs to take them.",
