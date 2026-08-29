@@ -3,7 +3,7 @@
 -- cancel that buyer's creator payout. Safe to re-run.
 
 alter table public.ownerships
-  add column if not exists placement_started_at timestamptz,
+  add column if not exists placement_started_at timestamptz default now(),
   add column if not exists placement_ended_at timestamptz,
   add column if not exists placement_end_reason text;
 

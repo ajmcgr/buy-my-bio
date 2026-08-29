@@ -208,8 +208,10 @@ function CreatorPage() {
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
                 This is the exact message and link the current sponsor paid for. We re-read your
-                live X bio every day. Your payout is released after 7 continuous days with this
-                placement live — if you remove or change it, the payout is cancelled.
+                live X bio every day while this sponsor is the current owner. Each sale is paid
+                out 7 days after it was bought. If someone else pays more, just swap in the new
+                sponsor's placement — your earlier payouts stay on track. Removing a placement
+                while that sponsor still owns the slot cancels that payout.
               </p>
               {session.compliance?.status === "non_compliant" ? (
                 <p className="mt-3 border-2 border-destructive px-3 py-2 text-sm font-semibold text-destructive">
