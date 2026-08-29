@@ -52,6 +52,11 @@ function CreatorPage() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [payouts, setPayouts] = useState<PayoutStatus | null>(null);
+
+  const loadPayouts = useCallback((t: string) => {
+    void getPayoutStatus({ data: { token: t } }).then((p) => setPayouts(p));
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -59,9 +64,10 @@ function CreatorPage() {
     if (err) setMessage(errorCopy(err));
     const connected = params.get("connected");
     if (connected && !err) setMessage(`X account verified — @${connected}`);
+    const stripeReturn = params.get("stripe");
     const fromUrl = params.get("t");
-    if (fromUrl) {
-      localStorage.setItem(STORAGE_KEY, fromUrl);
+    if (fromUrl || stripeReturn) {
+      if (fromUrl) localStorage.setItem(STORAGE_KEY, fromUrl);
       window.history.replaceState({}, "", "/creator");
     }
     const t = fromUrl ?? localStorage.getItem(STORAGE_KEY);
@@ -73,7 +79,13 @@ function CreatorPage() {
     void getCreatorSession({ data: { token: t } })
       .then((s) => setSession(s))
       .finally(() => setLoading(false));
-  }, []);
+
+    if (stripeReturn) {
+      void refreshPayoutAccount({ data: { token: t } }).then(() => loadPayouts(t));
+    } else {
+      loadPayouts(t);
+    }
+  }, [loadPayouts]);
 
   async function onVerify() {
     if (!token) return;
