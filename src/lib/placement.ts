@@ -77,11 +77,15 @@ export function retainedBioText(
  * already takes up space.
  */
 export function messageCharLimit(retainedChars: number, url: string | null | undefined): number {
+  // Website-only sponsorships live on buymybio.com, so the creator's X bio
+  // length is irrelevant: every buyer gets the full message allowance.
+  if (WEBSITE_ONLY_SPONSORSHIP) return MESSAGE_MAX_CHARS;
   const retained = Math.max(0, retainedChars);
   const spacer = retained > 0 ? 1 : 0;
   const room = X_BIO_MAX_CHARS - retained - spacer - placementOverheadChars(url);
   return Math.max(0, Math.min(MESSAGE_MAX_CHARS, room));
 }
+
 
 export type PlacementValidation =
   | { ok: true; placement: string; limit: number }
