@@ -14,7 +14,7 @@ export const Route = createFileRoute("/success")({
   head: () => ({
     meta: [
       { title: "Purchase successful — Buy My Bio" },
-      { name: "description", content: "Your purchase is confirmed. The creator has 24 hours to activate your placement." },
+      { name: "description", content: "Your purchase is confirmed and your sponsored placement is live on Buy My Bio." },
       { property: "og:title", content: "I just bought the link in a bio" },
       {
         property: "og:description",
@@ -71,14 +71,15 @@ function Success() {
         Purchase successful
       </h1>
       <div className="panel mt-6 px-5 py-4">
-        <p className="font-semibold">Waiting for the creator to update their X bio.</p>
+        <p className="font-semibold">Your sponsored placement is live.</p>
         <p className="mt-1 text-sm text-muted-foreground">
-          Creators have up to 24 hours to activate a placement. We'll email you the moment we
-          verify it live — and if they don't activate it in time, your payment is refunded.
+          It's showing on this creator's Buy My Bio profile right now, and stays there until
+          somebody pays more. Nothing changes on the creator's X profile.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
           Your placement goes live with a “Sponsored:” label so it's clearly disclosed as paid
-          advertising. You've bought a sponsored placement in this bio — not the account itself.
+          advertising. You've bought a sponsored slot on this creator's Buy My Bio profile — not
+          their X account.
         </p>
       </div>
       {result.globalRank === 1 ? (

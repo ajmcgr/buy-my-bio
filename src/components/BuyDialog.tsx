@@ -223,8 +223,8 @@ export function BuyDialog({
           <div className="border-2 border-border px-4 py-3 text-sm text-foreground">
             <p className="font-semibold">You'll own this sponsored slot until somebody pays more.</p>
             <p className="mt-1 text-muted-foreground">
-              The creator has up to 24 hours to activate your placement. If they don't, your
-              payment will be refunded.
+              Your sponsored message goes live on this creator's Buy My Bio profile immediately
+              after payment. Nothing needs to change on X.
             </p>
           </div>
 
