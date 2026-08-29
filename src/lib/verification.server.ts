@@ -308,6 +308,40 @@ export async function runPlacementSweep(limit = 50): Promise<SweepSummary> {
         non_compliant_reason: result.reason,
       })
       .eq("id", listing.id);
+
+    const { recordEvent } = await import("./events.server");
+    await recordEvent("verification_failed", {
+      paymentId: o.payment_id,
+      listingId: listing.id,
+      ownershipId: o.id,
+      payoutId: payout?.id ?? null,
+      detail: { reason: result.reason, phase },
+    });
+    await recordEvent("listing_suspended", {
+      listingId: listing.id,
+      detail: { reason: result.reason },
+    });
+
+    // Buyer protection: the creator removed a placement the buyer paid for.
+    // If the payout already left the platform we never auto-refund; an admin
+    // decides so we don't pay both sides out of our own funds.
+    const { refundPayment } = await import("./refunds.server");
+    await refundPayment(o.payment_id, "creator_removed_active_placement");
+
+    try {
+      const { data: creatorContact } = await db
+        .from("creators")
+        .select("email")
+        .eq("id", creator.id)
+        .maybeSingle();
+      const contactEmail = (creatorContact as { email?: string | null } | null)?.email;
+      if (contactEmail) {
+        const { sendListingSuspendedEmail } = await import("./email.server");
+        await sendListingSuspendedEmail({ to: contactEmail, reason: result.reason });
+      }
+    } catch (e) {
+      console.error("suspension email failed", e);
+    }
   }
 
   return summary;
