@@ -46,7 +46,7 @@ function TrafficCounters() {
   if (!traffic) return <p className="font-mono text-xs font-bold text-primary">&nbsp;</p>;
 
   return (
-    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs font-bold text-primary">
+    <p className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 font-mono text-xs font-bold text-primary">
       <span>{traffic.pageviews.toLocaleString()} page views</span>
       <span className="inline-flex items-center gap-1.5 text-muted-foreground">
         <span className="relative flex h-2 w-2">
