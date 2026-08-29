@@ -218,7 +218,7 @@ export function BuyDialog({
 
           <button
             type="submit"
-            disabled={busy || !agreed}
+            disabled={busy || !agreed || message.trim().length < 3 || message.trim().length > 100}
             onClick={() => {
               void trackEvent({ data: { name: "buy_clicked", listingId: view.listing.id } });
             }}
