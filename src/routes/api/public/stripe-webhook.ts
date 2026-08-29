@@ -6,7 +6,13 @@ export const Route = createFileRoute("/api/public/stripe-webhook")({
       POST: async ({ request }) => {
         const payload = await request.text();
         const { verifyStripeSignature } = await import("@/lib/stripe.server");
-        const ok = await verifyStripeSignature(payload, request.headers.get("stripe-signature"));
+        let ok: boolean;
+        try {
+          ok = await verifyStripeSignature(payload, request.headers.get("stripe-signature"));
+        } catch (e) {
+          console.error("Stripe webhook configuration error", e);
+          return new Response("Stripe webhook is not configured", { status: 500 });
+        }
         if (!ok) return new Response("Invalid signature", { status: 401 });
 
         const event = JSON.parse(payload) as {

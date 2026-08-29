@@ -95,8 +95,9 @@ export async function refundPaymentIntent(
 
 /** Verifies a Stripe webhook signature using Web Crypto (Workers-safe). */
 export async function verifyStripeSignature(payload: string, header: string | null) {
-  const secret = process.env["STRIPE_WEBHOOK_SECRET"];
-  if (!secret || !header) return false;
+  const secret = process.env["STRIPE_WEBHOOK_SECRET_SOCIAL_BID"];
+  if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET_SOCIAL_BID is not configured");
+  if (!header) return false;
   const parts = Object.fromEntries(
     header.split(",").map((p) => {
       const i = p.indexOf("=");
