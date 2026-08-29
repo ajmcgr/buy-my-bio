@@ -102,6 +102,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         "data-key": "N8DF+07OZVFCpj/L6EQilg",
         async: true,
       },
+      {
+        src: "https://cloud.umami.is/script.js",
+        "data-website-id": "4e9c09af-8147-468f-8feb-ed5739250ab1",
+        defer: true,
+      },
+
     ],
   }),
   shellComponent: RootShell,
@@ -185,6 +191,14 @@ function HamburgerMenu() {
             FAQ
           </Link>
           <Link
+            to="/about"
+            onClick={() => setOpen(false)}
+            className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            About
+          </Link>
+          <Link
+
             to="/terms"
             onClick={() => setOpen(false)}
             className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
