@@ -7,12 +7,13 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "Buy the sponsored slot in a creator's X bio. Pay more than the current owner, own the message and tracked link, and get outbid when someone pays more.",
+          "Buy the sponsored slot on a creator's Buy My Bio profile. Pay more than the current owner, own the message and tracked link, and get outbid when someone pays more.",
       },
       { property: "og:title", content: "Buy My Bio FAQ" },
       {
         property: "og:description",
-        content: "Pay more than the current owner and the X bio slot is yours. No deadline.",
+        content: "Pay more than the current owner and the sponsored slot is yours. No deadline.",
+
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
