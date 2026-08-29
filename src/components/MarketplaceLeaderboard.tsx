@@ -301,7 +301,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
               What’s your bio worth?
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
-              Add your profile to Buy My Bio and find out.
+              Add your X profile to Buy My Bio and find out.
             </p>
           </div>
         </div>
