@@ -1,5 +1,23 @@
 const STRIPE_API = "https://api.stripe.com/v1";
 
+async function socialBidWebhookSecret(): Promise<string | null> {
+  const configured = process.env["STRIPE_WEBHOOK_SECRET_SOCIAL_BID"]?.trim();
+  if (configured) return configured;
+
+  try {
+    const { admin } = await import("./db.server");
+    const { data, error } = await admin().rpc("get_social_bid_webhook_secret");
+    if (error) throw new Error(error.message);
+    const vaultSecret = typeof data === "string" ? data.trim() : "";
+    return vaultSecret || null;
+  } catch (error) {
+    console.error("Social Bid webhook Vault configuration lookup failed", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+}
+
 function form(params: Record<string, string | number | undefined>): string {
   const body = new URLSearchParams();
   for (const [k, v] of Object.entries(params)) {
@@ -96,7 +114,7 @@ export async function refundPaymentIntent(
 
 /** Verifies a Stripe webhook signature using Web Crypto (Workers-safe). */
 export async function verifyStripeSignature(payload: string, header: string | null) {
-  const secret = process.env["STRIPE_WEBHOOK_SECRET_SOCIAL_BID"];
+  const secret = await socialBidWebhookSecret();
   if (!secret) throw new Error("STRIPE_WEBHOOK_SECRET_SOCIAL_BID is not configured");
   if (!header) return false;
   const parts = Object.fromEntries(
