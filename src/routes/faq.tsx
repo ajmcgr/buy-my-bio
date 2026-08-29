@@ -29,8 +29,12 @@ const faqs: [string, string][] = [
   ["Do I get a refund if I'm outbid?", "No — you paid for ownership from the moment you bought it. If two payments race, the loser is refunded in full automatically."],
   ["Can I change my destination URL?", "Contact us and we'll update it, subject to moderation."],
   ["What links are not allowed?", "Adult content, illegal goods, malware, scams, hate speech, or anything that would get the creator's X account banned."],
-  ["How does the creator get paid?", "Payouts are sent after each takeover, minus the platform fee."],
+  ["How does the creator get paid?", "The buyer pays Buy My Bio. We hold the creator's share in escrow for 3 days, re-check that the placement is still live in their X bio, then transfer it to their bank via Stripe, minus the platform fee."],
+  ["Do creators have to keep the buymybio.com link in their bio?", "Yes. The link is the placement the buyer paid for — it must stay in the X bio for as long as the slot is owned, and at minimum through the 3-day escrow window. It is not a one-off verification step."],
+  ["What happens if a creator removes the link?", "The automatic re-check at release time fails, the payout is blocked and held, and the listing loses its verified status. Restore the link and the payout releases on the next hourly check."],
+  ["When can a creator remove the link?", "Once the payout for a takeover has been released and nobody currently owns the slot. While a slot is owned and paid for, the link stays live."],
 ];
+
 
 function FAQPage() {
   return (

@@ -71,13 +71,14 @@ export function BuyDialog({
           </div>
         </div>
 
-        <div className="border-b-2 border-border px-5 py-4 text-sm">
+        <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
           <p>You're buying a sponsored message + tracked link inside this creator's X bio.</p>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-foreground/75">
             You are not buying the X account, username, profile photo, banner, posts or access to
             the account.
           </p>
         </div>
+
 
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
           <div>
@@ -129,7 +130,7 @@ export function BuyDialog({
             <div className="text-4xl font-extrabold tracking-tight">{money(price)}</div>
           </div>
 
-          <label className="flex items-start gap-3 text-sm">
+          <label className="flex items-start gap-3 text-sm text-foreground">
             <input
               type="checkbox"
               checked={agreed}
@@ -139,12 +140,13 @@ export function BuyDialog({
             />
             <span>
               I agree to the{" "}
-              <a href="/terms" className="underline">
+              <a href="/terms" className="font-semibold underline">
                 Terms
               </a>{" "}
               and understand destinations are subject to moderation.
             </span>
           </label>
+
 
           {error && <p className="text-sm font-medium text-destructive">{error}</p>}
 
@@ -154,7 +156,7 @@ export function BuyDialog({
             onClick={() => {
               void trackEvent({ data: { name: "buy_clicked", listingId: view.listing.id } });
             }}
-            className="btn-ink btn-ink-hover w-full text-base disabled:opacity-40"
+            className="btn-ink btn-ink-hover w-full text-base disabled:cursor-not-allowed disabled:opacity-70"
           >
             {busy
               ? "Opening checkout…"
