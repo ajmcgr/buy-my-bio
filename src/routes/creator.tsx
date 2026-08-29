@@ -278,6 +278,10 @@ function CreatorPage() {
                 sponsor's placement — your earlier payouts stay on track. Removing a placement
                 while that sponsor still owns the slot cancels that payout.
               </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                You add this to your X bio yourself — Buy My Bio never edits your profile. We only
+                read your bio to check the placement is live.
+              </p>
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <button
                   type="button"
@@ -293,6 +297,34 @@ function CreatorPage() {
                 >
                   Copy placement
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const msg = session.ownerPlacement
+                      ? session.ownerPlacement.replace(
+                          session.ownerUrl ? ` ${session.ownerUrl}` : "",
+                          "",
+                        )
+                      : (session.ownerMessage ?? "");
+                    void navigator.clipboard.writeText(msg.trim());
+                    setMessage("Message copied.");
+                  }}
+                  className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                >
+                  Copy message
+                </button>
+                {session.ownerUrl ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(session.ownerUrl!);
+                      setMessage("URL copied.");
+                    }}
+                    className="border-2 border-border px-4 py-2 text-sm font-semibold hover:bg-muted"
+                  >
+                    Copy URL
+                  </button>
+                ) : null}
                 {session.activation?.status === "awaiting_activation" ? (
                   <button
                     type="button"
@@ -300,10 +332,14 @@ function CreatorPage() {
                     disabled={busy}
                     className="btn-ink btn-ink-hover disabled:opacity-50"
                   >
-                    {busy ? "Checking…" : "I've updated my bio — check now"}
+                    {busy ? "Checking…" : "Verify placement"}
                   </button>
                 ) : null}
               </div>
+              {session.activation?.status !== "awaiting_activation" &&
+              session.activation?.firstVerifiedAt ? (
+                <p className="mt-3 text-sm font-semibold">✓ Verified live</p>
+              ) : null}
               {session.activation?.status === "awaiting_activation" &&
               session.activation.deadline ? (
                 <p className="mt-3 text-sm font-semibold">
