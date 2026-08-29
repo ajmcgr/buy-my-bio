@@ -72,7 +72,7 @@ function Success() {
       </h1>
       {result.globalRank === 1 ? (
         <div className="mt-6 flex items-center gap-3 border-2 border-border bg-accent px-5 py-4 font-mono text-sm font-extrabold text-accent-foreground">
-          <Trophy className="size-5" /> The most valuable sponsored X bio on BuyMyBio
+          <Trophy className="size-5" /> The most valuable sponsored X bio on Buy My Bio
         </div>
       ) : result.globalRank ? (
         <p className="mt-4 font-mono text-sm font-bold">Now #{result.globalRank} most valuable</p>

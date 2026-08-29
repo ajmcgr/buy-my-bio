@@ -18,7 +18,7 @@ export const Route = createFileRoute("/creator")({
       {
         name: "description",
         content:
-          "Connect your X account, add the BuyMyBio placement to your profile, and open your bio to bids.",
+          "Connect your X account, add the Buy My Bio placement to your profile, and open your bio to bids.",
       },
       { property: "og:title", content: "Sell Your X Bio — Buy My Bio" },
       {
@@ -106,7 +106,7 @@ function CreatorPage() {
         Sell your X bio
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Two steps. Connect your real X account, then put the BuyMyBio placement in your X profile.
+        Two steps. Connect your real X account, then put the Buy My Bio placement in your X profile.
         Both must be verified before anyone can bid.
       </p>
 
@@ -251,7 +251,7 @@ function errorCopy(code: string): string {
     case "x_callback_error":
       return "X returned an error during sign-in. Please try again.";
     case "x_already_connected":
-      return "That X account is already connected to another BuyMyBio creator.";
+      return "That X account is already connected to another Buy My Bio creator.";
     case "missing_code":
       return "That sign-in didn't complete. Please connect again.";
     case "creator_create_failed":

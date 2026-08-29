@@ -68,7 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BuyMyBio — The Most Valuable Bios on X" },
+      { title: "Buy My Bio — The Most Valuable Bios on X" },
       {
         name: "description",
         content: "See the most valuable X bios, who owns them, and how much it costs to take them.",

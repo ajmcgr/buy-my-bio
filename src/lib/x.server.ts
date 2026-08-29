@@ -117,7 +117,7 @@ export function requiredPlacement(username: string): string {
   return `buymybio.com/${username}`;
 }
 
-/** True when the required BuyMyBio placement is currently present in the profile. */
+/** True when the required Buy My Bio placement is currently present in the profile. */
 export function placementPresent(user: XUser, username: string): boolean {
   const needle = requiredPlacement(username).toLowerCase();
   const haystack = [user.description, user.url ?? "", ...user.expandedUrls]

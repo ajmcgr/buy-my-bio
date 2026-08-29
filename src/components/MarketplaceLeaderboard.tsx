@@ -256,7 +256,7 @@ function SellYourBio() {
             Sell your X bio
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Connect your X account, add your BuyMyBio link to your bio, and let sponsors bid for the
+            Connect your X account, add your Buy My Bio link to your bio, and let sponsors bid for the
             slot.
           </p>
         </div>
