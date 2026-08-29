@@ -321,6 +321,34 @@ function CreatorPage() {
             <PayoutsPanel token={token} status={payouts} onChange={() => loadPayouts(token)} />
           ) : null}
 
+          <div className="panel mt-8 p-6">
+            <div className="label-xs">Account</div>
+            <h2 className="mt-1 text-xl font-extrabold">Disconnect your X account</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This unlinks @{session.handle}, removes your bio from the marketplace and signs you
+              out. You can reconnect any time. You can't disconnect while a sponsorship is live or a
+              payout is still being held.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                onClick={() => onDisconnect(false)}
+                disabled={busy}
+                className="btn-outline-ink disabled:opacity-50"
+              >
+                {busy ? "Working…" : "Disconnect X"}
+              </button>
+              <button
+                onClick={() => onDisconnect(true)}
+                disabled={busy}
+                className="btn-outline-ink text-destructive disabled:opacity-50"
+              >
+                Disconnect and delete my data
+              </button>
+            </div>
+          </div>
+
+
+
 
 
           <p className="mt-6 text-sm text-muted-foreground">
