@@ -47,6 +47,7 @@ export async function createCheckoutSession(opts: {
       customer_email: opts.email,
       "metadata[payment_id]": opts.paymentId,
       "payment_intent_data[metadata][payment_id]": opts.paymentId,
+      allow_promotion_codes: "true",
       success_url: opts.successUrl,
       cancel_url: opts.cancelUrl,
     }),
