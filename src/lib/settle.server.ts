@@ -301,8 +301,9 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("email failure", e);
   }
 
-  // Record the creator's held share. It only becomes eligible once the
-  // placement is verified live on X (release_at = first_verified_at + 7 days).
+  // Record the creator's 80% share. The website sponsorship is fulfilled the
+  // moment payment succeeds, ownership is assigned and the placement is live on
+  // buymybio.com, so the 7-day risk hold starts now.
   if (stripeLivemode) {
     try {
       const { recordPayout } = await import("./payouts.server");
@@ -316,6 +317,16 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
       console.error("recordPayout failed", e);
     }
   }
+
+  if (WEBSITE_ONLY_SPONSORSHIP) {
+    try {
+      const { markActivated } = await import("./activation.server");
+      await markActivated(ownershipId, payment.id, new Date().toISOString());
+    } catch (e) {
+      console.error("website fulfillment failed", e);
+    }
+  }
+
 
   await db.from("analytics_events").insert({
     name: "checkout_completed",
