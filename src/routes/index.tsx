@@ -11,18 +11,19 @@ export const Route = createFileRoute("/")({
   loader: async ({ deps }) => await getMarketplace({ data: { sort: deps.sort } }),
   head: () => ({
     meta: [
-      { title: "What would someone pay to sponsor you? — Buy My Bio" },
+      { title: "Buy My Bio — What’s your bio worth?" },
       {
         name: "description",
         content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
       },
-      { property: "og:title", content: "What would someone pay to sponsor you? — Buy My Bio" },
+      { property: "og:title", content: "Buy My Bio — What’s your bio worth?" },
       {
         property: "og:description",
         content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Buy My Bio — What’s your bio worth?" },
     ],
   }),
   component: Home,
