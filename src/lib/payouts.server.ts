@@ -1,5 +1,5 @@
 /**
- * Escrow-style payouts.
+ * Held creator payouts.
  *
  * Money flows: buyer -> platform Stripe balance (immediately, on checkout).
  * A `payouts` row is created in `pending` with a hold window. Nothing leaves
@@ -12,30 +12,7 @@
 
 import { admin } from "./db.server";
 
-const DEFAULT_HOLD_DAYS = 3;
-
-/** Loose text match: case-insensitive, whitespace/punctuation tolerant. */
-function normalizeBioText(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/https?:\/\//g, "")
-    .replace(/[\u2018\u2019\u201c\u201d]/g, "'")
-    .replace(/[^a-z0-9'@.\/_-]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function bioContainsMessage(
-  profile: { description: string; url: string | null; expandedUrls: string[] },
-  message: string,
-): boolean {
-  const needle = normalizeBioText(message);
-  if (!needle) return false;
-  const haystack = normalizeBioText(
-    [profile.description, profile.url ?? "", ...profile.expandedUrls].join(" "),
-  );
-  return haystack.includes(needle);
-}
+const DEFAULT_HOLD_DAYS = 7;
 
 function holdDays(): number {
   const raw = Number(process.env["PAYOUT_HOLD_DAYS"]);
@@ -205,39 +182,100 @@ export async function releaseOne(payoutId: string): Promise<string> {
   if (!payoutsEnabled || !transfersActive) return block(payoutId, "onboarding_incomplete");
 
   // The placement must still be live on X right now — this is the whole point
-  // of the hold: creators cannot take the money and delete the link.
-  const { xConfigured } = await import("./x.server");
-  if (creator.x_user_id && xConfigured()) {
-    const { lookupPublicProfile, placementPresent } = await import("./x-app.server");
-    try {
-      const profile = await lookupPublicProfile(String(creator.x_user_id));
-      // What the buyer paid for is THEIR message being live in the bio. Only
-      // fall back to the buymybio.com placement when no message was supplied.
-      const buyerMessage = String((payment as { bio_message?: string | null }).bio_message ?? "");
-      const present = buyerMessage.trim()
-        ? bioContainsMessage(profile, buyerMessage)
-        : placementPresent(profile, creator.username);
-      await db
-        .from("creators")
-        .update({
-          x_bio_snapshot: profile.description,
-          x_follower_count: profile.followers,
-          ...(present ? {} : { x_bio_verified: false }),
-        })
-        .eq("id", creator.id);
-      if (!present)
-        return block(
-          payoutId,
-          String((payment as { bio_message?: string | null }).bio_message ?? "").trim()
-            ? "buyer_message_missing_on_x"
-            : "placement_missing_on_x",
-        );
-    } catch (e) {
-      return block(payoutId, `x_lookup_failed: ${String(e)}`);
-    }
-  } else if (!creator.x_bio_verified) {
-    return block(payoutId, "bio_not_verified");
+  // of the hold: creators cannot take the money and delete the placement.
+  const { data: ownership } = await db
+    .from("ownerships")
+    .select("id, status, destination_url, bio_message, bio_verification_status")
+    .eq("payment_id", payout.payment_id)
+    .maybeSingle();
+
+  if (ownership?.bio_verification_status === "failed")
+    return block(payoutId, "placement_verification_failed");
+
+  const now = new Date().toISOString();
+  const { checkPlacement } = await import("./verification.server");
+  const result = await checkPlacement({
+    creatorId: creator.id,
+    username: creator.username,
+    xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
+    message:
+      ((ownership?.bio_message as string | null) ??
+        (payment as { bio_message?: string | null }).bio_message) ||
+      null,
+    url: (ownership?.destination_url as string | null) ?? null,
+  });
+
+  if (result.outcome === "unavailable") {
+    // Technical failure — never punish the creator, just retry next run.
+    await db
+      .from("payouts")
+      .update({ last_verification_attempt_at: now, last_verification_error: result.error })
+      .eq("id", payoutId);
+    return block(payoutId, `unable_to_verify: ${result.error}`);
   }
+
+  if (result.outcome === "mismatch") {
+    await db
+      .from("payouts")
+      .update({
+        status: "cancelled",
+        bio_verification_status: "failed",
+        verification_failure_at: now,
+        verification_failure_reason: result.reason,
+        last_verification_attempt_at: now,
+        last_error: `verification_failed: ${result.reason}`,
+      })
+      .eq("id", payoutId);
+    if (ownership)
+      await db
+        .from("ownerships")
+        .update({
+          bio_verification_status: "failed",
+          verification_failure_at: now,
+          verification_failure_reason: result.reason,
+          last_verification_attempt_at: now,
+        })
+        .eq("id", ownership.id);
+    await db.from("creators").update({ x_bio_verified: false }).eq("id", creator.id);
+    await db
+      .from("listings")
+      .update({
+        status: "suspended",
+        compliance_status: "non_compliant",
+        non_compliant_since: now,
+        non_compliant_reason: result.reason,
+      })
+      .eq("creator_id", creator.id);
+    await db.from("placement_violations").insert({
+      creator_id: creator.id,
+      ownership_id: ownership?.id ?? null,
+      payout_id: payoutId,
+      phase: "hold",
+      reason: result.reason,
+      bio_snapshot: result.snapshot,
+    });
+    return `blocked: verification_failed: ${result.reason}`;
+  }
+
+  await db
+    .from("payouts")
+    .update({
+      bio_verification_status: "verified",
+      last_bio_verified_at: now,
+      last_verification_attempt_at: now,
+      last_verification_error: null,
+    })
+    .eq("id", payoutId);
+  if (ownership)
+    await db
+      .from("ownerships")
+      .update({
+        bio_verification_status: "verified",
+        last_bio_verified_at: now,
+        last_verification_attempt_at: now,
+        last_verification_error: null,
+      })
+      .eq("id", ownership.id);
 
   // Prefer settling against the original charge so the funds are traceable.
   let sourceTransaction: string | null = null;

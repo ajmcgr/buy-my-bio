@@ -204,12 +204,20 @@ function CreatorPage() {
               <h2 className="mt-1 text-xl font-extrabold">Keep this in your X bio</h2>
               <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
                 {session.ownerMessage}
+                {session.ownerUrl ? ` ${session.ownerUrl}` : ""}
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                This is the exact text the current sponsor paid for. We re-read your live X bio
-                before releasing your payout — if it's missing, the payout stays on hold until you
-                restore it.
+                This is the exact message and link the current sponsor paid for. We re-read your
+                live X bio every day. Your payout is released after 7 continuous days with this
+                placement live — if you remove or change it, the payout is cancelled.
               </p>
+              {session.compliance?.status === "non_compliant" ? (
+                <p className="mt-3 border-2 border-destructive px-3 py-2 text-sm font-semibold text-destructive">
+                  Your listing is suspended because this placement is missing from your X bio.
+                  Restore it exactly as shown and your listing goes live again after the next
+                  check.
+                </p>
+              ) : null}
             </div>
           ) : null}
 

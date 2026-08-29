@@ -20,6 +20,8 @@ export type CreatorSession = {
   globalRank: number | null;
   ownerName: string | null;
   ownerMessage: string | null;
+  ownerUrl: string | null;
+  compliance: { status: string; reason: string | null } | null;
 };
 
 export const getCreatorSession = createServerFn({ method: "POST" })
@@ -40,7 +42,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
 
     const { data: listing } = await db
       .from("listings")
-      .select("id, status")
+      .select("id, status, compliance_status, non_compliant_reason")
       .eq("creator_id", c.id)
       .maybeSingle();
 
@@ -53,14 +55,16 @@ export const getCreatorSession = createServerFn({ method: "POST" })
     }
 
     let ownerMessage: string | null = null;
+    let ownerUrl: string | null = null;
     if (listing) {
       const { data: ownership } = await db
         .from("ownerships")
-        .select("bio_message")
+        .select("bio_message, destination_url")
         .eq("status", "active")
         .eq("listing_id", listing.id)
         .maybeSingle();
       ownerMessage = (ownership?.bio_message as string | null) ?? null;
+      ownerUrl = (ownership?.destination_url as string | null) ?? null;
     }
 
     return {
@@ -80,6 +84,13 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       globalRank: marketRow?.globalRank ?? null,
       ownerName: marketRow?.owner?.company_name ?? null,
       ownerMessage,
+      ownerUrl,
+      compliance: listing
+        ? {
+            status: String(listing.compliance_status ?? "compliant"),
+            reason: (listing.non_compliant_reason as string | null) ?? null,
+          }
+        : null,
     };
   });
 

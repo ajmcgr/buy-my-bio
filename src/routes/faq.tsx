@@ -24,17 +24,18 @@ export const Route = createFileRoute("/faq")({
 const faqs: [string, string][] = [
   ["What am I actually buying?", "You're buying a sponsored message + link inside this creator's X bio. You write the exact text that goes in their bio. You are not buying the X account, username, profile photo, banner, posts or access to the account."],
   ["Which platforms are supported?", "X bios only for now."],
-  ["How long do I own it?", "Until you're outbid. There is no deadline and no expiry."],
+  ["How long do I own a bio?", "You keep the sponsored slot until somebody pays more. When another buyer takes the slot, their message replaces yours."],
+  ["What happens when somebody pays more?", "Ownership immediately moves to the new buyer after successful payment. The creator is then instructed to replace the previous sponsored placement with the new owner's message and link."],
+  ["How do you make sure my sponsorship stays live?", "Buy My Bio verifies connected X profiles while a sponsorship is active. Creator payouts are held for 7 days and the sponsored message and link must remain live throughout the verification period."],
+  ["What happens if a creator removes my sponsorship?", "Creators are not paid if they remove or change the required placement during the 7-day verification period. Buy My Bio regularly checks connected X profiles to make sure active placements remain live. If a placement is removed after payout, the listing is suspended from the marketplace until it's restored."],
+  ["When does a creator get paid?", "Creator earnings become eligible for payout after 7 days of successful placement verification. The sponsorship itself does not expire after 7 days. It remains live until another buyer pays more."],
+  ["How much of the bio can a sponsor use?", "Sponsored messages can contain up to 100 characters plus a separate link. This keeps space available for the profile owner's own bio while still giving sponsors a meaningful placement."],
   ["What if I'm outbid one minute later?", "It can happen. You keep the exposure you got, and we email you the price to take it back."],
   ["Do I get a refund if I'm outbid?", "No — you paid for ownership from the moment you bought it. If two payments race, the loser is refunded in full automatically."],
   ["Can I change my message or link?", "Contact us and we'll update it, subject to moderation."],
   ["What links are not allowed?", "Adult content, illegal goods, malware, scams, hate speech, or anything that would get the creator's X account banned."],
-  ["How does the creator get paid?", "The buyer pays Buy My Bio. We hold the creator's share in escrow for 3 days, re-read their live X bio and check the buyer's exact message is still there, then transfer it to their bank via Stripe, minus the platform fee."],
-  ["What exactly is checked before a payout?", "At release time we read the creator's live X bio through the X API and look for the winning bidder's message word-for-word (ignoring case and extra spacing). If it's present, the payout releases. If it isn't, the payout is blocked."],
-  ["What is the buymybio.com/yourhandle link for then?", "That link is only used once, during creator onboarding, to verify the creator controls the X account and can edit their bio. After verification it isn't required for payouts — the buyer's message is what gets checked. (Older slots bought before custom messages existed still fall back to the link check.)"],
-  ["What happens if a creator removes or edits the buyer's message?", "The re-check at release time fails, the payout is blocked and held, and the listing loses its verified status. Restore the exact message and the payout releases on the next hourly check."],
-  ["When can a creator change their bio again?", "Once the payout for a takeover has been released and nobody currently owns the slot. While a slot is owned and unpaid, the buyer's message stays live as written."],
-
+  ["What exactly is checked?", "We read the creator's live X bio through the X API every day and look for the current owner's message word-for-word (ignoring case and extra spacing) plus their link. A temporary X API error never counts against a creator — we simply retry."],
+  ["What is the buymybio.com/yourhandle link for then?", "That link is only used once, during creator onboarding, to verify the creator controls the X account and can edit their bio. After verification the buyer's message and link are what get checked."],
 ];
 
 

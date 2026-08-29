@@ -18,6 +18,8 @@ export function BuyDialog({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [agreed, setAgreed] = useState(false);
+  const [message, setMessage] = useState("");
+  const [link, setLink] = useState("");
 
   if (!open) return null;
   const price = view.requiredPriceCents;
@@ -27,13 +29,24 @@ export function BuyDialog({
     setBusy(true);
     setError(null);
     const f = new FormData(e.currentTarget);
+    const msg = message.trim();
+    if (msg.length < 3 || msg.length > 100) {
+      setError("Your message must be between 3 and 100 characters.");
+      setBusy(false);
+      return;
+    }
+    if (!/^https?:\/\/\S+\.\S+/i.test(link.trim())) {
+      setError("Your link must be a valid http:// or https:// URL.");
+      setBusy(false);
+      return;
+    }
     try {
       const res = await checkout({
         data: {
           username: view.creator.username,
           companyName: String(f.get("company") ?? ""),
-          bioMessage: String(f.get("biomessage") ?? ""),
-          destinationUrl: String(f.get("destination") ?? ""),
+          bioMessage: msg,
+          destinationUrl: link.trim(),
           email: String(f.get("email") ?? ""),
           xHandle: String(f.get("xhandle") ?? "") || null,
           logoUrl: String(f.get("logo") ?? "") || null,
@@ -90,39 +103,67 @@ export function BuyDialog({
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
           <div>
             <label className="label-xs" htmlFor="biomessage">
-              Your message / link in the bio *
+              Your message *
             </label>
             <input
               id="biomessage"
               name="biomessage"
               required
               minLength={3}
-              maxLength={160}
-              placeholder="Sponsored by YourStartup — yourstartup.com"
+              maxLength={100}
+              value={message}
+              onChange={(e) => setMessage(e.target.value.slice(0, 100))}
+              placeholder="Sponsored by YourStartup"
               className="field mt-1"
             />
-            <p className="mt-1 text-xs text-muted-foreground">
-              This exact text must stay live in the creator's X bio. We re-read the bio through
-              the X API before releasing their payout.
-            </p>
-          </div>
-          <div>
-            <label className="label-xs" htmlFor="company">
-              Startup / Brand name *
-            </label>
-            <input id="company" name="company" required maxLength={80} className="field mt-1" />
+            <div className="mt-1 flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                Your message and link will appear in this X bio until someone pays more.
+              </span>
+              <span
+                className={
+                  message.trim().length > 100 ? "font-semibold text-destructive" : "text-muted-foreground"
+                }
+              >
+                {message.trim().length} / 100
+              </span>
+            </div>
           </div>
           <div>
             <label className="label-xs" htmlFor="destination">
-              Destination URL *
+              Your link *
             </label>
             <input
               id="destination"
               name="destination"
               required
+              type="url"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
               placeholder="https://yourstartup.com"
               className="field mt-1"
             />
+            <p className="mt-1 text-xs text-muted-foreground">
+              The link doesn't count towards your 100 characters.
+            </p>
+          </div>
+
+          <div className="border-2 border-border bg-muted px-4 py-3">
+            <div className="label-xs">Exactly what goes in the X bio</div>
+            <p className="mt-1 text-sm font-medium break-words text-foreground">
+              {message.trim() || "Your message"} {link.trim() || "https://yourlink.com"}
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              We re-read the bio through the X API every day. The creator is only paid if this
+              stays live.
+            </p>
+          </div>
+
+          <div>
+            <label className="label-xs" htmlFor="company">
+              Startup / Brand name *
+            </label>
+            <input id="company" name="company" required maxLength={80} className="field mt-1" />
           </div>
           <div>
             <label className="label-xs" htmlFor="email">
@@ -177,7 +218,7 @@ export function BuyDialog({
 
           <button
             type="submit"
-            disabled={busy || !agreed}
+            disabled={busy || !agreed || message.trim().length < 3 || message.trim().length > 100}
             onClick={() => {
               void trackEvent({ data: { name: "buy_clicked", listingId: view.listing.id } });
             }}

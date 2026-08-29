@@ -12,7 +12,7 @@ export const getAdminData = createServerFn({ method: "POST" })
     if (!gate.ok) return { error: gate.error } as const;
     const db = admin();
 
-    const [creators, listings, payments, ownerships] = await Promise.all([
+    const [creators, listings, payments, ownerships, payouts, violations] = await Promise.all([
       db
         .from("creators")
         .select(
@@ -20,7 +20,7 @@ export const getAdminData = createServerFn({ method: "POST" })
         )
         .order("created_at", { ascending: false })
         .limit(100),
-      db.from("listings").select("id, creator_id, slug, status, starting_price_cents").limit(200),
+      db.from("listings").select("id, creator_id, slug, status, starting_price_cents, compliance_status, non_compliant_reason").limit(200),
       db
         .from("payments")
         .select(
@@ -35,6 +35,18 @@ export const getAdminData = createServerFn({ method: "POST" })
         )
         .eq("status", "active")
         .limit(100),
+      db
+        .from("payouts")
+        .select(
+          "id, creator_id, amount_cents, status, hold_until, released_at, bio_verification_status, last_bio_verified_at, verification_failure_at, verification_failure_reason, last_verification_error, last_error",
+        )
+        .order("created_at", { ascending: false })
+        .limit(50),
+      db
+        .from("placement_violations")
+        .select("id, creator_id, phase, reason, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50),
     ]);
 
     const paid = (payments.data ?? []).filter(
@@ -45,6 +57,8 @@ export const getAdminData = createServerFn({ method: "POST" })
       listings: listings.data ?? [],
       payments: payments.data ?? [],
       active: ownerships.data ?? [],
+      payouts: payouts.data ?? [],
+      violations: violations.data ?? [],
       gmvCents: paid.reduce((s, p) => s + p.amount_cents, 0),
     } as const;
   });
