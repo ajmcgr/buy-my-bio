@@ -116,7 +116,9 @@ export const Route = createFileRoute("/api/public/x-callback")({
               x_bio_verified_method: "api",
             })
             .eq("id", creatorId);
-          await db.from("listings").update({ status: "active" }).eq("creator_id", creatorId);
+          // Connecting X never publicly lists a creator. The creator must
+          // explicitly click "List my profile" in the dashboard. Listings that
+          // are already live stay live.
         }
 
 
