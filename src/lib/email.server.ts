@@ -148,3 +148,145 @@ export async function sendOutbidEmail(o: {
     `),
   );
 }
+
+/* ------------------------------------------- lifecycle / money notifications */
+
+const REFUND_COPY: Record<string, { title: string; body: string }> = {
+  creator_failed_to_activate: {
+    title: "Placement wasn't activated",
+    body: "The creator didn't activate your sponsored placement in time, so your payment has been refunded.",
+  },
+  outbid_before_activation: {
+    title: "Placement wasn't activated",
+    body: "Another buyer took the slot before your placement went live, so you were never charged for a sponsorship you didn't receive. Your payment has been refunded.",
+  },
+  creator_removed_active_placement: {
+    title: "Placement was removed",
+    body: "The creator removed your sponsored placement from their X bio, so your payment has been refunded.",
+  },
+  concurrent_purchase_conflict: {
+    title: "Your purchase couldn't be completed",
+    body: "Another payment landed first and took the slot, so your payment has been refunded.",
+  },
+};
+
+export async function sendRefundEmail(o: { to: string; amountCents: number; reason: string }) {
+  const copy = REFUND_COPY[o.reason] ?? REFUND_COPY["creator_failed_to_activate"]!;
+  await send(
+    o.to,
+    copy.title,
+    shell(`
+      ${h1(copy.title)}
+      ${p(copy.body)}
+      ${facts([
+        ["Refunded", money(o.amountCents)],
+        ["Status", "Refund issued"],
+      ])}
+      ${p("Your bank or card provider may take additional time to show the refund.")}
+      ${button(baseUrl(), "Browse bios \u2192")}
+    `),
+  );
+}
+
+export async function sendBuyerAwaitingActivationEmail(o: {
+  to: string;
+  handle: string;
+  amountCents: number;
+  message: string | null;
+  destination: string;
+}) {
+  await send(
+    o.to,
+    `Purchase successful — waiting on @${o.handle}`,
+    shell(`
+      ${h1("Purchase successful")}
+      ${p(`You bought the sponsored slot in <b>@${o.handle}</b>'s X bio. They have up to 24 hours to add your placement — we'll email you the moment we verify it live.`)}
+      ${facts([
+        ["You paid", money(o.amountCents)],
+        ["Your message", o.message ?? "\u2014"],
+        ["Your link", o.destination],
+        ["Status", "Waiting for the creator to update their X bio"],
+      ])}
+      ${p("If they don't activate it in time, your payment is refunded automatically.")}
+    `),
+  );
+}
+
+export async function sendCreatorActionRequiredEmail(o: {
+  to: string;
+  amountCents: number;
+  message: string | null;
+  destination: string;
+  deadline: string;
+}) {
+  await send(
+    o.to,
+    "New bio owner — action required within 24 hours",
+    shell(`
+      ${h1("New owner. Action required")}
+      ${p("Somebody just bought the sponsored slot in your X bio. Add their message and link to your bio within 24 hours or the sale is cancelled and the buyer is refunded.")}
+      ${facts([
+        ["Sale", money(o.amountCents)],
+        ["Message to add", o.message ?? "\u2014"],
+        ["Link to add", o.destination],
+        ["Activate before", new Date(o.deadline).toUTCString()],
+      ])}
+      ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
+    `,
+      "You received this because you list your X bio on Buy My Bio.",
+    ),
+  );
+}
+
+export async function sendPlacementVerifiedEmail(o: {
+  to: string;
+  audience: "buyer" | "creator";
+  handle: string;
+  eligibleDate?: string | null;
+}) {
+  const buyer = o.audience === "buyer";
+  await send(
+    o.to,
+    buyer ? "You're live" : "Placement verified",
+    shell(`
+      ${h1(buyer ? "You're live" : "Placement verified")}
+      ${p(
+        buyer
+          ? `Your sponsored slot in <b>@${o.handle}</b>'s X bio is active. It's yours until somebody pays more.`
+          : `We verified the placement live on your X bio. Keep it up while it's owned.${
+              o.eligibleDate ? ` Eligible for payout after ${o.eligibleDate}.` : ""
+            }`,
+      )}
+      ${button(`${baseUrl()}/u/${o.handle}`, "View the listing \u2192")}
+    `),
+  );
+}
+
+export async function sendListingSuspendedEmail(o: { to: string; reason: string }) {
+  await send(
+    o.to,
+    "Your listing is suspended",
+    shell(`
+      ${h1("Listing suspended")}
+      ${p(`We couldn't find the current owner's placement on your X bio (${o.reason}), so your listing is suspended and the payout is on hold. Restore the exact message and link and re-check from your dashboard to lift the suspension.`)}
+      ${button(`${baseUrl()}/creator`, "Fix it now \u2192")}
+    `,
+      "You received this because you list your X bio on Buy My Bio.",
+    ),
+  );
+}
+
+export async function sendPayoutReleasedEmail(o: { to: string; amountCents: number }) {
+  await send(
+    o.to,
+    "Your payout is on its way",
+    shell(`
+      ${h1("Payout released")}
+      ${p("We've sent your earnings to your connected Stripe account. Your bank may take additional time to show it.")}
+      ${facts([["Amount", money(o.amountCents)]])}
+      ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
+    `,
+      "You received this because you list your X bio on Buy My Bio.",
+    ),
+  );
+}
