@@ -388,11 +388,11 @@ function PayoutsPanel({
                     : "Set up payouts"}
             </button>
             {status.connected ? (
-              <button onClick={onDashboard} disabled={busy} className="btn-outline">
+              <button onClick={onDashboard} disabled={busy} className="btn-outline-ink">
                 Stripe dashboard
               </button>
             ) : null}
-            <button onClick={onChange} className="btn-outline">
+            <button onClick={onChange} className="btn-outline-ink">
               Refresh
             </button>
           </div>
