@@ -273,7 +273,7 @@ export async function runActivationSweep(limit = 50): Promise<ActivationSummary>
   const { data: pending } = await db
     .from("ownerships")
     .select(
-      "id, listing_id, payment_id, bio_message, destination_url, activation_deadline, started_at",
+      "id, listing_id, payment_id, bio_message, destination_url, placement_format, activation_deadline, started_at",
     )
     .eq("status", "active")
     .eq("placement_status", "awaiting_activation")
@@ -304,6 +304,7 @@ export async function runActivationSweep(limit = 50): Promise<ActivationSummary>
       xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
       message: (o.bio_message as string | null) ?? null,
       url: (o.destination_url as string | null) ?? null,
+      placementFormat: (o.placement_format as string | null) ?? null,
     });
 
     if (result.outcome === "unavailable") {
@@ -383,7 +384,7 @@ export async function activateForCreator(creatorId: string): Promise<
 
   const { data: o } = await db
     .from("ownerships")
-    .select("id, payment_id, bio_message, destination_url")
+    .select("id, payment_id, bio_message, destination_url, placement_format")
     .eq("listing_id", listing.id)
     .eq("status", "active")
     .is("first_verified_at", null)
@@ -404,6 +405,7 @@ export async function activateForCreator(creatorId: string): Promise<
     xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
     message: (o.bio_message as string | null) ?? null,
     url: (o.destination_url as string | null) ?? null,
+    placementFormat: (o.placement_format as string | null) ?? null,
   });
 
   if (result.outcome === "unavailable") return { state: "unavailable", error: result.error };
