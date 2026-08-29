@@ -10,6 +10,7 @@
 
 import { admin } from "./db.server";
 import type { XUser } from "./x.server";
+import { SPONSOR_PREFIX, normalizeFormat } from "./placement";
 
 export const VERIFY_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
@@ -48,6 +49,15 @@ export function bioContainsMessage(
   return haystackOf(profile).includes(needle);
 }
 
+/** The automatic "Sponsored:" disclosure must be present for v2 placements. */
+export function bioContainsDisclosure(profile: {
+  description: string;
+  url: string | null;
+  expandedUrls: string[];
+}): boolean {
+  return haystackOf(profile).includes(normalizeBioText(SPONSOR_PREFIX));
+}
+
 /** host + path of the sponsored URL, which is what shows up in a bio. */
 export function urlNeedle(raw: string): string {
   try {
@@ -78,6 +88,8 @@ export async function checkPlacement(opts: {
   xUserId: string | null;
   message: string | null;
   url: string | null;
+  /** Placement format of the ownership/payment being verified. v2 requires the disclosure. */
+  placementFormat?: string | null;
 }): Promise<VerifyOutcome> {
   const { xConfigured } = await import("./x.server");
   if (!opts.xUserId || !xConfigured()) {
@@ -110,7 +122,11 @@ export async function checkPlacement(opts: {
 
   const messageOk = message ? bioContainsMessage(profile, message) : true;
   const urlOk = url ? bioContainsUrl(profile, url) : true;
-  if (messageOk && urlOk) return { outcome: "match" };
+  // Placements sold before the automatic disclosure existed stay on format v1
+  // and are never failed for a missing "Sponsored:" prefix.
+  const requiresDisclosure = normalizeFormat(opts.placementFormat) === "v2";
+  const disclosureOk = requiresDisclosure ? bioContainsDisclosure(profile) : true;
+  if (messageOk && urlOk && disclosureOk) return { outcome: "match" };
 
   return {
     outcome: "mismatch",
@@ -118,7 +134,9 @@ export async function checkPlacement(opts: {
       ? "sponsored_message_and_url_missing"
       : !messageOk
         ? "sponsored_message_missing"
-        : "sponsored_url_missing",
+        : !urlOk
+          ? "sponsored_url_missing"
+          : "sponsored_disclosure_missing",
     snapshot: profile.description,
   };
 }
