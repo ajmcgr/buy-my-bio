@@ -80,8 +80,23 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     console.error("pre-takeover rank lookup failed", e);
   }
 
+  // Fresh X read of the OUTGOING owner's placement while they are still the
+  // current owner. Taken before the ownership row flips, persisted only if the
+  // takeover actually lands, so a row turning OUTBID never makes a payout
+  // eligible on its own.
+  let outgoing: Awaited<
+    ReturnType<typeof import("./verification.server").verifyOutgoingBeforeTakeover>
+  > = null;
+  try {
+    const { verifyOutgoingBeforeTakeover } = await import("./verification.server");
+    outgoing = await verifyOutgoingBeforeTakeover(payment.listing_id);
+  } catch (e) {
+    console.error("outgoing placement verification failed", e);
+  }
+
   const { data: result } = await db.rpc("apply_takeover", { _payment_id: payment.id });
   const r = (result ?? {}) as Record<string, unknown>;
+
 
   if (!r["ok"]) {
     const reason = String(r["reason"] ?? "unknown");
