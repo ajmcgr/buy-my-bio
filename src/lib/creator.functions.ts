@@ -22,6 +22,11 @@ export type CreatorSession = {
   ownerMessage: string | null;
   ownerUrl: string | null;
   compliance: { status: string; reason: string | null } | null;
+  activation: {
+    status: string;
+    deadline: string | null;
+    firstVerifiedAt: string | null;
+  } | null;
 };
 
 export const getCreatorSession = createServerFn({ method: "POST" })
@@ -56,15 +61,25 @@ export const getCreatorSession = createServerFn({ method: "POST" })
 
     let ownerMessage: string | null = null;
     let ownerUrl: string | null = null;
+    let activation: CreatorSession["activation"] = null;
     if (listing) {
       const { data: ownership } = await db
         .from("ownerships")
-        .select("bio_message, destination_url")
+        .select(
+          "bio_message, destination_url, placement_status, activation_deadline, first_verified_at",
+        )
         .eq("status", "active")
         .eq("listing_id", listing.id)
         .maybeSingle();
       ownerMessage = (ownership?.bio_message as string | null) ?? null;
       ownerUrl = (ownership?.destination_url as string | null) ?? null;
+      if (ownership) {
+        activation = {
+          status: String(ownership.placement_status ?? "active"),
+          deadline: (ownership.activation_deadline as string | null) ?? null,
+          firstVerifiedAt: (ownership.first_verified_at as string | null) ?? null,
+        };
+      }
     }
 
     return {
@@ -85,6 +100,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       ownerName: marketRow?.owner?.company_name ?? null,
       ownerMessage,
       ownerUrl,
+      activation,
       compliance: listing
         ? {
             status: String(listing.compliance_status ?? "compliant"),
@@ -144,5 +160,37 @@ export const verifyMyBio = createServerFn({ method: "POST" })
     }
     return {
       error: `We couldn't find "buymybio.com/${c.username}" in your X profile yet. Add it, save, then try again.`,
+    } as const;
+  });
+
+
+/**
+ * Creator-triggered activation check for the CURRENT owner's placement.
+ * Clicking is never enough — we re-read the live X bio and only start the
+ * 7-day payout hold when the sponsored message + link are actually there.
+ */
+export const activatePlacement = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .handler(async ({ data }) => {
+    const { admin } = await import("./db.server");
+    const db = admin();
+    const { data: c } = await db
+      .from("creators")
+      .select("id, banned")
+      .eq("session_token", data.token)
+      .maybeSingle();
+    if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
+
+    const { activateForCreator } = await import("./activation.server");
+    const result = await activateForCreator(c.id);
+    if (result.state === "activated") return { ok: true } as const;
+    if (result.state === "none") return { error: "No sponsorship is waiting for activation." } as const;
+    if (result.state === "unavailable")
+      return {
+        error: "We couldn't read your X profile just now. We'll keep retrying automatically.",
+      } as const;
+    return {
+      error:
+        "We couldn't find the sponsor's message and link in your X bio yet. Paste both exactly, save your profile, then check again.",
     } as const;
   });
