@@ -184,13 +184,6 @@ function HamburgerMenu() {
       {open ? (
         <div className="absolute right-0 z-50 mt-3 w-52 overflow-hidden rounded-2xl bg-card py-2 shadow-[0_10px_40px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
           <Link
-            to="/faq"
-            onClick={() => setOpen(false)}
-            className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            FAQ
-          </Link>
-          <Link
             to="/about"
             onClick={() => setOpen(false)}
             className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
