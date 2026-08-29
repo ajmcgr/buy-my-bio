@@ -30,7 +30,7 @@ const faqs: [string, string][] = [
   ["Can I change my destination URL?", "Contact us and we'll update it, subject to moderation."],
   ["What links are not allowed?", "Adult content, illegal goods, malware, scams, hate speech, or anything that would get the creator's X account banned."],
   ["How does the creator get paid?", "The buyer pays Buy My Bio. We hold the creator's share in escrow for 3 days, re-check that the placement is still live in their X bio, then transfer it to their bank via Stripe, minus the platform fee."],
-  ["Do creators have to keep the buymybio.com link in their bio?", "Yes. The link is the placement the buyer paid for — it must stay in the X bio for as long as the slot is owned, and at minimum through the 3-day escrow window. It is not a one-off verification step."],
+  ["Do creators have to keep the buymybio.com link in their bio?", "Yes, and it never needs to change. buymybio.com/yourhandle is a permanent link that automatically redirects to whoever currently owns your slot — so you set it once and never edit your bio again when a new buyer takes over. It just has to stay live while a slot is owned, and at minimum through the 3-day escrow window."],
   ["What happens if a creator removes the link?", "The automatic re-check at release time fails, the payout is blocked and held, and the listing loses its verified status. Restore the link and the payout releases on the next hourly check."],
   ["When can a creator remove the link?", "Once the payout for a takeover has been released and nobody currently owns the slot. While a slot is owned and paid for, the link stays live."],
 ];
