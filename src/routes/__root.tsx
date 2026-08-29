@@ -228,7 +228,7 @@ function SiteHeader() {
             Rankings
           </Link>
           <Link to="/owners" className="hover:underline">
-            Owners
+            Sponsors
           </Link>
           <Link to="/faq" className="hover:underline">
             FAQ
