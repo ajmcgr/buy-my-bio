@@ -41,7 +41,10 @@ export async function startActivationWindow(ownershipId: string, paidAtIso?: str
     .is("first_verified_at", null);
 }
 
-/** Flags a payment for the admin refund queue without inventing a refund flow. */
+/**
+ * Flags a payment for refund and immediately attempts the automatic Stripe
+ * refund. The queue picks up anything that fails here.
+ */
 export async function flagForRefund(paymentId: string, reason: string) {
   const db = admin();
   await db
@@ -54,6 +57,16 @@ export async function flagForRefund(paymentId: string, reason: string) {
       admin_notes: `refund required: ${reason}`,
     })
     .eq("id", paymentId);
+
+  const { recordEvent } = await import("./events.server");
+  await recordEvent("refund_queued", { paymentId, detail: { reason } });
+
+  try {
+    const { refundPayment, normalizeReason } = await import("./refunds.server");
+    await refundPayment(paymentId, normalizeReason(reason));
+  } catch (e) {
+    console.error("automatic refund attempt failed", paymentId, e);
+  }
 }
 
 async function killPayout(paymentId: string, reason: string) {
