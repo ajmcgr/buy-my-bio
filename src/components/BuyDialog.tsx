@@ -103,39 +103,67 @@ export function BuyDialog({
         <form onSubmit={submit} className="space-y-4 px-5 py-5">
           <div>
             <label className="label-xs" htmlFor="biomessage">
-              Your message / link in the bio *
+              Your message *
             </label>
             <input
               id="biomessage"
               name="biomessage"
               required
               minLength={3}
-              maxLength={160}
-              placeholder="Sponsored by YourStartup — yourstartup.com"
+              maxLength={100}
+              value={message}
+              onChange={(e) => setMessage(e.target.value.slice(0, 100))}
+              placeholder="Sponsored by YourStartup"
               className="field mt-1"
             />
-            <p className="mt-1 text-xs text-muted-foreground">
-              This exact text must stay live in the creator's X bio. We re-read the bio through
-              the X API before releasing their payout.
-            </p>
-          </div>
-          <div>
-            <label className="label-xs" htmlFor="company">
-              Startup / Brand name *
-            </label>
-            <input id="company" name="company" required maxLength={80} className="field mt-1" />
+            <div className="mt-1 flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                Your message and link will appear in this X bio until someone pays more.
+              </span>
+              <span
+                className={
+                  message.trim().length > 100 ? "font-semibold text-destructive" : "text-muted-foreground"
+                }
+              >
+                {message.trim().length} / 100
+              </span>
+            </div>
           </div>
           <div>
             <label className="label-xs" htmlFor="destination">
-              Destination URL *
+              Your link *
             </label>
             <input
               id="destination"
               name="destination"
               required
+              type="url"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
               placeholder="https://yourstartup.com"
               className="field mt-1"
             />
+            <p className="mt-1 text-xs text-muted-foreground">
+              The link doesn't count towards your 100 characters.
+            </p>
+          </div>
+
+          <div className="border-2 border-border bg-muted px-4 py-3">
+            <div className="label-xs">Exactly what goes in the X bio</div>
+            <p className="mt-1 text-sm font-medium break-words text-foreground">
+              {message.trim() || "Your message"} {link.trim() || "https://yourlink.com"}
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              We re-read the bio through the X API every day. The creator is only paid if this
+              stays live.
+            </p>
+          </div>
+
+          <div>
+            <label className="label-xs" htmlFor="company">
+              Startup / Brand name *
+            </label>
+            <input id="company" name="company" required maxLength={80} className="field mt-1" />
           </div>
           <div>
             <label className="label-xs" htmlFor="email">
