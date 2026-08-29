@@ -68,7 +68,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Buy My Bio — Sponsor Creators" },
+      { title: "What would someone pay to sponsor you? — Buy My Bio" },
       {
         name: "description",
         content: "Sponsor creators on BuyMyBio.com and keep the spot until somebody pays more.",
