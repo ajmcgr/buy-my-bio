@@ -304,6 +304,28 @@ async function openMismatchWarning(ctx: PlacementCtx, reason: string) {
   }
 }
 
+/**
+ * Confirmed mismatch on a still-ACTIVE placement. The first one only opens a
+ * warning + short recheck; only a second confirming read is terminal.
+ */
+export async function registerActiveMismatch(
+  ctx: PlacementCtx,
+  reason: string,
+  snapshot: string | null,
+  phase: "hold" | "post_payout",
+  pendingSince: string | null,
+  recheckAt: string | null,
+): Promise<"pending" | "failed"> {
+  const dueForConfirmation =
+    Boolean(pendingSince) && (!recheckAt || new Date(recheckAt).getTime() <= Date.now());
+  if (!dueForConfirmation) {
+    if (!pendingSince) await openMismatchWarning(ctx, reason);
+    return "pending";
+  }
+  await failPlacement(ctx, reason, snapshot, phase);
+  return "failed";
+}
+
 /** The placement came back. Clear the warning, keep everything valid. */
 async function clearMismatchWarning(ctx: PlacementCtx) {
   const db = admin();
