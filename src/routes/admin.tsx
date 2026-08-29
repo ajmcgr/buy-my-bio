@@ -316,6 +316,14 @@ function Transactions({ token }: { token: string }) {
               <span>activation deadline: {when(t.activationDeadline)}</span>
               <span>first verified: {when(t.firstVerifiedAt)}</span>
               <span>verification: {t.verificationStatus ?? "—"}{t.verificationError ? ` (${t.verificationError})` : ""}</span>
+              <span>
+                final verification: {t.finalVerification ?? "—"}
+                {t.finalVerifiedAt ? ` · ${when(t.finalVerifiedAt)}` : ""}
+              </span>
+              <span>
+                mismatch: {t.mismatchPendingSince ? `pending confirmation since ${when(t.mismatchPendingSince)}` : "—"}
+                {t.mismatchReason ? ` · ${t.mismatchReason}` : ""}
+              </span>
               <span>payout: {t.payoutStatus ?? "—"} · release {when(t.releaseAt)}</span>
               <span>transfer: {t.stripeTransferId ?? "—"}</span>
               <span>
