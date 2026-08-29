@@ -217,6 +217,12 @@ function CreatorPage() {
             </button>
           </div>
 
+          {token ? (
+            <PayoutsPanel token={token} status={payouts} onChange={() => loadPayouts(token)} />
+          ) : null}
+
+
+
           <p className="mt-6 text-sm text-muted-foreground">
             Listing status:{" "}
             <span className="font-mono font-bold">{session.listingStatus ?? "none"}</span>
