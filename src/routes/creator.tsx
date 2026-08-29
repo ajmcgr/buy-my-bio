@@ -230,11 +230,13 @@ function CreatorPage() {
                   : "Keep this in your X bio"}
               </h2>
               <div className="mt-4 inline-block border-2 border-border bg-accent px-3 py-2 font-mono text-sm font-bold text-accent-foreground">
-                {session.ownerMessage}
-                {session.ownerUrl ? ` ${session.ownerUrl}` : ""}
+                {session.ownerPlacement ??
+                  `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`}
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                This is the exact message and link the current sponsor paid for. We re-read your
+                Paste this exactly as shown — including the “Sponsored:” label, which is
+                required so the placement is clearly disclosed as advertising and stays within
+                X's rules. This is the exact text the current sponsor paid for. We re-read your
                 live X bio every day while this sponsor is the current owner. Each sale is paid
                 out 7 days after it was first verified live. If someone else pays more, just swap in the new
                 sponsor's placement — your earlier payouts stay on track. Removing a placement
@@ -246,7 +248,8 @@ function CreatorPage() {
                   onClick={() => {
                     if (!session.ownerMessage) return;
                     void navigator.clipboard.writeText(
-                      `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`,
+                      session.ownerPlacement ??
+                        `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`,
                     );
                     setMessage("Placement copied.");
                   }}
