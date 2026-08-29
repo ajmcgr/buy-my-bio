@@ -198,7 +198,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
   const { data: ownership } = await db
     .from("ownerships")
     .select(
-      "id, status, placement_status, destination_url, bio_message, bio_verification_status, placement_end_reason, first_verified_at",
+      "id, status, placement_status, destination_url, bio_message, bio_verification_status, placement_end_reason, first_verified_at, final_verification_status, final_verified_at, mismatch_pending_since",
     )
     .eq("payment_id", payout.payment_id)
     .maybeSingle();
@@ -225,13 +225,19 @@ export async function releaseOne(payoutId: string): Promise<string> {
     return "blocked: never_activated";
   }
 
-  if (endReason === "seller_removed" || ownership?.bio_verification_status === "failed") {
+  if (
+    endReason === "seller_removed" ||
+    placementStatus === "non_compliant" ||
+    ownership?.bio_verification_status === "failed" ||
+    ownership?.final_verification_status === "failed"
+  ) {
     await db
       .from("payouts")
       .update({
         status: "cancelled",
         payout_status: "blocked",
         bio_verification_status: "failed",
+        final_verification_status: "failed",
         last_error: "placement_verification_failed",
       })
       .eq("id", payoutId);
@@ -241,18 +247,36 @@ export async function releaseOne(payoutId: string): Promise<string> {
   const stillCurrentOwner = !ownership || ownership.status === "active";
 
   if (!stillCurrentOwner) {
-    // Legitimate ownership change (outbid). The completed ownership period is
-    // owed to the creator — release without re-reading the bio.
+    // The ownership ended. It is payout-eligible ONLY when the fresh read taken
+    // at the transition succeeded — an OUTBID row alone proves nothing, and we
+    // never re-read X now (the old sponsor is no longer expected in the bio).
+    const finalStatus = (ownership?.final_verification_status as string | null) ?? null;
+    if (finalStatus !== "verified") {
+      return block(
+        payoutId,
+        finalStatus === "unresolved" || finalStatus === null
+          ? "awaiting_final_transition_verification"
+          : `final_verification_${finalStatus}`,
+      );
+    }
     await db
       .from("payouts")
       .update({
         bio_verification_status: "verified",
+        final_verification_status: "verified",
+        final_verified_at: (ownership?.final_verified_at as string | null) ?? now,
         last_verification_attempt_at: now,
         last_verification_error: null,
       })
       .eq("id", payoutId);
     return transferPayout(payoutId, payout, payment, creator, retrievePaymentIntent, createTransfer);
   }
+
+  // An unconfirmed mismatch is being re-checked: hold the money, don't punish.
+  if (ownership?.mismatch_pending_since) {
+    return block(payoutId, "mismatch_pending_confirmation");
+  }
+
 
   const { checkPlacement } = await import("./verification.server");
   const result = await checkPlacement({
