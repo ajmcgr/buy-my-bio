@@ -1,5 +1,11 @@
 import { admin } from "./db.server";
 import { nextPriceCents } from "./format";
+import {
+  buildPlacementText,
+  messageCharLimit,
+  normalizeFormat,
+  retainedBioText,
+} from "./placement";
 import type { ListingView, OwnerView } from "./listing.functions";
 
 export type MarketplaceSort = "most-valuable" | "trending" | "new" | "affordable";
@@ -49,6 +55,7 @@ type CreatorRow = {
   x_profile_url: string | null;
   x_profile_image_url: string | null;
   x_follower_count: number | null;
+  x_bio_snapshot: string | null;
   banned: boolean;
 };
 
@@ -62,7 +69,12 @@ type ListingRow = {
   created_at: string;
 };
 
-type OwnershipRow = OwnerView & { listing_id: string; payment_id: string | null };
+type OwnershipRow = OwnerView & {
+  listing_id: string;
+  payment_id: string | null;
+  bio_message?: string | null;
+  placement_format?: string | null;
+};
 
 /**
  * Builds every public market surface from payment-backed facts. Starting prices
@@ -81,7 +93,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
     db
       .from("creators")
       .select(
-        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status, x_account_verified, x_bio_verified, x_username, x_profile_url, x_profile_image_url, x_follower_count, banned",
+        "id, display_name, username, bio, profile_image_url, social_platform, social_handle, social_profile_url, verification_status, x_account_verified, x_bio_verified, x_username, x_profile_url, x_profile_image_url, x_follower_count, x_bio_snapshot, banned",
       )
       .eq("banned", false),
   ]);
@@ -100,7 +112,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
     ? await db
         .from("ownerships")
         .select(
-          "id, listing_id, payment_id, company_name, destination_url, logo_url, amount_cents, started_at, ended_at, click_count, status",
+          "id, listing_id, payment_id, company_name, destination_url, logo_url, amount_cents, started_at, ended_at, click_count, status, bio_message, placement_format",
         )
         .in("listing_id", listingIds)
         .order("started_at", { ascending: false })
@@ -140,6 +152,17 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
     const owner = ownershipHistory.find((o) => o.status === "active") ?? null;
     const history = ownershipHistory.filter((o) => o.status !== "active");
     const increase = Number(listing.minimum_increase_percentage);
+    const retainedChars = retainedBioText(creator.x_bio_snapshot, [
+      owner
+        ? buildPlacementText(
+            owner.bio_message ?? null,
+            owner.destination_url,
+            normalizeFormat(owner.placement_format),
+          )
+        : null,
+      owner?.bio_message ?? null,
+      owner?.destination_url ?? null,
+    ]).length;
     return {
       creator: {
         id: creator.id,
@@ -172,6 +195,8 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
       canBuy: true,
       globalRank: null,
       bioValueCents: owner?.amount_cents ?? null,
+      retainedBioChars: retainedChars,
+      messageCharLimit: messageCharLimit(retainedChars, null),
       listedAt: listing.created_at,
       latestTakeoverAt: owner?.started_at ?? history[0]?.started_at ?? null,
     };

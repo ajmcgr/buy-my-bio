@@ -44,6 +44,10 @@ export type ListingView = {
   canBuy: boolean;
   globalRank?: number | null;
   bioValueCents?: number | null;
+  /** Length of the creator's own bio text, excluding the current sponsored placement. */
+  retainedBioChars?: number;
+  /** Characters the next sponsor may use for their message (before their URL is known). */
+  messageCharLimit?: number;
 };
 
 export const getListing = createServerFn({ method: "GET" })
