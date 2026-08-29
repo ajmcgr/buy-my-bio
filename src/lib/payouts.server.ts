@@ -393,6 +393,31 @@ async function transferPayout(
   }) => Promise<Record<string, unknown>>,
 ): Promise<string> {
   const db = admin();
+
+  // Final guard immediately before moving money: a refund may have landed
+  // while the earlier checks were running, and a concurrent run may have
+  // already paid this out. The Stripe idempotency key (bmb_payout_<id>)
+  // makes a duplicate transfer impossible even in a race.
+  const { data: guard } = await db
+    .from("payouts")
+    .select("status, payments!inner(refund_status, stripe_refund_id)")
+    .eq("id", payoutId)
+    .maybeSingle();
+  if (guard) {
+    if (guard.status === "paid") return "paid";
+    const linked = guard.payments as unknown as {
+      refund_status: string | null;
+      stripe_refund_id: string | null;
+    } | null;
+    if (linked && ((linked.refund_status && linked.refund_status !== "none") || linked.stripe_refund_id)) {
+      await db
+        .from("payouts")
+        .update({ status: "cancelled", payout_status: "blocked", last_error: "payment_refunded" })
+        .eq("id", payoutId);
+      return "blocked: payment_refunded";
+    }
+  }
+
   // Prefer settling against the original charge so the funds are traceable.
   let sourceTransaction: string | null = null;
   if (payment.stripe_payment_intent) {
@@ -426,6 +451,31 @@ async function transferPayout(
       last_error: null,
     })
     .eq("id", payoutId);
+
+  const { recordEvent } = await import("./events.server");
+  await recordEvent("payout_released", {
+    paymentId: payout.payment_id,
+    payoutId,
+    detail: { amount_cents: payout.amount_cents, transfer_id: String(transfer["id"]) },
+  });
+
+  try {
+    const { data: payoutRow } = await db
+      .from("payouts")
+      .select("creator_id")
+      .eq("id", payoutId)
+      .maybeSingle();
+    if (payoutRow?.creator_id) {
+      const { creatorEmail } = await import("./notify.server");
+      const to = await creatorEmail(String(payoutRow.creator_id));
+      if (to) {
+        const { sendPayoutReleasedEmail } = await import("./email.server");
+        await sendPayoutReleasedEmail({ to, amountCents: payout.amount_cents });
+      }
+    }
+  } catch (e) {
+    console.error("payout email failed", e);
+  }
 
   return "paid";
 }
