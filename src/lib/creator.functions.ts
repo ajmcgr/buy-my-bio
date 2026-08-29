@@ -202,3 +202,99 @@ export const activatePlacement = createServerFn({ method: "POST" })
         "We couldn't find the sponsor's message and link in your X bio yet. Paste both exactly, save your profile, then check again.",
     } as const;
   });
+
+const disconnectIn = z.object({
+  token: z.string().min(10).max(200),
+  deleteData: z.boolean().optional(),
+});
+
+/**
+ * Disconnect the creator's X account (and optionally delete their Buy My Bio data).
+ * Blocked while a sponsorship is live or awaiting activation, so paid buyers can't be stranded.
+ */
+export const disconnectXAccount = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => disconnectIn.parse(input))
+  .handler(async ({ data }) => {
+    const { admin } = await import("./db.server");
+    const db = admin();
+
+    const { data: c } = await db
+      .from("creators")
+      .select("id")
+      .eq("session_token", data.token)
+      .maybeSingle();
+    if (!c) return { error: "Session expired. Connect X again." } as const;
+
+    const { data: listing } = await db
+      .from("listings")
+      .select("id")
+      .eq("creator_id", c.id)
+      .maybeSingle();
+
+    if (listing) {
+      const { data: live } = await db
+        .from("ownerships")
+        .select("id")
+        .eq("listing_id", listing.id)
+        .eq("status", "active")
+        .limit(1);
+      if (live && live.length > 0)
+        return {
+          error:
+            "You have a live sponsorship on your bio. It has to finish (or be refunded) before you can disconnect — email us and we'll sort it out.",
+        } as const;
+
+      const { data: pendingPayout } = await db
+        .from("payouts")
+        .select("id")
+        .eq("creator_id", c.id)
+        .in("status", ["pending", "blocked"])
+        .limit(1);
+      if (pendingPayout && pendingPayout.length > 0)
+        return {
+          error:
+            "You still have a payout being held. We can't disconnect your X account until it's released or cancelled.",
+        } as const;
+
+      await db.from("listings").update({ status: "suspended" }).eq("id", listing.id);
+    }
+
+    // Wipe the X connection either way.
+    await db
+      .from("creators")
+      .update({
+        x_user_id: null,
+        x_username: null,
+        x_display_name: null,
+        x_profile_image_url: null,
+        x_profile_url: null,
+        x_follower_count: null,
+        x_account_verified: false,
+        x_account_verified_at: null,
+        x_bio_verified: false,
+        x_bio_verified_at: null,
+        x_bio_verified_method: null,
+        x_bio_snapshot: null,
+        session_token: null,
+        verification_status: "pending",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", c.id);
+
+    if (!data.deleteData) return { ok: true, deleted: false } as const;
+
+    // Only hard-delete when no money ever moved through this listing.
+    let hasPayments = false;
+    if (listing) {
+      const { data: pay } = await db
+        .from("payments")
+        .select("id")
+        .eq("listing_id", listing.id)
+        .limit(1);
+      hasPayments = Boolean(pay && pay.length > 0);
+    }
+    if (hasPayments) return { ok: true, deleted: false, retained: true } as const;
+
+    await db.from("creators").delete().eq("id", c.id);
+    return { ok: true, deleted: true } as const;
+  });

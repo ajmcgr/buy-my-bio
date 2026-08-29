@@ -5,6 +5,7 @@ import {
   getCreatorSession,
   verifyMyBio,
   activatePlacement,
+  disconnectXAccount,
   type CreatorSession,
 } from "@/lib/creator.functions";
 import {
@@ -106,7 +107,35 @@ function CreatorPage() {
     }
   }
 
+  async function onDisconnect(deleteData: boolean) {
+    if (!token) return;
+    const warn = deleteData
+      ? "Disconnect X and delete your Buy My Bio data? This can't be undone."
+      : "Disconnect your X account from Buy My Bio?";
+    if (!window.confirm(warn)) return;
+    setBusy(true);
+    setMessage(null);
+    const res = await disconnectXAccount({ data: { token, deleteData } });
+    setBusy(false);
+    if ("error" in res) {
+      setMessage(res.error);
+      return;
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    setToken(null);
+    setSession(null);
+    setPayouts(null);
+    setMessage(
+      res.deleted
+        ? "Your X account is disconnected and your data has been deleted."
+        : "retained" in res && res.retained
+          ? "Your X account is disconnected and your bio is off the marketplace. Past transaction records are kept for legal and accounting reasons."
+          : "Your X account is disconnected. Connect again any time to relist.",
+    );
+  }
+
   async function onVerify() {
+
     if (!token) return;
     setBusy(true);
     setMessage(null);
@@ -320,6 +349,34 @@ function CreatorPage() {
           {token ? (
             <PayoutsPanel token={token} status={payouts} onChange={() => loadPayouts(token)} />
           ) : null}
+
+          <div className="panel mt-8 p-6">
+            <div className="label-xs">Account</div>
+            <h2 className="mt-1 text-xl font-extrabold">Disconnect your X account</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              This unlinks @{session.handle}, removes your bio from the marketplace and signs you
+              out. You can reconnect any time. You can't disconnect while a sponsorship is live or a
+              payout is still being held.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button
+                onClick={() => onDisconnect(false)}
+                disabled={busy}
+                className="btn-outline-ink disabled:opacity-50"
+              >
+                {busy ? "Working…" : "Disconnect X"}
+              </button>
+              <button
+                onClick={() => onDisconnect(true)}
+                disabled={busy}
+                className="btn-outline-ink text-destructive disabled:opacity-50"
+              >
+                Disconnect and delete my data
+              </button>
+            </div>
+          </div>
+
+
 
 
 
