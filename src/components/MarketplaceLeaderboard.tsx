@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { ArrowUpRight, Share2, Trophy } from "lucide-react";
+import { ArrowUpRight, Share2 } from "lucide-react";
 import { money } from "@/lib/format";
 import type {
   MarketplaceActivity,
@@ -155,14 +155,12 @@ function LeaderboardRow({
   const owned = row.bioValueCents !== null && row.owner;
   const displayRank = row.globalRank ?? (owned ? position + 1 : null);
   return (
-    <article className="grid gap-4 border-x-2 border-b-2 border-border bg-card p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_0.6fr_auto] sm:items-center sm:gap-5 sm:px-5">
-      <div
-        className="flex items-center gap-1 font-mono text-2xl font-extrabold"
-        aria-label={isMostValuableLeader ? "#1 most valuable" : undefined}
-      >
-        {isMostValuableLeader ? (
-          <Trophy className="size-4 text-primary" aria-hidden="true" />
-        ) : null}
+    <article
+      className={`grid gap-4 border-x-2 border-b-2 border-border p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_0.6fr_auto] sm:items-center sm:gap-5 sm:px-5 ${
+        isMostValuableLeader ? "bg-[#d4af37]" : "bg-card"
+      }`}
+    >
+      <div className="font-mono text-2xl font-extrabold" aria-label={isMostValuableLeader ? "#1 most valuable" : undefined}>
         {displayRank ? `#${displayRank}` : "—"}
       </div>
       <CreatorIdentity row={row} />
@@ -420,9 +418,9 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         </div>
       </section>
 
-      <section className="mt-4 border-2 border-border bg-muted px-5 py-5 text-center">
-        <div className="label-xs">Total sponsorships since launch</div>
-        <div className="mt-1 text-2xl font-extrabold">{money(market.totalSponsorshipsCents)}</div>
+      <section className="mt-4 border-2 border-border bg-muted px-5 py-6 text-center">
+        <div className="label-xs text-sm">Total sponsorships since launch</div>
+        <div className="mt-1 text-4xl font-extrabold">{money(market.totalSponsorshipsCents)}</div>
       </section>
     </div>
   );
