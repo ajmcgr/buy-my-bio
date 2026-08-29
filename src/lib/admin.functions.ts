@@ -138,3 +138,233 @@ export const adminAction = createServerFn({ method: "POST" })
     }
     return { ok: true } as const;
   });
+
+/* ------------------------------------------------------------- transactions */
+
+export type AdminTransaction = {
+  paymentId: string;
+  buyer: string;
+  buyerEmail: string;
+  creator: string;
+  slug: string;
+  amountCents: number;
+  paymentStatus: string;
+  ownershipStatus: string | null;
+  placementStatus: string | null;
+  activationDeadline: string | null;
+  firstVerifiedAt: string | null;
+  verificationStatus: string | null;
+  verificationError: string | null;
+  payoutStatus: string | null;
+  releaseAt: string | null;
+  stripeTransferId: string | null;
+  refundStatus: string;
+  refundReason: string | null;
+  refundError: string | null;
+  stripeRefundId: string | null;
+  adminReview: boolean;
+  createdAt: string;
+  bucket: "attention" | "awaiting" | "active" | "pending_payout" | "refunded" | "failed";
+};
+
+/** One row per purchase, stitched from payments + ownerships + payouts. */
+export const getAdminTransactions = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .handler(async ({ data }) => {
+    const { requireAdmin } = await import("./authz.server");
+    const { admin } = await import("./db.server");
+    const gate = await requireAdmin(data.token);
+    if (!gate.ok) return { error: gate.error } as const;
+    const db = admin();
+
+    const { data: payments } = await db
+      .from("payments")
+      .select(
+        "id, listing_id, company_name, email, amount_cents, status, refund_status, refund_reason, refund_error, stripe_refund_id, admin_review_required, created_at",
+      )
+      .in("status", ["paid", "applied", "stale", "refunded"])
+      .order("created_at", { ascending: false })
+      .limit(150);
+
+    const ids = (payments ?? []).map((p) => p.id);
+    const listingIds = [...new Set((payments ?? []).map((p) => p.listing_id))];
+
+    const [ownerships, payouts, listings] = await Promise.all([
+      ids.length
+        ? db
+            .from("ownerships")
+            .select(
+              "payment_id, status, placement_status, activation_deadline, first_verified_at, bio_verification_status, last_verification_error",
+            )
+            .in("payment_id", ids)
+        : { data: [] as never[] },
+      ids.length
+        ? db
+            .from("payouts")
+            .select("payment_id, status, payout_status, release_at, stripe_transfer_id, last_error")
+            .in("payment_id", ids)
+        : { data: [] as never[] },
+      listingIds.length
+        ? db.from("listings").select("id, slug, creator_id").in("id", listingIds)
+        : { data: [] as never[] },
+    ]);
+
+    const creatorIds = [...new Set((listings.data ?? []).map((l) => l.creator_id))];
+    const { data: creators } = creatorIds.length
+      ? await db.from("creators").select("id, username, x_username").in("id", creatorIds)
+      : { data: [] as never[] };
+
+    const oMap = new Map((ownerships.data ?? []).map((o) => [o.payment_id, o]));
+    const pMap = new Map((payouts.data ?? []).map((p) => [p.payment_id, p]));
+    const lMap = new Map((listings.data ?? []).map((l) => [l.id, l]));
+    const cMap = new Map((creators ?? []).map((c) => [c.id, c]));
+
+    const rows: AdminTransaction[] = (payments ?? []).map((p) => {
+      const o = oMap.get(p.id) as Record<string, string | null> | undefined;
+      const po = pMap.get(p.id) as Record<string, string | null> | undefined;
+      const l = lMap.get(p.listing_id) as { slug: string; creator_id: string } | undefined;
+      const c = l ? (cMap.get(l.creator_id) as { username: string; x_username: string | null } | undefined) : undefined;
+
+      const refundStatus = String(p.refund_status ?? "none");
+      const placement = (o?.["placement_status"] as string | null) ?? null;
+      const payoutStatus = (po?.["payout_status"] as string | null) ?? null;
+
+      let bucket: AdminTransaction["bucket"] = "active";
+      if (
+        p.admin_review_required ||
+        refundStatus === "failed" ||
+        (po?.["status"] === "failed" as unknown) ||
+        placement === "non_compliant"
+      )
+        bucket = "attention";
+      else if (refundStatus === "refunded" || refundStatus === "pending") bucket = "refunded";
+      else if (placement === "activation_failed" || placement === "superseded_before_activation")
+        bucket = "failed";
+      else if (placement === "awaiting_activation") bucket = "awaiting";
+      else if (payoutStatus === "pending") bucket = "pending_payout";
+
+      return {
+        paymentId: p.id,
+        buyer: p.company_name,
+        buyerEmail: p.email,
+        creator: c?.x_username ?? c?.username ?? l?.slug ?? "—",
+        slug: l?.slug ?? "",
+        amountCents: p.amount_cents,
+        paymentStatus: String(p.status),
+        ownershipStatus: (o?.["status"] as string | null) ?? null,
+        placementStatus: placement,
+        activationDeadline: (o?.["activation_deadline"] as string | null) ?? null,
+        firstVerifiedAt: (o?.["first_verified_at"] as string | null) ?? null,
+        verificationStatus: (o?.["bio_verification_status"] as string | null) ?? null,
+        verificationError:
+          (o?.["last_verification_error"] as string | null) ??
+          (po?.["last_error"] as string | null) ??
+          null,
+        payoutStatus: payoutStatus ?? (po?.["status"] as string | null) ?? null,
+        releaseAt: (po?.["release_at"] as string | null) ?? null,
+        stripeTransferId: (po?.["stripe_transfer_id"] as string | null) ?? null,
+        refundStatus,
+        refundReason: (p.refund_reason as string | null) ?? null,
+        refundError: (p.refund_error as string | null) ?? null,
+        stripeRefundId: (p.stripe_refund_id as string | null) ?? null,
+        adminReview: Boolean(p.admin_review_required),
+        createdAt: p.created_at,
+        bucket,
+      };
+    });
+
+    return { rows } as const;
+  });
+
+/**
+ * Recovery actions. They call the SAME idempotent helpers as the cron jobs, so
+ * clicking twice can never create a second refund or transfer.
+ */
+export const adminTransactionAction = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) =>
+    tokenIn
+      .extend({
+        action: z.enum(["retry_refund", "retry_verification", "retry_payout", "clear_review"]),
+        paymentId: z.string().uuid(),
+      })
+      .parse(input),
+  )
+  .handler(async ({ data }) => {
+    const { requireAdmin } = await import("./authz.server");
+    const { admin } = await import("./db.server");
+    const gate = await requireAdmin(data.token);
+    if (!gate.ok) return { error: gate.error } as const;
+    const db = admin();
+
+    if (data.action === "clear_review") {
+      await db
+        .from("payments")
+        .update({ admin_review_required: false, admin_review_reason: null })
+        .eq("id", data.paymentId);
+      return { ok: true, result: "review_cleared" } as const;
+    }
+
+    if (data.action === "retry_refund") {
+      const { data: payment } = await db
+        .from("payments")
+        .select("id, refund_reason, needs_refund_reason, admin_review_required")
+        .eq("id", data.paymentId)
+        .maybeSingle();
+      if (!payment) return { error: "payment_not_found" } as const;
+      const { refundPayment, normalizeReason } = await import("./refunds.server");
+      const reason = normalizeReason(
+        (payment.refund_reason as string | null) ?? (payment.needs_refund_reason as string | null),
+      );
+      // An admin retry is an explicit decision, so it may proceed even when the
+      // payout already went out — still fully idempotent per payment.
+      const result = await refundPayment(data.paymentId, reason, {
+        allowAfterPayout: Boolean(payment.admin_review_required),
+      });
+      return { ok: true, result: result.status } as const;
+    }
+
+    if (data.action === "retry_verification") {
+      const { data: ownership } = await db
+        .from("ownerships")
+        .select("id, listing_id, payment_id, bio_message, destination_url, first_verified_at")
+        .eq("payment_id", data.paymentId)
+        .maybeSingle();
+      if (!ownership) return { error: "ownership_not_found" } as const;
+      const { data: listing } = await db
+        .from("listings")
+        .select("creator_id")
+        .eq("id", ownership.listing_id)
+        .maybeSingle();
+      const { data: creator } = listing
+        ? await db
+            .from("creators")
+            .select("id, username, x_user_id")
+            .eq("id", listing.creator_id)
+            .maybeSingle()
+        : { data: null };
+      if (!creator) return { error: "creator_not_found" } as const;
+      const { checkPlacement } = await import("./verification.server");
+      const result = await checkPlacement({
+        creatorId: creator.id,
+        username: creator.username,
+        xUserId: creator.x_user_id ? String(creator.x_user_id) : null,
+        message: (ownership.bio_message as string | null) ?? null,
+        url: (ownership.destination_url as string | null) ?? null,
+      });
+      if (result.outcome === "match" && !ownership.first_verified_at) {
+        const { markActivated } = await import("./activation.server");
+        await markActivated(ownership.id, ownership.payment_id, new Date().toISOString());
+      }
+      return { ok: true, result: result.outcome } as const;
+    }
+
+    const { data: payout } = await db
+      .from("payouts")
+      .select("id")
+      .eq("payment_id", data.paymentId)
+      .maybeSingle();
+    if (!payout) return { error: "payout_not_found" } as const;
+    const { releaseOne } = await import("./payouts.server");
+    const result = await releaseOne(payout.id);
+    return { ok: true, result } as const;
+  });
