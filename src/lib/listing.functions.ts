@@ -12,6 +12,7 @@ export type OwnerView = {
   click_count: number;
   status: string;
   payment_id?: string | null;
+  bio_message?: string | null;
 };
 
 export type ListingView = {

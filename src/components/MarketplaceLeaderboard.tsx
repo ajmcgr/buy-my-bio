@@ -91,32 +91,34 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
 }
 
 function SponsorDetails({ row }: { row: MarketplaceRow }) {
+  const sponsor = row.owner;
+  if (!sponsor) return null;
+
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      {row.owner?.logo_url ? (
-        <img
-          src={row.owner.logo_url}
-          alt={`${row.owner.company_name} logo`}
-          className="size-8 shrink-0 border-2 border-border object-contain"
-          loading="lazy"
-        />
+    <div className="min-w-0">
+      <div className="label-xs">Sponsored by</div>
+      <a
+        href={sponsor.destination_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-1 flex min-w-0 items-center gap-2 hover:underline"
+      >
+        {sponsor.logo_url ? (
+          <img
+            src={sponsor.logo_url}
+            alt={`${sponsor.company_name} logo`}
+            className="size-8 shrink-0 border-2 border-border object-contain"
+            loading="lazy"
+          />
+        ) : null}
+        <span className="truncate font-semibold">{sponsor.company_name}</span>
+        <ArrowUpRight className="size-3.5 shrink-0" />
+      </a>
+      {sponsor.bio_message ? (
+        <p className="mt-1 truncate text-xs leading-snug text-muted-foreground">
+          {sponsor.bio_message}
+        </p>
       ) : null}
-      <div className="min-w-0">
-        <div className="label-xs">Sponsored</div>
-        {row.owner ? (
-          <a
-            href={row.owner.destination_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-0.5 flex min-w-0 items-center gap-1 font-bold hover:underline"
-          >
-            <span className="truncate">{row.owner.company_name}</span>
-            <ArrowUpRight className="size-3.5 shrink-0" />
-          </a>
-        ) : (
-          <div className="mt-0.5 font-bold">—</div>
-        )}
-      </div>
     </div>
   );
 }
@@ -177,9 +179,7 @@ function LeaderboardRow({
           <div className="mt-0.5 font-mono text-[0.65rem] font-bold">Unsponsored</div>
         ) : null}
       </div>
-      <div className="min-w-0">
-        <SponsorDetails row={row} />
-      </div>
+      {row.owner ? <SponsorDetails row={row} /> : <div aria-hidden="true" />}
       <div>
         <div className="label-xs">Sponsor clicks</div>
         <div className="mt-0.5 text-xl font-extrabold">
