@@ -175,14 +175,14 @@ function Admin() {
         ))}
       </div>
 
-      <h2 className="mt-10 text-lg font-extrabold">Payouts & verification</h2>
+      <h2 className="mt-10 text-lg font-extrabold">Payouts & sponsorship status</h2>
       <div className="panel mt-3 divide-y-2 divide-border">
         {data.payouts.map((p) => (
           <div key={p.id} className="grid gap-1 px-4 py-3 text-sm sm:grid-cols-4 sm:items-center">
             <span className="font-bold">{money(p.amount_cents)}</span>
             <span className="font-mono text-xs">{p.status}</span>
             <span className="font-mono text-xs">
-              bio: {p.bio_verification_status}
+              sponsorship: {p.bio_verification_status}
               {p.last_bio_verified_at
                 ? ` · ok ${new Date(p.last_bio_verified_at).toLocaleDateString()}`
                 : ""}

@@ -6,7 +6,7 @@
  * the platform until ALL of the following are true at release time:
  *   - the hold window has elapsed
  *   - the payment is still `applied` and not refunded, live-mode
- *   - the sponsored placement was fulfilled on BuyMyBio.com
+ *   - the sponsorship was created on BuyMyBio.com
  *   - the creator's connected account has transfers enabled
  */
 
@@ -134,7 +134,7 @@ export async function releaseOne(payoutId: string): Promise<string> {
   if (!payout) return "blocked: payout_missing";
   if (payout.status === "paid") return "paid";
   if (payout.status === "cancelled") return "blocked: cancelled";
-  // Hard requirement: the creator only earns once the placement was verified live.
+  // Website-only settlement marks the sponsorship live at payment time.
   if (!payout.first_verified_at) return block(payoutId, "never_activated");
   if (!payout.release_at || new Date(payout.release_at).getTime() > Date.now())
     return "blocked: hold_not_elapsed";

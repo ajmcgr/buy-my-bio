@@ -21,8 +21,8 @@ export const Route = createFileRoute("/api/public/release-payouts")({
         }
         if (diff !== 0) return new Response("Unauthorized", { status: 401 });
 
-        // Daily bio verification sweep first (during the hold AND after payout),
-        // then release everything that is still eligible.
+        // Keep legacy-record maintenance separate from the website-only payout
+        // flow, then release everything that is still eligible.
         const { runActivationSweep } = await import("@/lib/activation.server");
         const activation = await runActivationSweep();
         const { runPlacementSweep, resolveUnresolvedFinalVerifications } =

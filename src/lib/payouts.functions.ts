@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 const tokenIn = z.object({ token: z.string().min(10).max(200) });
+const DEFAULT_HOLD_DAYS = 7;
 
 export type PayoutStatus = {
   configured: boolean;
@@ -67,7 +68,7 @@ export const getPayoutStatus = createServerFn({ method: "POST" })
       connected: Boolean(creator.stripe_account_id),
       payoutsEnabled: Boolean(creator.stripe_payouts_enabled),
       detailsSubmitted: Boolean(creator.stripe_details_submitted),
-      holdDays: Number.isFinite(holdRaw) && holdRaw >= 0 ? holdRaw : 3,
+      holdDays: Number.isFinite(holdRaw) && holdRaw >= 0 ? holdRaw : DEFAULT_HOLD_DAYS,
       feePercentage: Number(rows?.[0]?.fee_percentage ?? 20),
       pendingCents: items
         .filter((i) => i.status === "pending" || i.status === "blocked")

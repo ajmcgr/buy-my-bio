@@ -401,8 +401,8 @@ function PayoutsPanel({
       <div className="label-xs">Step 3</div>
       <h2 className="mt-1 text-xl font-extrabold">Get paid</h2>
       <p className="mt-2 text-sm text-muted-foreground">
-        Buyers pay Buy My Bio. We hold your share for {status?.holdDays ?? 3} days, re-check that
-        your sponsorship is live on BuyMyBio.com, then transfer it to your bank via Stripe.
+        Buyers pay Buy My Bio. We hold your share for 7 days, then transfer it to your bank via
+        Stripe.
       </p>
 
       {status ? (
