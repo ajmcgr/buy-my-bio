@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
-import { ArrowUpRight, Radio, Share2, Trophy } from "lucide-react";
+import { ArrowUpRight, Share2, Trophy } from "lucide-react";
 import { money } from "@/lib/format";
 import type {
   MarketplaceActivity,
