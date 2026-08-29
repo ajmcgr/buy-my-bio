@@ -9,6 +9,8 @@ import type {
   MarketplaceSort,
 } from "@/lib/marketplace.server";
 import { getSupabase } from "@/integrations/supabase/browser";
+import { getSiteTraffic } from "@/lib/analytics.functions";
+
 import { BuyDialog } from "./BuyDialog";
 import { XIcon } from "./XIcon";
 
