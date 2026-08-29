@@ -339,6 +339,29 @@ export async function releaseOne(payoutId: string): Promise<string> {
       })
       .eq("id", ownership.id);
 
+  return transferPayout(payoutId, payout, payment, creator, retrievePaymentIntent, createTransfer);
+}
+
+type PayoutRow = { id: string; payment_id: string; amount_cents: number };
+type PaymentRow = { stripe_payment_intent: string | null };
+type CreatorRow = { stripe_account_id: string };
+
+/** Moves the money. Assumes every eligibility guard already passed. */
+async function transferPayout(
+  payoutId: string,
+  payout: PayoutRow,
+  payment: PaymentRow,
+  creator: CreatorRow,
+  retrievePaymentIntent: (id: string) => Promise<unknown>,
+  createTransfer: (opts: {
+    amountCents: number;
+    destination: string;
+    sourceTransaction: string | null;
+    payoutId: string;
+    paymentId: string;
+  }) => Promise<Record<string, unknown>>,
+): Promise<string> {
+  const db = admin();
   // Prefer settling against the original charge so the funds are traceable.
   let sourceTransaction: string | null = null;
   if (payment.stripe_payment_intent) {
