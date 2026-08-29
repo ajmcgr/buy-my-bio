@@ -33,14 +33,18 @@ begin
       and column_name = 'first_verified_at'
   ) then
     execute $q$
-      update public.ownerships
+      update public.ownerships o
         set final_verification_status = 'verified',
-            final_verified_at = coalesce(last_bio_verified_at, placement_ended_at, ended_at)
-        where final_verification_status is null
-          and status <> 'active'
-          and first_verified_at is not null
-          and coalesce(placement_end_reason, 'outbid') = 'outbid'
-          and coalesce(bio_verification_status, 'verified') <> 'failed'
+            final_verified_at = coalesce(
+              nullif(to_jsonb(o) ->> 'last_bio_verified_at', '')::timestamptz,
+              nullif(to_jsonb(o) ->> 'placement_ended_at', '')::timestamptz,
+              o.ended_at
+            )
+        where o.final_verification_status is null
+          and o.status <> 'active'
+          and o.first_verified_at is not null
+          and coalesce(to_jsonb(o) ->> 'placement_end_reason', 'outbid') = 'outbid'
+          and coalesce(to_jsonb(o) ->> 'bio_verification_status', 'verified') <> 'failed'
     $q$;
 
     execute $q$
