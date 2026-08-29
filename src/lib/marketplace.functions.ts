@@ -12,6 +12,7 @@ function emptyMarketplace(sort: MarketplaceSort): MarketplaceSnapshot {
     activity: [],
     ownedCount: 0,
     totalMarketValueCents: 0,
+    totalSponsorshipsCents: 0,
   };
 }
 

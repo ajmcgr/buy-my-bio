@@ -33,6 +33,7 @@ export type MarketplaceSnapshot = {
   activity: MarketplaceActivity[];
   ownedCount: number;
   totalMarketValueCents: number;
+  totalSponsorshipsCents: number;
 };
 
 type CreatorRow = {
@@ -280,5 +281,6 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
     activity,
     ownedCount: owned.length,
     totalMarketValueCents: owned.reduce((sum, row) => sum + (row.bioValueCents ?? 0), 0),
+    totalSponsorshipsCents: genuineOwnerships.reduce((sum, ownership) => sum + ownership.amount_cents, 0),
   };
 }
