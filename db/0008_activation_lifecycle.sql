@@ -13,19 +13,62 @@ comment on column public.ownerships.placement_status is
 
 -- Backfill legacy rows: anything that already existed was treated as live.
 update public.ownerships
-  set first_verified_at = coalesce(first_verified_at, last_bio_verified_at, started_at),
-      activated_at = coalesce(activated_at, last_bio_verified_at, started_at),
+  set first_verified_at = coalesce(first_verified_at, started_at),
+      activated_at = coalesce(activated_at, started_at),
       activation_deadline = coalesce(activation_deadline, started_at + interval '24 hours')
   where first_verified_at is null;
 
 update public.ownerships
   set placement_status = case
-        when status = 'active' and bio_verification_status = 'failed' then 'non_compliant'
         when status = 'active' then 'active'
-        when placement_end_reason = 'seller_removed' then 'non_compliant'
         else 'outbid'
       end
   where placement_status = 'awaiting_activation';
+
+-- These refinements depend on optional columns introduced by 0006/0007.
+-- Dynamic SQL prevents PostgreSQL from resolving columns that are absent.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ownerships'
+      and column_name = 'last_bio_verified_at'
+  ) then
+    execute $sql$
+      update public.ownerships
+      set first_verified_at = coalesce(last_bio_verified_at, first_verified_at),
+          activated_at = coalesce(last_bio_verified_at, activated_at)
+      where last_bio_verified_at is not null
+    $sql$;
+  end if;
+
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ownerships'
+      and column_name = 'bio_verification_status'
+  ) then
+    execute $sql$
+      update public.ownerships
+      set placement_status = 'non_compliant'
+      where status = 'active' and bio_verification_status = 'failed'
+    $sql$;
+  end if;
+
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'ownerships'
+      and column_name = 'placement_end_reason'
+  ) then
+    execute $sql$
+      update public.ownerships
+      set placement_status = 'non_compliant'
+      where placement_end_reason = 'seller_removed'
+    $sql$;
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------- payouts
 alter table public.payouts
@@ -40,7 +83,7 @@ comment on column public.payouts.payout_status is
 
 -- Backfill existing payouts from the old hold_until behaviour.
 update public.payouts p
-  set first_verified_at = coalesce(p.first_verified_at, o.first_verified_at, p.last_bio_verified_at),
+  set first_verified_at = coalesce(p.first_verified_at, o.first_verified_at),
       release_at = coalesce(p.release_at, p.hold_until)
   from public.ownerships o
   where o.payment_id = p.payment_id
@@ -48,8 +91,25 @@ update public.payouts p
 
 update public.payouts
   set release_at = coalesce(release_at, hold_until),
-      first_verified_at = coalesce(first_verified_at, last_bio_verified_at)
+      first_verified_at = coalesce(first_verified_at, created_at)
   where release_at is null;
+
+-- Preserve the more accurate legacy verification timestamp when 0006 exists.
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'payouts'
+      and column_name = 'last_bio_verified_at'
+  ) then
+    execute $sql$
+      update public.payouts
+      set first_verified_at = coalesce(last_bio_verified_at, first_verified_at)
+      where last_bio_verified_at is not null
+    $sql$;
+  end if;
+end $$;
 
 update public.payouts
   set payout_status = case
