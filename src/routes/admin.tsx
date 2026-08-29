@@ -83,6 +83,8 @@ function Admin() {
         ))}
       </div>
 
+      {token && <Transactions token={token} />}
+
       <h2 className="mt-10 text-lg font-extrabold">Creators</h2>
       <div className="panel mt-3 divide-y-2 divide-border">
         {data.creators.map((c) => {
