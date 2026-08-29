@@ -199,7 +199,7 @@ export async function failPlacement(
 
   await db.from("placement_violations").insert({
     creator_id: ctx.creatorId,
-    listing_id: ctx.listingId,
+    listing_id: ctx.listingId || null,
     ownership_id: ctx.ownershipId,
     payout_id: ctx.payoutId,
     phase,
@@ -212,15 +212,16 @@ export async function failPlacement(
     detail: reason,
   });
   await db.from("creators").update({ x_bio_verified: false }).eq("id", ctx.creatorId);
-  await db
-    .from("listings")
-    .update({
-      status: "suspended",
-      compliance_status: "non_compliant",
-      non_compliant_since: now,
-      non_compliant_reason: reason,
-    })
-    .eq("id", ctx.listingId);
+  if (ctx.listingId)
+    await db
+      .from("listings")
+      .update({
+        status: "suspended",
+        compliance_status: "non_compliant",
+        non_compliant_since: now,
+        non_compliant_reason: reason,
+      })
+      .eq("id", ctx.listingId);
 
   const { recordEvent } = await import("./events.server");
   await recordEvent("verification_failed", {
