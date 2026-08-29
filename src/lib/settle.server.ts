@@ -184,18 +184,20 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     paymentId: payment.id,
     listingId: payment.listing_id,
     ownershipId,
-    detail: { status: "awaiting_activation" },
+    detail: { status: WEBSITE_ONLY_SPONSORSHIP ? "live" : "awaiting_activation" },
   });
 
-  // The buyer paid, but the creator has NOT delivered yet: start the 24-hour
-  // activation window and void any earlier purchase that was never activated.
-  try {
-    const { startActivationWindow, supersedeUnactivated } = await import("./activation.server");
-    await startActivationWindow(ownershipId, new Date().toISOString());
-    await supersedeUnactivated(payment.listing_id, ownershipId);
-  } catch (e) {
-    console.error("activation window setup failed", e);
+  if (!WEBSITE_ONLY_SPONSORSHIP) {
+    // Legacy: the buyer paid, but the creator has NOT delivered yet.
+    try {
+      const { startActivationWindow, supersedeUnactivated } = await import("./activation.server");
+      await startActivationWindow(ownershipId, new Date().toISOString());
+      await supersedeUnactivated(payment.listing_id, ownershipId);
+    } catch (e) {
+      console.error("activation window setup failed", e);
+    }
   }
+
 
   // context for emails
   const { data: listing } = await db
