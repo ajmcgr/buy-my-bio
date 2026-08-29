@@ -1,7 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Share2 } from "lucide-react";
 import { getCreatorSession, verifyMyBio, type CreatorSession } from "@/lib/creator.functions";
+import {
+  getPayoutStatus,
+  startPayoutOnboarding,
+  refreshPayoutAccount,
+  payoutDashboardLink,
+  type PayoutStatus,
+} from "@/lib/payouts.functions";
 import { money } from "@/lib/format";
 
 export const Route = createFileRoute("/creator")({
