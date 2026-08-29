@@ -19,9 +19,48 @@ const sorts: Array<{ value: MarketplaceSort; label: string }> = [
   { value: "affordable", label: "Affordable" },
 ];
 
+function TrafficCounters() {
+  const [traffic, setTraffic] = useState<{ pageviews: number; online: number } | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const load = () => {
+      getSiteTraffic()
+        .then((t) => {
+          if (alive) setTraffic(t);
+        })
+        .catch(() => {
+          /* counters are decorative */
+        });
+    };
+    load();
+    const id = setInterval(load, 30_000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, []);
+
+  if (!traffic) return <p className="font-mono text-xs font-bold text-primary">&nbsp;</p>;
+
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs font-bold text-primary">
+      <span>{traffic.pageviews.toLocaleString()} page views</span>
+      <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+        <span className="relative flex h-2 w-2">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
+        </span>
+        {traffic.online.toLocaleString()} online now
+      </span>
+    </p>
+  );
+}
+
 function handleOf(row: MarketplaceRow) {
   return row.creator.x_username ?? row.creator.social_handle ?? row.creator.username;
 }
+
 
 function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: boolean }) {
   const handle = handleOf(row);
