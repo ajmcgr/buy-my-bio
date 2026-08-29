@@ -1,3 +1,4 @@
+import { SPONSOR_PREFIX } from "./placement";
 import { baseUrl } from "./db.server";
 
 const FROM = "Buy My Bio <noreply@buymybio.com>";
@@ -203,7 +204,7 @@ export async function sendBuyerAwaitingActivationEmail(o: {
       ${p(`You bought the sponsored slot in <b>@${o.handle}</b>'s X bio. They have up to 24 hours to add your placement — we'll email you the moment we verify it live.`)}
       ${facts([
         ["You paid", money(o.amountCents)],
-        ["Your message", o.message ?? "\u2014"],
+        ["Your placement", o.message ? `${SPONSOR_PREFIX} ${o.message}` : "\u2014"],
         ["Your link", o.destination],
         ["Status", "Waiting for the creator to update their X bio"],
       ])}
@@ -224,10 +225,10 @@ export async function sendCreatorActionRequiredEmail(o: {
     "New bio owner — action required within 24 hours",
     shell(`
       ${h1("New owner. Action required")}
-      ${p("Somebody just bought the sponsored slot in your X bio. Add their message and link to your bio within 24 hours or the sale is cancelled and the buyer is refunded.")}
+      ${p("Somebody just bought the sponsored placement in your X bio. Add the text and link below to your bio exactly as shown \u2014 including the \u201CSponsored:\u201D label, which keeps the placement clearly disclosed as advertising \u2014 within 24 hours, or the sale is cancelled and the buyer is refunded.")}
       ${facts([
         ["Sale", money(o.amountCents)],
-        ["Message to add", o.message ?? "\u2014"],
+        ["Text to add", o.message ? `${SPONSOR_PREFIX} ${o.message}` : "\u2014"],
         ["Link to add", o.destination],
         ["Activate before", new Date(o.deadline).toUTCString()],
       ])}
