@@ -56,7 +56,7 @@ function FAQPage() {
       <div className="mt-10 grid gap-6 sm:grid-cols-3">
         {[
           ["1. Buy", "Pay more than the current owner. The price is set by the last sale plus a minimum increase."],
-          ["2. Own", "Once the creator activates it, your \u201CSponsored:\u201D message + tracked link sits in their X bio. Own the placement until someone pays more."],
+          ["2. Own", "Your \u201CSponsored:\u201D message + tracked link goes live instantly on the creator's Buy My Bio profile. Own it until someone pays more."],
           ["3. Get outbid", "Someone pays more, they take over, and you get an email with the new price."],
         ].map(([t, d]) => (
           <div key={t} className="panel px-5 py-6">
