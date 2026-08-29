@@ -48,10 +48,7 @@ function About() {
             to take it back.
           </p>
 
-          <p>
-            Every sponsor, price and click stays on the public record. Nothing is posted to or
-            changed on X; X is used only to verify creator identity and public profile details.
-          </p>
+          <p>Every sponsor, price and click stays on the public record.</p>
         </div>
 
         <div className="mt-12">

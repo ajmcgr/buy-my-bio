@@ -108,8 +108,7 @@ export function validatePlacement(input: {
   if (limit <= 0) {
     return {
       ok: false,
-      error:
-        "This link is too long to fit alongside the creator's own bio text. Use a shorter link.",
+      error: "This link is too long for the sponsor spot. Use a shorter link.",
       limit: 0,
     };
   }

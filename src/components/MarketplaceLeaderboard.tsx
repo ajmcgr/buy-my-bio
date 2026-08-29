@@ -257,8 +257,7 @@ function AddYourBio() {
             Add your bio
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Connect X to add your profile and let anyone sponsor it on Buy My Bio. Nothing is posted
-            or changed on X.
+            Connect X to add your profile and let anyone sponsor it on Buy My Bio.
           </p>
         </div>
         <form

@@ -114,13 +114,8 @@ export function BuyDialog({
 
         <div className="border-b-2 border-border px-5 py-4 text-sm text-foreground">
           <p>
-            You're buying a <b>sponsored placement</b> — a disclosed advertising message and tracked
-            link on this creator's Buy My Bio profile.
-          </p>
-          <p className="mt-2 text-foreground/75">
-            You are not buying the X account, username, profile photo, banner, posts, or any access
-            to the account, and nothing is added to the creator's X profile. The placement appears
-            on buymybio.com only.
+            You're buying the <b>sponsor spot</b> on this creator's Buy My Bio profile. Your message
+            and link stay there until somebody pays more.
           </p>
           <p className="mt-2 text-foreground/75">
             Your placement is always published with a “{SPONSOR_PREFIX}” label so it's clear to
@@ -231,7 +226,7 @@ export function BuyDialog({
             </p>
             <p className="mt-1 text-muted-foreground">
               Your sponsored message goes live on this creator's Buy My Bio profile immediately
-              after payment. Nothing needs to change on X.
+              after payment.
             </p>
           </div>
 

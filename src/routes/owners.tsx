@@ -47,8 +47,7 @@ function OwnersPage() {
         Top sponsors
       </h1>
       <p className="mt-4 max-w-2xl text-muted-foreground">
-        The brands holding the most valuable sponsored bio slots, ranked by genuine current Bio
-        Value.
+        The brands holding the most valuable sponsorships, ranked by genuine current Bio Value.
       </p>
 
       {numberOne?.owner ? (

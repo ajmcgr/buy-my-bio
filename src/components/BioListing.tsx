@@ -186,14 +186,8 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
             </button>
             <div className="panel mt-6 px-5 py-5 text-sm">
               <p>
-                <span className="font-bold">What you get:</span> you're buying a sponsored message +
-                tracked link on this creator's Buy My Bio profile. This sponsorship appears on
-                BuyMyBio.com only.
-              </p>
-              <p className="mt-2 text-muted-foreground">
-                <span className="font-bold text-foreground">What you don't get:</span> you are not
-                buying the X account, username, profile photo, banner, posts or access to the
-                account.
+                <span className="font-bold">What you get:</span> your sponsored message and tracked
+                link on this creator's Buy My Bio profile until somebody pays more.
               </p>
             </div>
           </>

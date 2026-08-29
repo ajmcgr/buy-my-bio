@@ -154,12 +154,12 @@ export async function sendOutbidEmail(o: {
 
 const REFUND_COPY: Record<string, { title: string; body: string }> = {
   creator_failed_to_activate: {
-    title: "Placement wasn't activated",
-    body: "The creator didn't activate your sponsored placement in time, so your payment has been refunded.",
+    title: "Sponsorship couldn't go live",
+    body: "Your sponsorship couldn't go live, so your payment has been refunded.",
   },
   outbid_before_activation: {
-    title: "Placement wasn't activated",
-    body: "Another buyer took the slot before your placement went live, so you were never charged for a sponsorship you didn't receive. Your payment has been refunded.",
+    title: "Someone paid first",
+    body: "Another buyer took the spot before your sponsorship went live, so your payment has been refunded.",
   },
   creator_removed_active_placement: {
     title: "Placement was removed",
@@ -184,7 +184,7 @@ export async function sendRefundEmail(o: { to: string; amountCents: number; reas
         ["Status", "Refund issued"],
       ])}
       ${p("Your bank or card provider may take additional time to show the refund.")}
-      ${button(baseUrl(), "Browse bios \u2192")}
+      ${button(baseUrl(), "Browse profiles \u2192")}
     `),
   );
 }
@@ -198,7 +198,7 @@ export async function sendBuyerAwaitingActivationEmail(o: {
 }) {
   await send(
     o.to,
-    `Purchase successful — waiting on @${o.handle}`,
+    "Your sponsorship is live on Buy My Bio",
     shell(`
       ${h1("Purchase successful")}
       ${p(`You sponsored <b>@${o.handle}</b> on Buy My Bio. Your placement is published on BuyMyBio.com only.`)}
@@ -208,7 +208,6 @@ export async function sendBuyerAwaitingActivationEmail(o: {
         ["Your link", o.destination],
         ["Status", "Live on Buy My Bio"],
       ])}
-      ${p("Nothing is posted to or changed on the creator's X account.")}
     `),
   );
 }
@@ -226,9 +225,9 @@ export async function sendCreatorActionRequiredEmail(o: {
     shell(
       `
       ${h1("You have a new sponsor")}
-      ${p("Somebody just sponsored your Buy My Bio profile. The disclosed message and link are already live on BuyMyBio.com; no action on X is required.")}
+      ${p("Somebody just sponsored your Buy My Bio profile. Their message and link are live now.")}
       ${facts([
-        ["Sale", money(o.amountCents)],
+        ["Sponsorship", money(o.amountCents)],
         ["Sponsored message", o.message ? `${SPONSOR_PREFIX} ${o.message}` : "\u2014"],
         ["Destination", o.destination],
         ["Status", "Live on Buy My Bio"],
@@ -249,9 +248,9 @@ export async function sendPlacementVerifiedEmail(o: {
   const buyer = o.audience === "buyer";
   await send(
     o.to,
-    buyer ? "You're live" : "Placement verified",
+    buyer ? "Your sponsorship is live" : "Your profile has a new sponsor",
     shell(`
-      ${h1(buyer ? "You're live" : "Placement verified")}
+      ${h1(buyer ? "Your sponsorship is live" : "Your profile has a new sponsor")}
       ${p(
         buyer
           ? `Your sponsored spot on <b>@${o.handle}</b>'s Buy My Bio profile is active. It's yours until somebody pays more.`
@@ -271,7 +270,7 @@ export async function sendListingSuspendedEmail(o: { to: string; reason: string 
     shell(
       `
       ${h1("Listing suspended")}
-      ${p(`Your Buy My Bio listing was suspended (${o.reason}). No changes to your X profile are required; open your dashboard for details.`)}
+      ${p(`Your Buy My Bio listing was suspended (${o.reason}). Open your dashboard for details.`)}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
       "You received this because you listed your profile on Buy My Bio.",
@@ -286,7 +285,7 @@ export async function sendPlacementMismatchWarningEmail(o: { to: string; reason:
     shell(
       `
       ${h1("Review your sponsored placement")}
-      ${p(`Your Buy My Bio placement needs review (${o.reason}). Nothing needs to be changed on X; open your dashboard for details.`)}
+      ${p(`Your Buy My Bio placement needs review (${o.reason}). Open your dashboard for details.`)}
       ${button(`${baseUrl()}/creator`, "Open your dashboard \u2192")}
     `,
       "You received this because you listed your profile on Buy My Bio.",

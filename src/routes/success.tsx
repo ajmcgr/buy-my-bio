@@ -32,7 +32,7 @@ export const Route = createFileRoute("/success")({
     <div className="mx-auto max-w-xl px-5 py-24 text-center">
       <h1 className="text-3xl font-extrabold">We couldn't confirm this payment yet.</h1>
       <p className="mt-2 text-muted-foreground">
-        If you were charged, your ownership will appear within a minute. Check your email.
+        If you were charged, your sponsorship will appear within a minute. Check your email.
       </p>
     </div>
   ),
@@ -55,7 +55,7 @@ function Success() {
         </h1>
         <p className="mt-3 text-muted-foreground">
           {testMode
-            ? "This was a Stripe test-mode checkout, so it cannot create ownership or public Bio Value."
+            ? "This was a Stripe test-mode checkout, so it cannot create a sponsorship or public Bio Value."
             : stale
               ? "The price moved before your payment landed. You'll be refunded automatically — no charge sticks."
               : "We're still confirming your payment. This page updates within a minute."}
@@ -77,12 +77,11 @@ function Success() {
         <p className="font-semibold">Your sponsored placement is live.</p>
         <p className="mt-1 text-sm text-muted-foreground">
           It's showing on this creator's Buy My Bio profile right now, and stays there until
-          somebody pays more. Nothing changes on the creator's X profile.
+          somebody pays more.
         </p>
         <p className="mt-2 text-sm text-muted-foreground">
-          Your placement goes live with a “Sponsored:” label so it's clearly disclosed as paid
-          advertising. You've bought a sponsored slot on this creator's Buy My Bio profile — not
-          their X account.
+          Your message and link appear with a “Sponsored:” label so the placement is clearly
+          disclosed.
         </p>
       </div>
       {result.globalRank === 1 ? (

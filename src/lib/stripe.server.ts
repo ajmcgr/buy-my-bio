@@ -41,9 +41,9 @@ export async function createCheckoutSession(opts: {
       "line_items[0][quantity]": 1,
       "line_items[0][price_data][currency]": "usd",
       "line_items[0][price_data][unit_amount]": opts.amountCents,
-      "line_items[0][price_data][product_data][name]": `Ownership of @${opts.creatorHandle}'s bio link`,
+      "line_items[0][price_data][product_data][name]": `Sponsor @${opts.creatorHandle} on Buy My Bio`,
       "line_items[0][price_data][product_data][description]":
-        "You own the destination of the Buy My Bio link until someone pays more.",
+        "Your sponsor spot stays live until someone pays more.",
       customer_email: opts.email,
       "metadata[payment_id]": opts.paymentId,
       "payment_intent_data[metadata][payment_id]": opts.paymentId,

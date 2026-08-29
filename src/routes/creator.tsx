@@ -27,7 +27,7 @@ export const Route = createFileRoute("/creator")({
       { property: "og:title", content: "Add Your Profile — Buy My Bio" },
       {
         property: "og:description",
-        content: "Connect X to verify your identity, then list your profile on Buy My Bio.",
+        content: "Connect X to confirm your identity, then list your profile on Buy My Bio.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -143,9 +143,8 @@ function CreatorPage() {
         Add your profile
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Connect your real X account to verify your identity, then choose when to list your profile
-        publicly. This sponsorship appears on BuyMyBio.com only — you are never required to edit
-        your X bio or take any action on X.
+        Connect X to confirm your identity, then put your profile up for sponsorship on
+        BuyMyBio.com.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
@@ -155,17 +154,10 @@ function CreatorPage() {
       ) : !session ? (
         <div className="panel mt-8 p-6">
           <div className="label-xs">Get listed</div>
-          <h2 className="mt-1 text-xl font-semibold">Connect X to verify your account</h2>
+          <h2 className="mt-1 text-xl font-semibold">Connect X to confirm your account</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            You stay in control. Buy My Bio never edits your X profile — the connection is
-            read-only, used only to verify your identity and pull your public profile. We never
-            post, DM, follow or change anything on your account.
-          </p>
-          <p className="mt-3 text-sm text-muted-foreground">
-            You're listing a <b>sponsored slot</b> on your Buy My Bio profile — not your account and
-            not your X bio. Payments are for sponsorship on BuyMyBio.com only. You are never
-            required to edit your X bio, post, follow, like, repost, reply or perform any other
-            action on X. Every placement is labelled “Sponsored on Buy My Bio”.
+            Your connection confirms your identity and imports your public profile. Sponsorships
+            appear on BuyMyBio.com.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
@@ -201,9 +193,8 @@ function CreatorPage() {
               <div className="label-xs">Not listed yet</div>
               <h2 className="mt-1 text-xl font-semibold">List my profile</h2>
               <p className="mt-2 text-sm text-muted-foreground">
-                Connecting X does not list you publicly. Publish when you're ready — your profile
-                then appears in the marketplace and buyers can sponsor it. This sponsorship appears
-                on BuyMyBio.com only.
+                Connecting X does not list you publicly. Publish when you're ready, then buyers can
+                sponsor your profile on BuyMyBio.com.
               </p>
               <button
                 onClick={onPublish}
@@ -277,9 +268,8 @@ function CreatorPage() {
                   `${session.ownerMessage}${session.ownerUrl ? ` ${session.ownerUrl}` : ""}`}
               </div>
               <p className="mt-3 text-sm text-muted-foreground">
-                This sponsorship appears on your Buy My Bio profile only. You never have to change
-                your X bio, and Buy My Bio never edits your X profile. Each sale is paid out 7 days
-                after purchase, and being outbid doesn't affect payouts you've already earned.
+                Each sponsorship is paid out 7 days after purchase. Being outbid doesn't affect
+                payouts you've already earned.
               </p>
             </div>
           ) : null}

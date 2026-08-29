@@ -22,33 +22,27 @@ export const Route = createFileRoute("/faq")({
 });
 
 const faqs: [string, string][] = [
+  ["What is Buy My Bio?", "Buy My Bio lets people sponsor creator profiles on BuyMyBio.com."],
   [
-    "How does Buy My Bio work?",
-    "X creators list a sponsored slot on their Buy My Bio profile. Anyone can buy that slot at the current price. Your sponsored message and link go live immediately on buymybio.com and stay there until somebody pays more.",
+    "How does sponsorship work?",
+    "Pay the current price to take the sponsor spot. Your message and link go live immediately and stay until somebody pays more.",
   ],
+  ["Where does my sponsor appear?", "On the creator's profile on BuyMyBio.com."],
   [
-    "Does the sponsorship appear in the creator's X bio?",
-    "No. The sponsored placement appears on the creator's Buy My Bio profile only. Creators never have to edit their X bio or take any action on X.",
-  ],
-  [
-    "How long do I own a slot?",
+    "How long does a sponsorship last?",
     "Until somebody pays more. There is no fixed sponsorship period and no deadline.",
   ],
   [
     "What happens when somebody pays more?",
-    "The new buyer takes over the slot on the creator's Buy My Bio profile and your ownership ends normally. You get an email with the new price.",
-  ],
-  [
-    "How quickly does my sponsorship go live?",
-    "Instantly. As soon as your payment succeeds, your placement is live on buymybio.com.",
+    "The new sponsor takes the spot. You get an email with the new price so you can take it back.",
   ],
   [
     "When do creators get paid?",
-    "Creators keep 80% of every sale. Earnings are held for 7 days after purchase as a standard risk and chargeback window, then paid out automatically to their connected Stripe account. Being outbid during that window doesn't affect a payout you've already earned.",
+    "Creators keep 80% of every sponsorship. Earnings are held for 7 days after purchase as a standard risk and chargeback window, then paid out automatically to their connected Stripe account. Being outbid during that window doesn't affect a payout you've already earned.",
   ],
   [
-    "Can someone buy a slot immediately after another person buys it?",
-    "Yes. There is no waiting period. If someone pays the next price, they take over instantly, and every purchase is tracked separately.",
+    "Do I need to change anything on X?",
+    "No. Sponsorships appear on BuyMyBio.com only. You do not need to change your X profile or take any action on X.",
   ],
   [
     "How long can my sponsored message be?",
@@ -59,28 +53,8 @@ const faqs: [string, string][] = [
     "Yes. Buy My Bio generates the \u201CSponsored:\u201D label automatically and buyers can't remove or reword it.",
   ],
   [
-    "Am I buying an X account?",
-    "No. You're buying a disclosed sponsored placement \u2014 an advertising message and tracked link \u2014 on a creator's Buy My Bio profile. You never get the account, username, password, profile photo, banner, posts or any access to it.",
-  ],
-  [
     "What isn't allowed in a sponsored message?",
-    "Messages must be honest advertising. You can't impersonate the creator, X Corp, Buy My Bio, or anyone else; you can't imply that you own, run, work for or are endorsed by the account beyond the paid placement; and you can't post adult content, illegal goods, malware, scams or hate speech. We moderate messages as well as destinations.",
-  ],
-  [
-    "Is Buy My Bio affiliated with X?",
-    "No. Buy My Bio is an independent marketplace. We are not affiliated with, endorsed by or sponsored by X Corp, and \u201CX\u201D is a trademark of X Corp.",
-  ],
-  [
-    "Does Buy My Bio control my X account?",
-    "No. The X connection is read-only and used to verify your identity and pull your public profile. We never post, edit your profile, send DMs or change anything on your account.",
-  ],
-  [
-    "Why do I connect X?",
-    "Connecting X proves you control the account you're listing and provides your handle, name, photo and follower count. That's all it's used for.",
-  ],
-  [
-    "Can buyers access my X account?",
-    "No. Buyers never receive access to your account, credentials or X connection.",
+    "Messages must be honest advertising. You can't impersonate the creator or anyone else, and you can't promote adult content, illegal goods, malware, scams or hate speech. We moderate messages and destinations.",
   ],
   ["Can I sponsor my own profile?", "No. Creators can't buy or outbid their own sponsor spot."],
   [
