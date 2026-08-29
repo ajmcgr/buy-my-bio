@@ -400,13 +400,6 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         ) : null}
       </section>
 
-      <div className="border-x-2 border-b-2 border-border bg-muted px-5 py-4 text-center">
-        <div className="label-xs">Total sponsorships since launch</div>
-        <div className="mt-1 text-2xl font-extrabold">
-          {money(market.totalSponsorshipsCents)}
-        </div>
-      </div>
-
       {showSeparateUnowned ? (
         <section className="mt-12" aria-labelledby="unowned-heading">
           <div className="mb-3 flex items-end justify-between gap-4">
@@ -465,6 +458,13 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
               <Share2 className="size-4" /> Share #1
             </a>
           ) : null}
+        </div>
+      </section>
+
+      <section className="mt-4 border-2 border-border bg-muted px-5 py-5 text-center">
+        <div className="label-xs">Total sponsorships since launch</div>
+        <div className="mt-1 text-2xl font-extrabold">
+          {money(market.totalSponsorshipsCents)}
         </div>
       </section>
     </div>
