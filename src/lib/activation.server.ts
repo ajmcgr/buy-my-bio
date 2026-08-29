@@ -85,19 +85,22 @@ async function killPayout(paymentId: string, reason: string) {
  */
 export async function markActivated(ownershipId: string, paymentId: string, nowIso: string) {
   const db = admin();
-  const { data: existing } = await db
+  const { data: existing, error: ownershipReadError } = await db
     .from("ownerships")
     .select("first_verified_at")
     .eq("id", ownershipId)
     .maybeSingle();
-  const firstVerifiedAt = (existing?.first_verified_at as string | null) ?? nowIso;
+  if (ownershipReadError)
+    throw new Error(`activation ownership lookup failed: ${ownershipReadError.message}`);
+  if (!existing) throw new Error("activation ownership is missing");
 
-  await db
+  const existingFirstVerifiedAt = existing.first_verified_at as string | null;
+  const { data: newlyActivated, error: ownershipUpdateError } = await db
     .from("ownerships")
     .update({
       placement_status: "active",
-      activated_at: (existing?.first_verified_at as string | null) ?? nowIso,
-      first_verified_at: firstVerifiedAt,
+      activated_at: nowIso,
+      first_verified_at: nowIso,
       bio_verification_status: "verified",
       last_bio_verified_at: nowIso,
       last_verification_attempt_at: nowIso,
@@ -105,20 +108,22 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
       verification_failure_at: null,
       verification_failure_reason: null,
     })
-    .eq("id", ownershipId);
+    .eq("id", ownershipId)
+    .is("first_verified_at", null)
+    .select("first_verified_at")
+    .maybeSingle();
+  if (ownershipUpdateError)
+    throw new Error(`activation ownership update failed: ${ownershipUpdateError.message}`);
+
+  const firstVerifiedAt =
+    (newlyActivated?.first_verified_at as string | null) ?? existingFirstVerifiedAt;
+  if (!firstVerifiedAt) throw new Error("activation timestamp was not recorded");
 
   const releaseAt = new Date(
     new Date(firstVerifiedAt).getTime() + holdDays() * 86_400_000,
   ).toISOString();
 
-  const { recordEvent } = await import("./events.server");
-  await recordEvent("placement_verified", {
-    paymentId,
-    ownershipId,
-    detail: { first_verified_at: firstVerifiedAt },
-  });
-
-  await db
+  const { error: payoutUpdateError } = await db
     .from("payouts")
     .update({
       first_verified_at: firstVerifiedAt,
@@ -132,8 +137,20 @@ export async function markActivated(ownershipId: string, paymentId: string, nowI
     })
     .eq("payment_id", paymentId)
     .neq("status", "paid");
+  if (payoutUpdateError)
+    throw new Error(`activation payout update failed: ${payoutUpdateError.message}`);
 
-  await notifyActivated(ownershipId, paymentId, releaseAt);
+  // The first writer emits lifecycle activity and emails. Retries only repair
+  // database state, avoiding duplicate activity for the same sponsorship.
+  if (newlyActivated) {
+    const { recordEvent } = await import("./events.server");
+    await recordEvent("placement_verified", {
+      paymentId,
+      ownershipId,
+      detail: { first_verified_at: firstVerifiedAt },
+    });
+    await notifyActivated(ownershipId, paymentId, releaseAt);
+  }
 }
 
 /** Tells the buyer they're live and the creator when they become payable. */

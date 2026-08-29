@@ -49,7 +49,7 @@ export const Route = createFileRoute("/terms")({
       </p>
       <p>
         Creators may pause a listing or reject a destination. If a listing is permanently removed
-        while you own it, you'll receive a pro-rated refund at our discretion.
+        while your sponsorship is active, you'll receive a pro-rated refund at our discretion.
       </p>
       <p>Payments are processed by Stripe. We never store card details.</p>
     </article>

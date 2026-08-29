@@ -20,7 +20,10 @@ function holdDays(): number {
   return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_HOLD_DAYS;
 }
 
-/** Called after a takeover is applied. Idempotent via the unique payment_id. */
+/**
+ * Ensures the applied payment has its one creator payout. The database unique
+ * constraint on payment_id makes webhook and success-page retries safe.
+ */
 export async function recordPayout(opts: {
   paymentId: string;
   listingId: string;
@@ -38,7 +41,7 @@ export async function recordPayout(opts: {
     .select("id, creator_id, platform_fee_percentage")
     .eq("id", opts.listingId)
     .maybeSingle();
-  if (!listing) return;
+  if (!listing) throw new Error("payout listing is missing");
 
   const feePct = Number(listing.platform_fee_percentage ?? 20);
   const feeCents = Math.round((opts.grossCents * feePct) / 100);
@@ -61,9 +64,10 @@ export async function recordPayout(opts: {
     payout_status: "not_eligible",
     status: "pending",
   });
-  // A duplicate key just means the webhook and the success page both settled.
-  if (error && !String(error.message).includes("duplicate")) {
-    console.error("recordPayout failed", error);
+  // A duplicate key just means a prior settlement attempt already created the
+  // payout. Any other failure must reach the webhook so Stripe retries it.
+  if (error && error.code !== "23505") {
+    throw new Error(`recordPayout failed: ${error.message}`);
   }
 }
 

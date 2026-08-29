@@ -143,8 +143,7 @@ function CreatorPage() {
         Add your profile
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Connect X to confirm your identity, then put your profile up for sponsorship on
-        BuyMyBio.com.
+        Connect X to confirm your identity, then list your profile on BuyMyBio.com.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}

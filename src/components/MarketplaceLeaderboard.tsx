@@ -160,7 +160,10 @@ function LeaderboardRow({
         isMostValuableLeader ? "bg-[#d4af37]" : "bg-card"
       }`}
     >
-      <div className="font-mono text-2xl font-extrabold" aria-label={isMostValuableLeader ? "#1 most valuable" : undefined}>
+      <div
+        className="font-mono text-2xl font-extrabold"
+        aria-label={isMostValuableLeader ? "#1 most valuable" : undefined}
+      >
         {displayRank ? `#${displayRank}` : "—"}
       </div>
       <CreatorIdentity row={row} />
@@ -194,8 +197,8 @@ function ActivityLine({ item }: { item: MarketplaceActivity }) {
     item.type === "listed"
       ? `@${item.handle} entered the market`
       : item.globalRank === 1
-        ? `${item.companyName} just took the #1 bio`
-        : `${item.companyName} ${item.previousOwner ? "stole" : "bought"} @${item.handle}`;
+        ? `${item.companyName} just took the #1 sponsorship spot`
+        : `${item.companyName} is now sponsoring @${item.handle}`;
   return (
     <div className="flex flex-col gap-1 border-b border-border/30 py-3 last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <Link
@@ -295,10 +298,10 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           <div className="flex flex-col items-center">
             <TrafficCounters />
             <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
-              What’s your X profile worth?
+              How much are you worth?
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
-              Put your profile up for sponsorship and find out.
+              Add your profile to Buy My Bio and find out.
             </p>
           </div>
         </div>

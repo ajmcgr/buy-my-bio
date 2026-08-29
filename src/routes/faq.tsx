@@ -7,12 +7,12 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "Buy the sponsored slot on a creator's Buy My Bio profile. Pay more than the current owner, own the message and tracked link, and get outbid when someone pays more.",
+          "Sponsor a creator on BuyMyBio.com. Your message and tracked link stay in the sponsor spot until somebody pays more.",
       },
       { property: "og:title", content: "Buy My Bio FAQ" },
       {
         property: "og:description",
-        content: "Pay more than the current owner and the sponsored slot is yours. No deadline.",
+        content: "Pay more than the current sponsor to take the sponsorship spot. No deadline.",
       },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary" },
@@ -56,7 +56,7 @@ const faqs: [string, string][] = [
     "What isn't allowed in a sponsored message?",
     "Messages must be honest advertising. You can't impersonate the creator or anyone else, and you can't promote adult content, illegal goods, malware, scams or hate speech. We moderate messages and destinations.",
   ],
-  ["Can I sponsor my own profile?", "No. Creators can't buy or outbid their own sponsor spot."],
+  ["Can I sponsor my own profile?", "No. Creators can't sponsor or outbid their own sponsor spot."],
   [
     "How do refunds work?",
     "If a placement can't be delivered, or a purchase is cancelled for policy or moderation reasons, the payment is automatically refunded in full to the original payment method. Refunds usually appear within 5-10 business days.",

@@ -22,6 +22,35 @@ export type SettleResult =
   | { status: "unknown" };
 
 /**
+ * Completes the idempotent work that must exist after an ownership has been
+ * applied. This deliberately runs for both a newly applied payment and an
+ * `already_applied` retry, so a temporary post-takeover failure is repaired by
+ * the next Stripe webhook delivery without recreating ownership or activity.
+ */
+async function ensurePostTakeoverSettlement(opts: {
+  paymentId: string;
+  listingId: string;
+  ownershipId: string;
+  grossCents: number;
+  stripeLivemode: boolean;
+}) {
+  if (opts.stripeLivemode) {
+    const { recordPayout } = await import("./payouts.server");
+    await recordPayout({
+      paymentId: opts.paymentId,
+      listingId: opts.listingId,
+      ownershipId: opts.ownershipId,
+      grossCents: opts.grossCents,
+    });
+  }
+
+  if (WEBSITE_ONLY_SPONSORSHIP) {
+    const { markActivated } = await import("./activation.server");
+    await markActivated(opts.ownershipId, opts.paymentId, new Date().toISOString());
+  }
+}
+
+/**
  * Idempotent: verifies the Stripe session server-side, then applies the takeover
  * through a locking SQL function so only one owner can ever exist.
  */
@@ -135,6 +164,14 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
           .eq("id", slugRow.creator_id)
           .maybeSingle()
       : { data: null };
+    if (!own?.id) throw new Error("applied payment is missing its ownership");
+    await ensurePostTakeoverSettlement({
+      paymentId: payment.id,
+      listingId: payment.listing_id,
+      ownershipId: own.id,
+      grossCents: payment.amount_cents,
+      stripeLivemode,
+    });
     let existingRank: number | null = null;
     try {
       const { loadMarketplace } = await import("./marketplace.server");
@@ -157,7 +194,17 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     };
   }
 
-  const ownershipId = String(r["ownership_id"]);
+  const ownershipId = r["ownership_id"];
+  if (typeof ownershipId !== "string" || !ownershipId)
+    throw new Error("takeover did not return an ownership id");
+
+  await ensurePostTakeoverSettlement({
+    paymentId: payment.id,
+    listingId: payment.listing_id,
+    ownershipId,
+    grossCents: payment.amount_cents,
+    stripeLivemode,
+  });
 
   // The transition happened: record the outgoing owner's final verification.
   // A confirmed mismatch here is creator non-compliance (blocks that payout and
@@ -294,32 +341,6 @@ export async function settleCheckoutSession(sessionId: string): Promise<SettleRe
     }
   } catch (e) {
     console.error("email failure", e);
-  }
-
-  // Record the creator's 80% share. The website sponsorship is fulfilled the
-  // moment payment succeeds, ownership is assigned and the placement is live on
-  // buymybio.com, so the 7-day risk hold starts now.
-  if (stripeLivemode) {
-    try {
-      const { recordPayout } = await import("./payouts.server");
-      await recordPayout({
-        paymentId: payment.id,
-        listingId: payment.listing_id,
-        ownershipId,
-        grossCents: payment.amount_cents,
-      });
-    } catch (e) {
-      console.error("recordPayout failed", e);
-    }
-  }
-
-  if (WEBSITE_ONLY_SPONSORSHIP) {
-    try {
-      const { markActivated } = await import("./activation.server");
-      await markActivated(ownershipId, payment.id, new Date().toISOString());
-    } catch (e) {
-      console.error("website fulfillment failed", e);
-    }
   }
 
   await db.from("analytics_events").insert({
