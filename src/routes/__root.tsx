@@ -197,8 +197,8 @@ function HamburgerMenu() {
           >
             About
           </Link>
-
           <Link
+
             to="/terms"
             onClick={() => setOpen(false)}
             className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
