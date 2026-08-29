@@ -45,8 +45,8 @@ export function BuyDialog({
         data: {
           username: view.creator.username,
           companyName: String(f.get("company") ?? ""),
-          bioMessage: String(f.get("biomessage") ?? ""),
-          destinationUrl: String(f.get("destination") ?? ""),
+          bioMessage: msg,
+          destinationUrl: link.trim(),
           email: String(f.get("email") ?? ""),
           xHandle: String(f.get("xhandle") ?? "") || null,
           logoUrl: String(f.get("logo") ?? "") || null,
