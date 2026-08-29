@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
+import { useServerFn } from "@tanstack/react-start";
 import { ArrowUpRight, Share2 } from "lucide-react";
 import { money } from "@/lib/format";
+import { getSiteTraffic } from "@/lib/analytics.functions";
 import type {
   MarketplaceActivity,
   MarketplaceRow,
@@ -21,6 +23,15 @@ const sorts: Array<{ value: MarketplaceSort; label: string }> = [
 ];
 
 function TrafficCounters() {
+  const getTraffic = useServerFn(getSiteTraffic);
+  const [traffic, setTraffic] = useState<{ pageviews: number; online: number } | null>(null);
+
+  useEffect(() => {
+    void getTraffic()
+      .then(setTraffic)
+      .catch(() => undefined);
+  }, [getTraffic]);
+
   return (
     <a
       href="https://cloud.umami.is/share/3BTUSlr3W6nAGqWJ"
@@ -28,7 +39,8 @@ function TrafficCounters() {
       rel="noopener noreferrer"
       className="font-mono text-xs font-bold text-primary hover:underline"
     >
-      Total visitors 1,360 ↗
+      Total visitors {traffic ? traffic.pageviews.toLocaleString() : "—"} · {traffic?.online ?? "—"}{" "}
+      live ↗
     </a>
   );
 }
