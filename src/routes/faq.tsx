@@ -70,7 +70,7 @@ function FAQPage() {
 
 
       <Link to="/" className="btn-ink btn-ink-hover mt-12">
-        See the current price
+        See the Bios
       </Link>
     </div>
   );
