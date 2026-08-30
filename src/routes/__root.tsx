@@ -234,11 +234,7 @@ function SiteHeader() {
     };
   }, [locationHref]);
 
-  const creatorCta = creatorSession
-    ? creatorSession.publiclyListed
-      ? "Your profile"
-      : "Finish your profile"
-    : "Add your profile";
+  const creatorCta = creatorSession ? "Profile" : "Add your profile";
 
   return (
     <header>

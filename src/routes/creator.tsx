@@ -148,7 +148,7 @@ function CreatorPage() {
   return (
     <div className="mx-auto max-w-2xl px-5 py-14">
       <h1 className="text-[clamp(2rem,7vw,3.25rem)] leading-[0.9] font-semibold tracking-[-0.05em]">
-        Add your profile
+        {session ? "Profile" : "Add your profile"}
       </h1>
       <p className="mt-4 text-muted-foreground">
         Connect X to confirm your identity, then add your profile to Social Bid.
