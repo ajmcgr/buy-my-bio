@@ -185,6 +185,13 @@ function HamburgerMenu() {
       {open ? (
         <div className="absolute right-0 z-50 mt-3 w-52 overflow-hidden rounded-2xl bg-card py-2 shadow-[0_10px_40px_rgba(0,0,0,0.14)] ring-1 ring-black/5">
           <Link
+            to="/owners"
+            onClick={() => setOpen(false)}
+            className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            Sponsors
+          </Link>
+          <Link
             to="/about"
             onClick={() => setOpen(false)}
             className="block px-5 py-3 text-base text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -249,9 +256,6 @@ function SiteHeader() {
         <nav className="flex items-center gap-3 whitespace-nowrap text-xs font-bold sm:gap-6 sm:text-sm sm:font-medium">
           <Link to="/" className="hover:underline">
             Rankings
-          </Link>
-          <Link to="/owners" className="hidden hover:underline sm:inline">
-            Sponsors
           </Link>
           <Link to="/faq" className="hover:underline">
             FAQ
