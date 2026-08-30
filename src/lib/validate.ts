@@ -30,3 +30,9 @@ export function safeLogoUrl(raw?: string | null): string | null {
 export function isEmail(v: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
 }
+
+/** A structurally valid address that can safely be sent to by a provider. */
+export function isDeliverableEmail(value?: string | null): value is string {
+  const email = value?.trim().toLowerCase() ?? "";
+  return Boolean(email) && isEmail(email) && !email.endsWith(".invalid");
+}

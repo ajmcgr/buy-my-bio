@@ -1,5 +1,6 @@
 import { SPONSOR_PREFIX } from "./placement";
 import { baseUrl } from "./db.server";
+import { isDeliverableEmail } from "./validate";
 
 const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@socialbid.co>";
 const LOGO_URL = `${baseUrl()}/social-bid-logo.png`;
@@ -14,12 +15,12 @@ async function send(
   options: SendOptions = {},
 ): Promise<EmailSendResult | { sent: false }> {
   const key = process.env["RESEND_API_KEY"];
-  if (!key || !to) {
+  if (!key || !isDeliverableEmail(to)) {
     const error = new Error(
-      !key ? "RESEND_API_KEY is not configured" : "email recipient is missing",
+      !key ? "RESEND_API_KEY is not configured" : "email recipient is missing or invalid",
     );
     if (options.throwOnFailure) throw error;
-    console.error("resend failed", error.message);
+    console.error("resend skipped", { reason: !key ? "not_configured" : "invalid_recipient" });
     return { sent: false };
   }
   try {

@@ -32,6 +32,7 @@ export type CreatorSession = {
     deadline: string | null;
     firstVerifiedAt: string | null;
   } | null;
+  notificationEmail: string | null;
 };
 
 export const getCreatorSession = createServerFn({ method: "POST" })
@@ -54,6 +55,12 @@ export const getCreatorSession = createServerFn({ method: "POST" })
       .eq("session_token", token)
       .maybeSingle();
     if (!c) return null;
+
+    const { data: notification } = await db
+      .from("creator_notification_emails")
+      .select("notification_email")
+      .eq("creator_id", c.id)
+      .maybeSingle();
 
     // Keep this lookup for dashboard-only metadata, but do not use it to decide
     // whether the profile is public. The marketplace snapshot below is the
@@ -123,6 +130,7 @@ export const getCreatorSession = createServerFn({ method: "POST" })
         ? buildPlacementText(ownerMessage, ownerUrl, normalizeFormat(ownerFormat))
         : null,
       activation,
+      notificationEmail: (notification?.notification_email as string | null) ?? null,
       compliance: listing
         ? {
             status: String(listing.compliance_status ?? "compliant"),
@@ -130,6 +138,46 @@ export const getCreatorSession = createServerFn({ method: "POST" })
           }
         : null,
     };
+  });
+
+const notificationEmailIn = z.object({ email: z.string().trim().max(160) });
+
+export const updateNotificationEmail = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => notificationEmailIn.parse(input))
+  .handler(async ({ data }) => {
+    const [{ admin }, { creatorSessionToken }, { isDeliverableEmail }] = await Promise.all([
+      import("./db.server"),
+      import("./creator-session.server"),
+      import("./validate"),
+    ]);
+    const email = data.email.trim().toLowerCase();
+    if (!isDeliverableEmail(email))
+      return { error: "Enter a valid email address for notifications." } as const;
+
+    const token = creatorSessionToken();
+    if (!token) return { error: "Session expired. Connect X again." } as const;
+    const db = admin();
+    const { data: creator } = await db
+      .from("creators")
+      .select("id")
+      .eq("session_token", token)
+      .maybeSingle();
+    if (!creator) return { error: "Session expired. Connect X again." } as const;
+    const { data: notification, error } = await db
+      .from("creator_notification_emails")
+      .upsert(
+        {
+          creator_id: creator.id,
+          notification_email: email,
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "creator_id" },
+      )
+      .select("notification_email")
+      .maybeSingle();
+    if (error || !notification)
+      return { error: "We couldn't save your notification email. Please try again." } as const;
+    return { notificationEmail: String(notification.notification_email) } as const;
   });
 
 /**

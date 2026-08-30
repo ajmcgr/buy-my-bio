@@ -5,6 +5,7 @@ import {
   getCreatorSession,
   disconnectXAccount,
   publishListing,
+  updateNotificationEmail,
   type CreatorSession,
 } from "@/lib/creator.functions";
 import {
@@ -54,6 +55,7 @@ function CreatorPage() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [payouts, setPayouts] = useState<PayoutStatus | null>(null);
+  const [notificationEmail, setNotificationEmail] = useState("");
 
   const loadPayouts = useCallback(() => {
     void getPayoutStatus({ data: {} }).then((p) => setPayouts(p));
@@ -70,7 +72,10 @@ function CreatorPage() {
       window.history.replaceState({}, "", "/creator");
     }
     void getCreatorSession({ data: {} })
-      .then((s) => setSession(s))
+      .then((s) => {
+        setSession(s);
+        setNotificationEmail(s?.notificationEmail ?? "");
+      })
       .finally(() => setLoading(false));
 
     if (stripeReturn) {
@@ -122,6 +127,20 @@ function CreatorPage() {
             ? "X is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect. Past transaction records are retained."
             : "X is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect.",
     );
+  }
+
+  async function onSaveNotificationEmail() {
+    if (!session) return;
+    setBusy(true);
+    const res = await updateNotificationEmail({ data: { email: notificationEmail } });
+    setBusy(false);
+    if ("error" in res) {
+      setMessage(res.error);
+      return;
+    }
+    setSession({ ...session, notificationEmail: res.notificationEmail });
+    setNotificationEmail(res.notificationEmail);
+    setMessage("Notification email saved.");
   }
 
   return (
@@ -195,6 +214,44 @@ function CreatorPage() {
           <div className="mt-4 flex flex-wrap gap-3">
             <Badge on={session.accountVerified} label="X connected" />
             <Badge on={session.publiclyListed} label="Profile live" />
+          </div>
+
+          <div className="panel mt-6 p-6">
+            {!session.notificationEmail ? (
+              <>
+                <div className="label-xs">Don't miss a sponsor</div>
+                <h2 className="mt-1 text-xl font-semibold">Add your email</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Add your email and we'll let you know when someone sponsors or outbids you.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="label-xs">Email for notifications</div>
+                <h2 className="mt-1 text-xl font-semibold">Notification email</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  We'll email you when someone sponsors or outbids your profile.
+                </p>
+              </>
+            )}
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+              <input
+                type="email"
+                value={notificationEmail}
+                onChange={(event) => setNotificationEmail(event.target.value)}
+                placeholder="you@example.com"
+                aria-label="Email for notifications"
+                className="min-w-0 flex-1 border-2 border-border bg-background px-3 py-2.5 text-sm outline-none"
+              />
+              <button
+                type="button"
+                onClick={onSaveNotificationEmail}
+                disabled={busy}
+                className="btn-ink btn-ink-hover shrink-0 disabled:opacity-50"
+              >
+                {busy ? "Saving…" : session.notificationEmail ? "Save email" : "Add email"}
+              </button>
+            </div>
           </div>
 
           {session.bioVerified ? (

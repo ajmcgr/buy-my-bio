@@ -1,18 +1,24 @@
 import { admin } from "./db.server";
+import { isDeliverableEmail } from "./validate";
 
-/** Creators have no email column — their address lives on the auth user. */
+/** Notification email is explicit creator contact data, never the synthetic X identity user. */
 export async function creatorEmail(creatorId: string): Promise<string | null> {
   try {
     const db = admin();
-    const { data: creator } = await db
-      .from("creators")
-      .select("user_id")
-      .eq("id", creatorId)
+    const { data: notification } = await db
+      .from("creator_notification_emails")
+      .select("notification_email")
+      .eq("creator_id", creatorId)
       .maybeSingle();
-    const userId = (creator?.user_id as string | null) ?? null;
-    if (!userId) return null;
-    const { data } = await db.auth.admin.getUserById(userId);
-    return data.user?.email ?? null;
+    const email = (notification?.notification_email as string | null) ?? null;
+    if (!isDeliverableEmail(email)) {
+      console.warn("creator notification email unavailable", {
+        creatorId,
+        reason: email ? "invalid" : "missing",
+      });
+      return null;
+    }
+    return email.trim().toLowerCase();
   } catch (e) {
     console.error("creatorEmail lookup failed", e);
     return null;
