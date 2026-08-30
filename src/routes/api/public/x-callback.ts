@@ -139,9 +139,7 @@ export const Route = createFileRoute("/api/public/x-callback")({
         return new Response(null, {
           status: 302,
           headers: {
-            Location: `/creator?t=${encodeURIComponent(sessionToken)}&connected=${encodeURIComponent(
-              xUser.username,
-            )}`,
+            Location: `/creator?connected=${encodeURIComponent(xUser.username)}`,
             "Set-Cookie": `bmb_creator_session=${encodeURIComponent(sessionToken)}; Path=/; Max-Age=2592000; HttpOnly; Secure; SameSite=Lax`,
           },
         });

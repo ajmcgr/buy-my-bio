@@ -2,7 +2,7 @@ import { buildPlacementText, normalizeFormat } from "./placement";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const tokenIn = z.object({ token: z.string().min(10).max(200) });
+const creatorSessionIn = z.object({});
 
 export type CreatorSession = {
   username: string;
@@ -35,18 +35,23 @@ export type CreatorSession = {
 };
 
 export const getCreatorSession = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .inputValidator((input: unknown) => creatorSessionIn.parse(input))
   .handler(async ({ data }): Promise<CreatorSession | null> => {
-    const { admin } = await import("./db.server");
+    const [{ admin }, { creatorSessionToken }] = await Promise.all([
+      import("./db.server"),
+      import("./creator-session.server"),
+    ]);
     const { requiredPlacement } = await import("./x.server");
     const db = admin();
+    const token = creatorSessionToken();
+    if (!token) return null;
 
     const { data: c } = await db
       .from("creators")
       .select(
         "id, username, display_name, x_username, x_profile_image_url, x_profile_url, x_follower_count, x_account_verified, x_bio_verified, x_bio_verified_method, banned",
       )
-      .eq("session_token", data.token)
+      .eq("session_token", token)
       .maybeSingle();
     if (!c) return null;
 
@@ -132,14 +137,19 @@ export const getCreatorSession = createServerFn({ method: "POST" })
  * never listed publicly until the creator clicks "List my profile".
  */
 export const publishListing = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .inputValidator((input: unknown) => creatorSessionIn.parse(input))
   .handler(async ({ data }) => {
-    const { admin } = await import("./db.server");
+    const [{ admin }, { creatorSessionToken }] = await Promise.all([
+      import("./db.server"),
+      import("./creator-session.server"),
+    ]);
     const db = admin();
+    const token = creatorSessionToken();
+    if (!token) return { error: "Session expired. Connect X again." } as const;
     const { data: c } = await db
       .from("creators")
       .select("id, banned, x_account_verified")
-      .eq("session_token", data.token)
+      .eq("session_token", token)
       .maybeSingle();
     if (!c || c.banned) return { error: "Session expired. Connect X again." } as const;
     if (!c.x_account_verified) return { error: "Connect X before listing your profile." } as const;
@@ -155,7 +165,6 @@ export const publishListing = createServerFn({ method: "POST" })
   });
 
 const disconnectIn = z.object({
-  token: z.string().min(10).max(200),
   deleteData: z.boolean().optional(),
 });
 
@@ -172,13 +181,18 @@ const disconnectIn = z.object({
 export const disconnectXAccount = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => disconnectIn.parse(input))
   .handler(async ({ data }) => {
-    const { admin } = await import("./db.server");
+    const [{ admin }, { creatorSessionToken }] = await Promise.all([
+      import("./db.server"),
+      import("./creator-session.server"),
+    ]);
     const db = admin();
+    const token = creatorSessionToken();
+    if (!token) return { error: "Session expired. Connect X again." } as const;
 
     const { data: c } = await db
       .from("creators")
       .select("id")
-      .eq("session_token", data.token)
+      .eq("session_token", token)
       .maybeSingle();
     if (!c) return { error: "Session expired. Connect X again." } as const;
 

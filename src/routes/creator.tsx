@@ -36,8 +36,6 @@ export const Route = createFileRoute("/creator")({
   component: CreatorPage,
 });
 
-const STORAGE_KEY = "bmb_creator_token";
-
 function Badge({ on, label }: { on: boolean; label: string }) {
   return (
     <span
@@ -51,15 +49,14 @@ function Badge({ on, label }: { on: boolean; label: string }) {
 }
 
 function CreatorPage() {
-  const [token, setToken] = useState<string | null>(null);
   const [session, setSession] = useState<CreatorSession | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [payouts, setPayouts] = useState<PayoutStatus | null>(null);
 
-  const loadPayouts = useCallback((t: string) => {
-    void getPayoutStatus({ data: { token: t } }).then((p) => setPayouts(p));
+  const loadPayouts = useCallback(() => {
+    void getPayoutStatus({ data: {} }).then((p) => setPayouts(p));
   }, []);
 
   useEffect(() => {
@@ -69,44 +66,36 @@ function CreatorPage() {
     const connected = params.get("connected");
     if (connected && !err) setMessage(`X connected — @${connected}`);
     const stripeReturn = params.get("stripe");
-    const fromUrl = params.get("t");
-    if (fromUrl || stripeReturn) {
-      if (fromUrl) localStorage.setItem(STORAGE_KEY, fromUrl);
+    if (connected || stripeReturn) {
       window.history.replaceState({}, "", "/creator");
     }
-    const t = fromUrl ?? localStorage.getItem(STORAGE_KEY);
-    setToken(t);
-    if (!t) {
-      setLoading(false);
-      return;
-    }
-    void getCreatorSession({ data: { token: t } })
+    void getCreatorSession({ data: {} })
       .then((s) => setSession(s))
       .finally(() => setLoading(false));
 
     if (stripeReturn) {
-      void refreshPayoutAccount({ data: { token: t } }).then(() => loadPayouts(t));
+      void refreshPayoutAccount({ data: {} }).then(() => loadPayouts());
     } else {
-      loadPayouts(t);
+      loadPayouts();
     }
   }, [loadPayouts]);
 
   async function onPublish() {
-    if (!token) return;
+    if (!session) return;
     setBusy(true);
-    const res = await publishListing({ data: { token } });
+    const res = await publishListing({ data: {} });
     setBusy(false);
     if ("error" in res) {
       setMessage(res.error);
       return;
     }
     setMessage("Your profile is now listed on Social Bid.");
-    const next = await getCreatorSession({ data: { token } });
+    const next = await getCreatorSession({ data: {} });
     setSession(next);
   }
 
   async function onDisconnect(deleteData: boolean) {
-    if (!token) return;
+    if (!session) return;
     const obligation = Boolean(session?.ownerMessage || session?.activation);
     const obligationWarning =
       "Disconnecting X will keep your profile in the rankings but stop it from accepting new sponsors. It does not cancel any current sponsorship or pending payout obligations.";
@@ -116,14 +105,12 @@ function CreatorPage() {
     if (!window.confirm(obligation ? `${obligationWarning}\n\n${warn}` : warn)) return;
     setBusy(true);
     setMessage(null);
-    const res = await disconnectXAccount({ data: { token, deleteData } });
+    const res = await disconnectXAccount({ data: { deleteData } });
     setBusy(false);
     if ("error" in res) {
       setMessage(res.error);
       return;
     }
-    localStorage.removeItem(STORAGE_KEY);
-    setToken(null);
     setSession(null);
     setPayouts(null);
     setMessage(
@@ -273,9 +260,7 @@ function CreatorPage() {
             </div>
           ) : null}
 
-          {token ? (
-            <PayoutsPanel token={token} status={payouts} onChange={() => loadPayouts(token)} />
-          ) : null}
+          {session ? <PayoutsPanel status={payouts} onChange={loadPayouts} /> : null}
 
           <div className="panel mt-8 p-6">
             <div className="label-xs">Account</div>
@@ -363,22 +348,14 @@ function payoutLabel(status: string): string {
   }
 }
 
-function PayoutsPanel({
-  token,
-  status,
-  onChange,
-}: {
-  token: string;
-  status: PayoutStatus | null;
-  onChange: () => void;
-}) {
+function PayoutsPanel({ status, onChange }: { status: PayoutStatus | null; onChange: () => void }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function onConnect() {
     setBusy(true);
     setError(null);
-    const res = await startPayoutOnboarding({ data: { token } });
+    const res = await startPayoutOnboarding({ data: {} });
     if ("error" in res) {
       setError(res.error);
       setBusy(false);
@@ -389,7 +366,7 @@ function PayoutsPanel({
 
   async function onDashboard() {
     setBusy(true);
-    const res = await payoutDashboardLink({ data: { token } });
+    const res = await payoutDashboardLink({ data: {} });
     setBusy(false);
     if ("url" in res) window.open(res.url, "_blank", "noopener");
     else setError(res.error);

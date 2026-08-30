@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const tokenIn = z.object({ token: z.string().min(10).max(200) });
+const creatorSessionIn = z.object({});
 const PAYOUT_HOLD_DAYS = 7;
 
 export type PayoutStatus = {
@@ -24,9 +24,14 @@ export type PayoutStatus = {
   }[];
 };
 
-async function creatorFromToken(token: string) {
-  const { admin } = await import("./db.server");
+async function creatorFromToken() {
+  const [{ admin }, { creatorSessionToken }] = await Promise.all([
+    import("./db.server"),
+    import("./creator-session.server"),
+  ]);
   const db = admin();
+  const token = creatorSessionToken();
+  if (!token) return { db, creator: null };
   const { data } = await db
     .from("creators")
     .select(
@@ -38,9 +43,9 @@ async function creatorFromToken(token: string) {
 }
 
 export const getPayoutStatus = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .inputValidator((input: unknown) => creatorSessionIn.parse(input))
   .handler(async ({ data }): Promise<PayoutStatus | null> => {
-    const { db, creator } = await creatorFromToken(data.token);
+    const { db, creator } = await creatorFromToken();
     if (!creator) return null;
 
     const { data: rows } = await db
@@ -81,9 +86,9 @@ export const getPayoutStatus = createServerFn({ method: "POST" })
 
 /** Creates (or reuses) the creator's connected account and returns an onboarding URL. */
 export const startPayoutOnboarding = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .inputValidator((input: unknown) => creatorSessionIn.parse(input))
   .handler(async ({ data }) => {
-    const { db, creator } = await creatorFromToken(data.token);
+    const { db, creator } = await creatorFromToken();
     if (!creator || creator.banned) return { error: "Session expired. Connect X again." } as const;
     if (!process.env["STRIPE_SECRET_KEY"])
       return { error: "Payouts aren't configured yet." } as const;
@@ -111,9 +116,9 @@ export const startPayoutOnboarding = createServerFn({ method: "POST" })
 
 /** Refreshes the cached Stripe onboarding state after the creator returns. */
 export const refreshPayoutAccount = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .inputValidator((input: unknown) => creatorSessionIn.parse(input))
   .handler(async ({ data }) => {
-    const { db, creator } = await creatorFromToken(data.token);
+    const { db, creator } = await creatorFromToken();
     if (!creator?.stripe_account_id) return { ok: false } as const;
     const { retrieveAccount } = await import("./stripe.server");
     try {
@@ -136,9 +141,9 @@ export const refreshPayoutAccount = createServerFn({ method: "POST" })
 
 /** Opens the creator's Stripe Express dashboard. */
 export const payoutDashboardLink = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => tokenIn.parse(input))
+  .inputValidator((input: unknown) => creatorSessionIn.parse(input))
   .handler(async ({ data }) => {
-    const { creator } = await creatorFromToken(data.token);
+    const { creator } = await creatorFromToken();
     if (!creator?.stripe_account_id) return { error: "No payout account yet." } as const;
     const { createLoginLink } = await import("./stripe.server");
     try {
