@@ -5,7 +5,7 @@ import { isDeliverableEmail } from "./validate";
 const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@socialbid.co>";
 const LOGO_URL = `${baseUrl()}/social-bid-logo.png`;
 
-type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean };
+type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean; replyTo?: string };
 export type EmailSendResult = { sent: true; providerId: string | null };
 
 async function send(
@@ -31,7 +31,15 @@ async function send(
         "Content-Type": "application/json",
         ...(options.idempotencyKey ? { "Idempotency-Key": options.idempotencyKey } : {}),
       },
-      body: JSON.stringify({ from: FROM, to: [to], subject, html }),
+      body: JSON.stringify({
+        from: FROM,
+        to: [to],
+        subject,
+        html,
+        ...(options.replyTo && isDeliverableEmail(options.replyTo)
+          ? { reply_to: options.replyTo }
+          : {}),
+      }),
     });
     const body = (await response.json().catch(() => null)) as {
       id?: unknown;
@@ -103,6 +111,45 @@ function button(href: string, label: string) {
 
 function textLink(href: string, label: string) {
   return `<div style="margin-top:20px"><a href="${href}" style="color:#206dcb;text-decoration:none;font-size:16px">${label}</a></div>`;
+}
+
+function escapeHtml(value: string) {
+  return value.replace(/[&<>"']/g, (character) => {
+    const entities: Record<string, string> = {
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;",
+    };
+    return entities[character]!;
+  });
+}
+
+export async function sendContactEmail(o: {
+  name: string;
+  email: string;
+  subject: string | null;
+  message: string;
+  idempotencyKey: string;
+}) {
+  const subject = o.subject?.trim() || "New enquiry";
+  const content = [
+    ["Name", o.name],
+    ["Email", o.email],
+    ["Subject", subject],
+  ] as Array<[string, string]>;
+  return send(
+    "alex@alexmacgregor.com",
+    `Social Bid contact: ${subject}`,
+    shell(
+      `${h1("New contact enquiry")}${facts(
+        content.map(([label, value]) => [label, escapeHtml(value)]),
+      )}<p style="margin:0;color:#3c4149;font-size:17px;line-height:1.6;white-space:pre-wrap">${escapeHtml(o.message)}</p>`,
+      "This message was sent from the Social Bid contact form.",
+    ),
+    { idempotencyKey: o.idempotencyKey, replyTo: o.email, throwOnFailure: true },
+  );
 }
 
 export function humanDuration(from: string, to: string) {
