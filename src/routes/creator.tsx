@@ -104,7 +104,7 @@ function CreatorPage() {
     if (!session) return;
     const obligation = Boolean(session?.ownerMessage || session?.activation);
     const obligationWarning =
-      "Disconnecting X will keep your profile in the rankings but stop it from accepting new sponsors. It does not cancel any current sponsorship or pending payout obligations.";
+      "Disconnecting X will remove your profile from public rankings and stop it from accepting new sponsors. It does not cancel any current sponsorship or pending payout obligations.";
     const warn = deleteData
       ? "Disconnect X and delete your Social Bid data? This can't be undone."
       : "Disconnect X from Social Bid?";
@@ -124,10 +124,10 @@ function CreatorPage() {
       res.deleted
         ? "X is disconnected and your data has been deleted."
         : "hasObligation" in res && res.hasObligation
-          ? "X is disconnected and your profile no longer accepts new sponsors. Your current sponsorship and any held payout continue under the existing rules."
+          ? "X is disconnected and your profile has been removed from public rankings. Your current sponsorship and any held payout continue under the existing rules."
           : "retained" in res && res.retained
-            ? "X is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect. Past transaction records are retained."
-            : "X is disconnected. Your profile remains in the rankings but is unsponsored and unavailable until you reconnect.",
+            ? "X is disconnected. Your profile has been removed from public rankings. Past transaction records are retained."
+            : "X is disconnected. Your profile has been removed from public rankings until you reconnect and add it again.",
     );
   }
 
@@ -326,8 +326,8 @@ function CreatorPage() {
             <h2 className="mt-1 text-xl font-extrabold">Disconnect X</h2>
             <p className="mt-2 text-sm text-muted-foreground">
               This unlinks @{session.handle} and signs you out. Your profile stays permanently in
-              the rankings, but its sponsor is hidden and nobody can bid until you reconnect and add
-              it again. Existing payment and payout records remain intact.
+              internal records, but is removed from public rankings. Nobody can bid until you
+              reconnect and add it again. Existing payment and payout records remain intact.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">

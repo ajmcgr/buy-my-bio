@@ -220,10 +220,10 @@ const disconnectIn = z.object({
  * Disconnect the creator's X account (and optionally delete their Social Bid data).
  *
  * Disconnecting is always allowed, but it NEVER cancels an obligation:
- * - the profile remains publicly listed but cannot accept new sponsorships,
+ * - the profile is removed from public discovery and cannot accept new sponsorships,
  * - live/awaiting sponsorships, payouts, refunds and violation history are untouched,
- * - public X identity fields are retained so the permanent ranking entry and a
- *   future reconnect resolve to the same creator.
+ * - X identity fields are retained privately so a future reconnect resolves
+ *   to the same creator.
  * Hard deletion is refused while an obligation or any payment history exists.
  */
 export const disconnectXAccount = createServerFn({ method: "POST" })

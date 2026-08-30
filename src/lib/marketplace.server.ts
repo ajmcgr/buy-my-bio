@@ -119,7 +119,7 @@ export async function loadMarketplace(sort: MarketplaceSort): Promise<Marketplac
       .select(
         "id, creator_id, slug, status, starting_price_cents, minimum_increase_percentage, created_at",
       )
-      .in("status", ["active", "disconnected"])
+      .eq("status", "active")
       .order("created_at", { ascending: false }),
     db
       .from("creators")
