@@ -12,7 +12,7 @@ export const Route = createFileRoute("/u/$username")({
     const name = loaderData?.creator.display_name ?? "this creator";
     const handle = loaderData?.creator.social_handle ?? loaderData?.creator.username ?? "";
     const title = `Sponsor @${handle} — Social Bid`;
-    const description = `Sponsor ${name} on SocialBid.co. Your message and link stay on their profile until somebody pays more.`;
+    const description = `Sponsor ${name} on Social Bid. Your message and link stay on their profile until somebody pays more.`;
     return {
       meta: [
         { title },

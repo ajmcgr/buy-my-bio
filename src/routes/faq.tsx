@@ -7,7 +7,7 @@ export const Route = createFileRoute("/faq")({
       {
         name: "description",
         content:
-          "Sponsor a creator on SocialBid.co. Your message and tracked link stay in the sponsor spot until somebody pays more.",
+          "Sponsor a creator on Social Bid. Your message and tracked link stay in the sponsor spot until somebody pays more.",
       },
       { property: "og:title", content: "Social Bid FAQ" },
       {
@@ -22,12 +22,12 @@ export const Route = createFileRoute("/faq")({
 });
 
 const faqs: [string, string][] = [
-  ["What is Social Bid?", "Social Bid lets people sponsor creator profiles on SocialBid.co."],
+  ["What is Social Bid?", "Social Bid lets people sponsor creator profiles on Social Bid."],
   [
     "How does sponsorship work?",
     "Pay the current price to take the sponsor spot. Your message and link go live immediately and stay until somebody pays more.",
   ],
-  ["Where does my sponsor appear?", "On the creator's profile on SocialBid.co."],
+  ["Where does my sponsor appear?", "On the creator's profile on Social Bid."],
   [
     "How long does a sponsorship last?",
     "Until somebody pays more. There is no fixed sponsorship period and no deadline.",
@@ -42,7 +42,7 @@ const faqs: [string, string][] = [
   ],
   [
     "Do I need to change anything on X?",
-    "No. Sponsorships appear on SocialBid.co only. You do not need to change your X profile or take any action on X.",
+    "No. Sponsorships appear on Social Bid only. You do not need to change your X profile or take any action on X.",
   ],
   [
     "How long can my sponsored message be?",

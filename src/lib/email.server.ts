@@ -241,7 +241,7 @@ export async function sendBuyerAwaitingActivationEmail(o: {
     "Your sponsorship is live on Social Bid",
     shell(`
       ${h1("Purchase successful")}
-      ${p(`You sponsored <b>@${o.handle}</b> on Social Bid. Your placement is published on SocialBid.co only.`)}
+      ${p(`You sponsored <b>@${o.handle}</b> on Social Bid. Your placement is published on Social Bid only.`)}
       ${facts([
         ["You paid", money(o.amountCents)],
         ["Your placement", o.message ? `${SPONSOR_PREFIX} ${o.message}` : "\u2014"],

@@ -21,7 +21,7 @@ export const Route = createFileRoute("/success")({
       { property: "og:title", content: "I just sponsored a creator on Social Bid" },
       {
         property: "og:description",
-        content: "My sponsored message and link are live on SocialBid.co until someone outbids me.",
+        content: "My sponsored message and link are live on Social Bid until someone outbids me.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

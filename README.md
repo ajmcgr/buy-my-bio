@@ -6,7 +6,7 @@ Creators connect X to confirm their identity and add a public profile. Sponsors 
 disclosed sponsorship spot on that creator's Social Bid page. The current sponsor keeps the spot
 until somebody pays more.
 
-Sponsorship appears on SocialBid.co only. Nothing is posted to X, and creators never need to take
+Sponsorship appears on Social Bid only. Nothing is posted to X, and creators never need to take
 an action on X after connecting their account.
 
 ## Product rules

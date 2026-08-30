@@ -7,7 +7,7 @@ export const Route = createFileRoute("/about")({
       { title: "About — Social Bid" },
       {
         name: "description",
-        content: "Social Bid lets anyone sponsor a creator's profile on SocialBid.co.",
+        content: "Social Bid lets anyone sponsor a creator's profile on Social Bid.",
       },
       { property: "og:title", content: "About Social Bid" },
       {
@@ -43,9 +43,9 @@ function About() {
 
           <p>
             Anyone can sponsor it. No account, no waiting, no auction deadline. Pay the current
-            price and your message and link appear on SocialBid.co as soon as payment clears. You
-            keep the spot until someone pays more — and if that happens, we'll email you the price
-            to take it back.
+            price and your message and link appear on Social Bid as soon as payment clears. You keep
+            the spot until someone pays more — and if that happens, we'll email you the price to
+            take it back.
           </p>
 
           <p>Every sponsor, price and click stays on the public record.</p>

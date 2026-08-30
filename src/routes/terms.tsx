@@ -23,7 +23,7 @@ export const Route = createFileRoute("/terms")({
         There is no minimum sponsorship period or guaranteed duration.
       </p>
       <p>
-        Sponsorships are displayed and managed on SocialBid.co only. Nothing is published on X, and
+        Sponsorships are displayed and managed on Social Bid only. Nothing is published on X, and
         creators do not need to take any action on X.
       </p>
       <p>

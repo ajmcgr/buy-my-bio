@@ -22,7 +22,7 @@ export const Route = createFileRoute("/creator")({
       { title: "Add Your Profile — Social Bid" },
       {
         name: "description",
-        content: "Connect X, add your profile, and let anyone sponsor you on SocialBid.co.",
+        content: "Connect X, add your profile, and let anyone sponsor you on Social Bid.",
       },
       { property: "og:title", content: "Add Your Profile — Social Bid" },
       {
@@ -130,7 +130,7 @@ function CreatorPage() {
         Add your profile
       </h1>
       <p className="mt-4 text-muted-foreground">
-        Connect X to confirm your identity, then add your profile to SocialBid.co.
+        Connect X to confirm your identity, then add your profile to Social Bid.
       </p>
 
       {message ? <div className="panel mt-6 px-4 py-3 text-sm font-medium">{message}</div> : null}
@@ -143,7 +143,7 @@ function CreatorPage() {
           <h2 className="mt-1 text-xl font-semibold">Connect X to confirm your identity</h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Your connection confirms your identity and imports your public profile. Sponsorships
-            appear on SocialBid.co.
+            appear on Social Bid.
           </p>
           <a href="/api/public/x-start" className="btn-ink btn-ink-hover mt-6">
             Connect X
@@ -180,7 +180,7 @@ function CreatorPage() {
               <h2 className="mt-1 text-xl font-semibold">Add my profile</h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Connecting X does not add you publicly. Publish when you're ready, then sponsors can
-                sponsor you on SocialBid.co.
+                sponsor you on Social Bid.
               </p>
               <button
                 onClick={onPublish}

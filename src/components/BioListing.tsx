@@ -151,7 +151,7 @@ export function BioListing({ view, heading }: { view: ListingView; heading: bool
               </span>
             </div>
             <p className="mt-2 text-xs text-muted-foreground">
-              Sponsorship appears on SocialBid.co only.
+              Sponsorship appears on Social Bid only.
             </p>
           </div>
 
