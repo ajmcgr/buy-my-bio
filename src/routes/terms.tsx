@@ -31,7 +31,7 @@ export const Route = createFileRoute("/terms")({
         and a placement without it is treated as non-compliant.
       </p>
       <p>
-        Sponsored messages must be honest advertising. You may not impersonate the creator, Buy My
+        Sponsored messages must be honest advertising. You may not impersonate the creator, Social
         Bid or any other person or brand, or misrepresent the placement as a personal endorsement.
       </p>
       <p>
