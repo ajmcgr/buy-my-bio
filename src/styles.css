@@ -96,7 +96,9 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    overscroll-behavior-y: none;
   }
+
 
   body {
     background-color: var(--color-background);
