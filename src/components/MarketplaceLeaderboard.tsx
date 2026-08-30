@@ -165,7 +165,7 @@ function LeaderboardRow({
   isMostValuableLeader?: boolean;
 }) {
   const owned = row.bioValueCents !== null && row.owner;
-  const displayRank = row.globalRank ?? (owned ? position + 1 : null);
+  const displayRank = position + 1;
   return (
     <article
       className={`grid gap-4 border-x-2 border-b-2 border-border p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_0.6fr_auto] sm:items-center sm:gap-5 sm:px-5 ${
@@ -176,7 +176,7 @@ function LeaderboardRow({
         className="font-mono text-2xl font-extrabold"
         aria-label={isMostValuableLeader ? "#1 most valuable" : undefined}
       >
-        {displayRank ? `#${displayRank}` : "—"}
+        #{displayRank}
       </div>
       <CreatorIdentity row={row} />
       <div>
@@ -389,7 +389,11 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           </div>
           <div className="border-t-2 border-border">
             {market.unowned.map((row, index) => (
-              <LeaderboardRow key={row.listing.id} row={row} position={index} />
+              <LeaderboardRow
+                key={row.listing.id}
+                row={row}
+                position={market.rows.length + index}
+              />
             ))}
           </div>
         </section>
