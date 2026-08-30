@@ -221,10 +221,10 @@ function SiteHeader() {
           />
         </Link>
         <nav className="flex items-center gap-3 whitespace-nowrap text-xs font-bold sm:gap-6 sm:text-sm sm:font-medium">
-          <Link to="/" className="hidden hover:underline sm:inline">
+          <Link to="/" className="hover:underline">
             Rankings
           </Link>
-          <Link to="/owners" className="hover:underline">
+          <Link to="/owners" className="hidden hover:underline sm:inline">
             Sponsors
           </Link>
           <Link to="/faq" className="hover:underline">
