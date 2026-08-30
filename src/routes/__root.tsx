@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -13,6 +14,7 @@ import { Menu, Moon, Sun } from "lucide-react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicConfig } from "../lib/public-config.functions";
+import { getCreatorSession, type CreatorSession } from "../lib/creator.functions";
 import { initSupabase } from "../integrations/supabase/browser";
 
 function NotFoundComponent() {
@@ -210,6 +212,34 @@ function HamburgerMenu() {
 }
 
 function SiteHeader() {
+  const [creatorSession, setCreatorSession] = useState<CreatorSession | null>(null);
+  const locationHref = useRouterState({ select: (state) => state.location.href });
+
+  useEffect(() => {
+    let active = true;
+    const refreshCreatorSession = () =>
+      void getCreatorSession({ data: {} })
+        .then((session) => {
+          if (active) setCreatorSession(session);
+        })
+        .catch(() => {
+          // An unavailable session should retain the safe unauthenticated CTA.
+          if (active) setCreatorSession(null);
+        });
+    refreshCreatorSession();
+    window.addEventListener("creator-session-changed", refreshCreatorSession);
+    return () => {
+      active = false;
+      window.removeEventListener("creator-session-changed", refreshCreatorSession);
+    };
+  }, [locationHref]);
+
+  const creatorCta = creatorSession
+    ? creatorSession.publiclyListed
+      ? "Your profile"
+      : "Finish your profile"
+    : "Add your profile";
+
   return (
     <header>
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-5 sm:py-4">
@@ -231,8 +261,7 @@ function SiteHeader() {
             FAQ
           </Link>
           <Link to="/creator" className="hover:underline">
-            <span className="sm:hidden">Add</span>
-            <span className="hidden sm:inline">Add your profile</span>
+            {creatorCta}
           </Link>
           <ThemeToggle />
           <HamburgerMenu />

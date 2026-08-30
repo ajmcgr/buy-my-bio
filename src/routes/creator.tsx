@@ -97,6 +97,7 @@ function CreatorPage() {
     setMessage("Your profile is now listed on Social Bid.");
     const next = await getCreatorSession({ data: {} });
     setSession(next);
+    window.dispatchEvent(new Event("creator-session-changed"));
   }
 
   async function onDisconnect(deleteData: boolean) {
@@ -118,6 +119,7 @@ function CreatorPage() {
     }
     setSession(null);
     setPayouts(null);
+    window.dispatchEvent(new Event("creator-session-changed"));
     setMessage(
       res.deleted
         ? "X is disconnected and your data has been deleted."
