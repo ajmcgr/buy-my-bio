@@ -226,7 +226,11 @@ function HamburgerMenu() {
 }
 
 function SiteHeader() {
-  const [creatorSession, setCreatorSession] = useState<CreatorSession | null>(null);
+  // `undefined` is the unresolved state. Do not render a logged-out CTA until
+  // the server-side creator session lookup has completed.
+  const [creatorSession, setCreatorSession] = useState<CreatorSession | null | undefined>(
+    undefined,
+  );
   const locationHref = useRouterState({ select: (state) => state.location.href });
 
   useEffect(() => {
@@ -267,9 +271,13 @@ function SiteHeader() {
           <Link to="/faq" className="hover:underline">
             FAQ
           </Link>
-          <Link to="/creator" className="hover:underline">
-            {creatorCta}
-          </Link>
+          {creatorSession === undefined ? (
+            <span aria-hidden="true" className="inline-block h-5 w-[6.5rem]" />
+          ) : (
+            <Link to="/creator" className="hover:underline">
+              {creatorCta}
+            </Link>
+          )}
           <ThemeToggle />
           <HamburgerMenu />
         </nav>
