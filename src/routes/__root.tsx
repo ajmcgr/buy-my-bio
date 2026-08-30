@@ -250,7 +250,7 @@ function SiteHeader() {
           <img
             src="/social-bid-logo.png"
             alt="Social Bid"
-            className="h-10 w-auto dark:invert sm:h-14"
+            className="h-10 w-auto scale-[1.12] dark:invert sm:h-14"
           />
         </Link>
         <nav className="flex items-center gap-3 whitespace-nowrap text-xs font-bold sm:gap-6 sm:text-sm sm:font-medium">
