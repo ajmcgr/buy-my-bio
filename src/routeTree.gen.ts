@@ -21,6 +21,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SuccessRouteImport } from './routes/success'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UUsernameRouteImport } from './routes/u.$username'
+import { Route as ApiPublicOutboundRouteImport } from './routes/api/public/outbound'
 import { Route as ApiPublicReleasePayoutsRouteImport } from './routes/api/public/release-payouts'
 import { Route as ApiPublicStripeWebhookRouteImport } from './routes/api/public/stripe-webhook'
 import { Route as ApiPublicXCallbackRouteImport } from './routes/api/public/x-callback'
@@ -86,6 +87,11 @@ const UUsernameRoute = UUsernameRouteImport.update({
   path: '/u/$username',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicOutboundRoute = ApiPublicOutboundRouteImport.update({
+  id: '/api/public/outbound',
+  path: '/api/public/outbound',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicReleasePayoutsRoute = ApiPublicReleasePayoutsRouteImport.update({
   id: '/api/public/release-payouts',
   path: '/api/public/release-payouts',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/outbound': typeof ApiPublicOutboundRoute
   '/api/public/release-payouts': typeof ApiPublicReleasePayoutsRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/x-callback': typeof ApiPublicXCallbackRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/outbound': typeof ApiPublicOutboundRoute
   '/api/public/release-payouts': typeof ApiPublicReleasePayoutsRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/x-callback': typeof ApiPublicXCallbackRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/success': typeof SuccessRoute
   '/terms': typeof TermsRoute
   '/u/$username': typeof UUsernameRoute
+  '/api/public/outbound': typeof ApiPublicOutboundRoute
   '/api/public/release-payouts': typeof ApiPublicReleasePayoutsRoute
   '/api/public/stripe-webhook': typeof ApiPublicStripeWebhookRoute
   '/api/public/x-callback': typeof ApiPublicXCallbackRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/u/$username'
+    | '/api/public/outbound'
     | '/api/public/release-payouts'
     | '/api/public/stripe-webhook'
     | '/api/public/x-callback'
@@ -195,6 +205,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/u/$username'
+    | '/api/public/outbound'
     | '/api/public/release-payouts'
     | '/api/public/stripe-webhook'
     | '/api/public/x-callback'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/success'
     | '/terms'
     | '/u/$username'
+    | '/api/public/outbound'
     | '/api/public/release-payouts'
     | '/api/public/stripe-webhook'
     | '/api/public/x-callback'
@@ -232,6 +244,7 @@ export interface RootRouteChildren {
   SuccessRoute: typeof SuccessRoute
   TermsRoute: typeof TermsRoute
   UUsernameRoute: typeof UUsernameRoute
+  ApiPublicOutboundRoute: typeof ApiPublicOutboundRoute
   ApiPublicReleasePayoutsRoute: typeof ApiPublicReleasePayoutsRoute
   ApiPublicStripeWebhookRoute: typeof ApiPublicStripeWebhookRoute
   ApiPublicXCallbackRoute: typeof ApiPublicXCallbackRoute
@@ -324,6 +337,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UUsernameRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/outbound': {
+      id: '/api/public/outbound'
+      path: '/api/public/outbound'
+      fullPath: '/api/public/outbound'
+      preLoaderRoute: typeof ApiPublicOutboundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/release-payouts': {
       id: '/api/public/release-payouts'
       path: '/api/public/release-payouts'
@@ -368,6 +388,7 @@ const rootRouteChildren: RootRouteChildren = {
   SuccessRoute: SuccessRoute,
   TermsRoute: TermsRoute,
   UUsernameRoute: UUsernameRoute,
+  ApiPublicOutboundRoute: ApiPublicOutboundRoute,
   ApiPublicReleasePayoutsRoute: ApiPublicReleasePayoutsRoute,
   ApiPublicStripeWebhookRoute: ApiPublicStripeWebhookRoute,
   ApiPublicXCallbackRoute: ApiPublicXCallbackRoute,

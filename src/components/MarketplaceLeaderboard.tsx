@@ -110,7 +110,7 @@ function SponsorDetails({ row }: { row: MarketplaceRow }) {
     <div className="min-w-0">
       <div className="label-xs">Sponsored by</div>
       <a
-        href={sponsor.destination_url}
+        href={`/api/public/outbound?username=${encodeURIComponent(row.creator.username)}`}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-1 flex min-w-0 items-center gap-2 hover:underline"
