@@ -309,7 +309,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex flex-col items-center">
             <TrafficCounters />
-            <h1 className="mt-1 text-[clamp(2.2rem,7vw,4.8rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
+            <h1 className="mt-1 text-[clamp(2.2rem,5vw,3rem)] leading-[0.88] font-extrabold tracking-[-0.055em]">
               How much are you worth on X?
             </h1>
             <p className="mt-3 max-w-2xl text-base font-medium text-muted-foreground sm:text-lg">
