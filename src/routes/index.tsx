@@ -17,7 +17,10 @@ function rememberMarket(market: MarketplaceSnapshot) {
 }
 
 export const Route = createFileRoute("/")({
-  validateSearch: z.object({ sort: sortSchema.optional().catch("trending") }),
+  validateSearch: z.object({
+    sort: sortSchema.optional().catch("trending"),
+    page: z.coerce.number().int().min(1).optional().catch(1),
+  }),
   loaderDeps: ({ search }) => ({ sort: search.sort ?? "trending" }),
   loader: async ({ deps }) => {
     try {
@@ -60,6 +63,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const market = Route.useLoaderData();
+  const { page } = Route.useSearch();
   const router = useRouter();
 
   useEffect(() => {
@@ -70,7 +74,7 @@ function Home() {
     return () => window.removeEventListener("online", refreshMarket);
   }, [market, router]);
 
-  return <MarketplaceLeaderboard market={market} />;
+  return <MarketplaceLeaderboard market={market} page={page ?? 1} />;
 }
 
 function MarketLoadError({ reset }: { reset: () => void }) {

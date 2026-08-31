@@ -22,6 +22,54 @@ const sorts: Array<{ value: MarketplaceSort; label: string }> = [
   { value: "affordable", label: "Affordable" },
 ];
 
+const RANKINGS_PAGE_SIZE = 50;
+
+function rankingsPageHref(sort: MarketplaceSort, page: number) {
+  const params = new URLSearchParams();
+  if (sort !== "trending") params.set("sort", sort);
+  if (page > 1) params.set("page", String(page));
+  const query = params.toString();
+  return query ? `/?${query}` : "/";
+}
+
+function RankingsPagination({
+  sort,
+  page,
+  totalPages,
+}: {
+  sort: MarketplaceSort;
+  page: number;
+  totalPages: number;
+}) {
+  if (totalPages < 2) return null;
+
+  return (
+    <nav className="mt-5 flex items-center justify-center gap-3" aria-label="Rankings pages">
+      {page > 1 ? (
+        <a href={rankingsPageHref(sort, page - 1)} className="btn-outline-ink px-4 py-2 text-sm">
+          Previous
+        </a>
+      ) : (
+        <span className="btn-outline-ink cursor-not-allowed px-4 py-2 text-sm opacity-40">
+          Previous
+        </span>
+      )}
+      <span className="font-mono text-xs font-bold">
+        Page {page} of {totalPages}
+      </span>
+      {page < totalPages ? (
+        <a href={rankingsPageHref(sort, page + 1)} className="btn-outline-ink px-4 py-2 text-sm">
+          Next
+        </a>
+      ) : (
+        <span className="btn-outline-ink cursor-not-allowed px-4 py-2 text-sm opacity-40">
+          Next
+        </span>
+      )}
+    </nav>
+  );
+}
+
 function TrafficCounters() {
   const getTraffic = useServerFn(getSiteTraffic);
   const [traffic, setTraffic] = useState<{ pageviews: number; online: number } | null>(null);
@@ -285,7 +333,13 @@ function AddYourProfile() {
   );
 }
 
-export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot }) {
+export function MarketplaceLeaderboard({
+  market,
+  page,
+}: {
+  market: MarketplaceSnapshot;
+  page: number;
+}) {
   const router = useRouter();
 
   useEffect(() => {
@@ -304,7 +358,21 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
   }, [router]);
 
   const numberOne = market.sort === "most-valuable" ? market.rows[0] : null;
-  const showSeparateUnowned = market.sort === "most-valuable" && market.unowned.length > 0;
+  const isMostValuable = market.sort === "most-valuable";
+  const rankedRows = isMostValuable ? [...market.rows, ...market.unowned] : market.rows;
+  const totalPages = Math.max(1, Math.ceil(rankedRows.length / RANKINGS_PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const pageStart = (currentPage - 1) * RANKINGS_PAGE_SIZE;
+  const pageEnd = pageStart + RANKINGS_PAGE_SIZE;
+  const visibleRows = rankedRows.slice(pageStart, pageEnd);
+  const visibleOwned = isMostValuable
+    ? visibleRows.slice(0, Math.max(0, market.rows.length - pageStart))
+    : visibleRows;
+  const unownedPageStart = Math.max(0, pageStart - market.rows.length);
+  const visibleUnowned = isMostValuable
+    ? visibleRows.slice(Math.max(0, market.rows.length - pageStart))
+    : [];
+  const showSeparateUnowned = visibleUnowned.length > 0;
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 sm:px-5">
@@ -337,7 +405,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           <div className="flex max-w-full gap-1 overflow-x-auto" aria-label="Leaderboard sorting">
             {sorts.map((sort) => {
               const active = market.sort === sort.value;
-              const href = sort.value === "trending" ? "/" : `/?sort=${sort.value}`;
+              const href = rankingsPageHref(sort.value, 1);
               return (
                 <a
                   key={sort.value}
@@ -354,25 +422,25 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
           </div>
         </div>
 
-        {market.rows.length > 0 ? (
+        {visibleOwned.length > 0 ? (
           <div>
-            {market.rows.map((row, index) => (
+            {visibleOwned.map((row, index) => (
               <LeaderboardRow
                 key={row.listing.id}
                 row={row}
-                position={index}
-                isMostValuableLeader={market.sort === "most-valuable" && index === 0}
+                position={pageStart + index}
+                isMostValuableLeader={isMostValuable && pageStart + index === 0}
               />
             ))}
           </div>
-        ) : (
+        ) : rankedRows.length === 0 ? (
           <div className="border-x-2 border-b-2 border-border bg-card px-5 py-10 text-center">
             <p className="text-xl font-extrabold">No profiles have been listed yet.</p>
             <p className="mt-2 text-sm text-muted-foreground">
               The first successful live payment will create the first real market value and #1 rank.
             </p>
           </div>
-        )}
+        ) : null}
       </section>
 
       {showSeparateUnowned ? (
@@ -391,16 +459,18 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
             </Link>
           </div>
           <div className="border-t-2 border-border">
-            {market.unowned.map((row, index) => (
+            {visibleUnowned.map((row, index) => (
               <LeaderboardRow
                 key={row.listing.id}
                 row={row}
-                position={market.rows.length + index}
+                position={market.rows.length + unownedPageStart + index}
               />
             ))}
           </div>
         </section>
       ) : null}
+
+      <RankingsPagination sort={market.sort} page={currentPage} totalPages={totalPages} />
 
       <section className="mt-12 grid gap-4 lg:grid-cols-[1fr_18rem]">
         <div className="border-2 border-border bg-card px-4 sm:px-5">
