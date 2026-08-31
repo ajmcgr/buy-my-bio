@@ -441,7 +441,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
       </section>
 
       <section className="mt-4 border-2 border-border bg-muted px-5 py-6 text-center">
-        <div className="label-xs text-sm">Total sponsorship volume</div>
+        <div className="label-xs text-sm">Total sponsorships since launch</div>
         <div className="mt-1 text-4xl font-extrabold">{money(market.totalSponsorshipsCents)}</div>
       </section>
     </div>
