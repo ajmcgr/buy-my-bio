@@ -205,12 +205,15 @@ function LeaderboardRow({
 }
 
 function ActivityLine({ item }: { item: MarketplaceActivity }) {
+  // Historical platform-owned sponsorship records used the former product
+  // name. Keep the record intact and normalize only this public display.
+  const sponsorName = item.companyName === "Buy My Bio" ? "Social Bid" : item.companyName;
   const copy =
     item.type === "listed"
       ? `@${item.handle} entered the market`
       : item.globalRank === 1
-        ? `${item.companyName} just took the #1 sponsorship spot`
-        : `${item.companyName} is now sponsoring @${item.handle}`;
+        ? `${sponsorName} just took the #1 sponsorship spot`
+        : `${sponsorName} is now sponsoring @${item.handle}`;
   return (
     <div className="flex flex-col gap-1 border-b border-border/30 py-3 last:border-0 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <Link
@@ -438,7 +441,7 @@ export function MarketplaceLeaderboard({ market }: { market: MarketplaceSnapshot
       </section>
 
       <section className="mt-4 border-2 border-border bg-muted px-5 py-6 text-center">
-        <div className="label-xs text-sm">Total sponsorships since launch</div>
+        <div className="label-xs text-sm">Total sponsorship volume</div>
         <div className="mt-1 text-4xl font-extrabold">{money(market.totalSponsorshipsCents)}</div>
       </section>
     </div>
