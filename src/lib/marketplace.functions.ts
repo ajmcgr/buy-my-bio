@@ -13,6 +13,7 @@ function emptyMarketplace(sort: MarketplaceSort): MarketplaceSnapshot {
     ownedCount: 0,
     totalMarketValueCents: 0,
     totalSponsorshipsCents: 0,
+    sourceUnavailable: true,
   };
 }
 

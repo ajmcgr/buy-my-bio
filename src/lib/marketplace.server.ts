@@ -37,6 +37,8 @@ export type MarketplaceSnapshot = {
   ownedCount: number;
   totalMarketValueCents: number;
   totalSponsorshipsCents: number;
+  /** The server could not reach the market source; this is not an empty market. */
+  sourceUnavailable?: boolean;
 };
 
 type CreatorRow = {
