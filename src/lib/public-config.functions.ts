@@ -1,5 +1,11 @@
 import { createServerFn } from "@tanstack/react-start";
 
+export const unavailablePublicConfig = {
+  supabaseUrl: "",
+  supabaseKey: "",
+  baseUrl: "https://socialbid.co",
+};
+
 export const getPublicConfig = createServerFn({ method: "GET" }).handler(async () => {
   const firstEnvironmentValue = (...names: string[]) => {
     for (const name of names) {
@@ -23,6 +29,6 @@ export const getPublicConfig = createServerFn({ method: "GET" }).handler(async (
       "VITE_SUPABASE_PUBLISHABLE_KEY",
       "VITE_SUPABASE_ANON_KEY",
     ),
-    baseUrl: "https://socialbid.co",
+    baseUrl: unavailablePublicConfig.baseUrl,
   };
 });

@@ -13,7 +13,7 @@ import { Menu, Moon, Sun } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { getPublicConfig } from "../lib/public-config.functions";
+import { getPublicConfig, unavailablePublicConfig } from "../lib/public-config.functions";
 import { getCreatorSession, type CreatorSession } from "../lib/creator.functions";
 import { initSupabase } from "../integrations/supabase/browser";
 
@@ -63,7 +63,20 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  loader: async () => await getPublicConfig(),
+  loader: async () => {
+    try {
+      return await getPublicConfig();
+    } catch (error) {
+      // Public Supabase browser config is nonessential to rendering the first
+      // document. A transient server-function failure must not turn a normal
+      // browser restore into a site-wide SSR 500.
+      console.error("root public config unavailable", {
+        stage: "root_public_config",
+        reason: error instanceof Error ? error.message : "unknown",
+      });
+      return unavailablePublicConfig;
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
