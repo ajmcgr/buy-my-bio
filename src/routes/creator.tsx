@@ -58,7 +58,21 @@ function CreatorPage() {
   const [notificationEmail, setNotificationEmail] = useState("");
 
   const loadPayouts = useCallback(() => {
-    void getPayoutStatus({ data: {} }).then((p) => setPayouts(p));
+    void getPayoutStatus({ data: {} })
+      .then((p) => setPayouts(p))
+      // Keep previously loaded payout state through a temporary reconnect
+      // failure; the global recovery event will try again.
+      .catch(() => undefined);
+  }, []);
+
+  const loadCreatorSession = useCallback(() => {
+    void getCreatorSession({ data: {} })
+      .then((s) => {
+        setSession(s);
+        setNotificationEmail(s?.notificationEmail ?? "");
+      })
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -71,19 +85,20 @@ function CreatorPage() {
     if (connected || stripeReturn) {
       window.history.replaceState({}, "", "/creator");
     }
-    void getCreatorSession({ data: {} })
-      .then((s) => {
-        setSession(s);
-        setNotificationEmail(s?.notificationEmail ?? "");
-      })
-      .finally(() => setLoading(false));
+    loadCreatorSession();
 
     if (stripeReturn) {
       void refreshPayoutAccount({ data: {} }).then(() => loadPayouts());
     } else {
       loadPayouts();
     }
-  }, [loadPayouts]);
+    const recover = () => {
+      loadCreatorSession();
+      loadPayouts();
+    };
+    window.addEventListener("social-bid-recover", recover);
+    return () => window.removeEventListener("social-bid-recover", recover);
+  }, [loadCreatorSession, loadPayouts]);
 
   async function onPublish() {
     if (!session) return;

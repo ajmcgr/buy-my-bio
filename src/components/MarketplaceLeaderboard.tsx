@@ -341,6 +341,13 @@ export function MarketplaceLeaderboard({
   page: number;
 }) {
   const router = useRouter();
+  const [realtimeEpoch, setRealtimeEpoch] = useState(0);
+
+  useEffect(() => {
+    const restartRealtime = () => setRealtimeEpoch((epoch) => epoch + 1);
+    window.addEventListener("social-bid-recover", restartRealtime);
+    return () => window.removeEventListener("social-bid-recover", restartRealtime);
+  }, []);
 
   useEffect(() => {
     const refresh = () => void router.invalidate();
@@ -355,7 +362,7 @@ export function MarketplaceLeaderboard({
       window.clearInterval(interval);
       if (db && channel) void db.removeChannel(channel);
     };
-  }, [router]);
+  }, [realtimeEpoch, router]);
 
   const numberOne = market.sort === "most-valuable" ? market.rows[0] : null;
   const isMostValuable = market.sort === "most-valuable";

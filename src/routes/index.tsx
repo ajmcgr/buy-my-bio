@@ -1,4 +1,4 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { z } from "zod";
 import { getMarketplace } from "@/lib/marketplace.functions";
@@ -28,13 +28,11 @@ export const Route = createFileRoute("/")({
       if (market.sourceUnavailable) throw new Error("market source unavailable");
       return market;
     } catch (error) {
-      // Keep an already-rendered market visible only while the browser has
-      // explicitly reported that it is offline. A live server failure still
-      // reaches the route error view instead of being hidden behind stale data.
-      const cached =
-        typeof navigator !== "undefined" && !navigator.onLine
-          ? lastMarketBySort.get(deps.sort)
-          : undefined;
+      // A route refresh can fail while a laptop is waking even though the
+      // browser has not yet changed navigator.onLine. Preserve an already
+      // rendered market until a subsequent recovery succeeds. A first visit
+      // has no cached snapshot and still reaches the normal error view.
+      const cached = typeof navigator !== "undefined" ? lastMarketBySort.get(deps.sort) : undefined;
       if (cached) return cached;
       throw error;
     }
@@ -64,30 +62,22 @@ export const Route = createFileRoute("/")({
 function Home() {
   const market = Route.useLoaderData();
   const { page } = Route.useSearch();
-  const router = useRouter();
 
   useEffect(() => {
     rememberMarket(market);
-
-    const refreshMarket = () => void router.invalidate();
-    window.addEventListener("online", refreshMarket);
-    return () => window.removeEventListener("online", refreshMarket);
-  }, [market, router]);
+  }, [market]);
 
   return <MarketplaceLeaderboard market={market} page={page ?? 1} />;
 }
 
 function MarketLoadError({ reset }: { reset: () => void }) {
-  const router = useRouter();
-
   useEffect(() => {
-    const recover = () => {
-      void router.invalidate();
-      reset();
-    };
-    window.addEventListener("online", recover);
-    return () => window.removeEventListener("online", recover);
-  }, [reset, router]);
+    // AppWakeRecovery invalidates routes immediately after it emits this
+    // event. Reset this boundary first so that revalidation can render.
+    const recover = () => reset();
+    window.addEventListener("social-bid-recover", recover);
+    return () => window.removeEventListener("social-bid-recover", recover);
+  }, [reset]);
 
   return (
     <div className="mx-auto max-w-xl px-5 py-24 text-center">

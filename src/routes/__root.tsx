@@ -15,7 +15,13 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { getPublicConfig, unavailablePublicConfig } from "../lib/public-config.functions";
 import { getCreatorSession, type CreatorSession } from "../lib/creator.functions";
-import { initSupabase } from "../integrations/supabase/browser";
+import { initSupabase, recoverSupabaseSession } from "../integrations/supabase/browser";
+
+const WAKE_RECOVERY_THRESHOLD_MS = 30_000;
+
+function recoveryLog(stage: string, details?: Record<string, unknown>) {
+  if (import.meta.env.DEV) console.debug("[social-bid recovery]", stage, details ?? {});
+}
 
 function NotFoundComponent() {
   return (
@@ -254,14 +260,19 @@ function SiteHeader() {
           if (active) setCreatorSession(session);
         })
         .catch(() => {
-          // An unavailable session should retain the safe unauthenticated CTA.
-          if (active) setCreatorSession(null);
+          // A transient wake/reconnect failure must not turn an already-known
+          // creator into a logged-out user. On first load we can safely settle
+          // to the unauthenticated state; later failures keep the last result
+          // until the next recovery attempt succeeds.
+          if (active) setCreatorSession((current) => (current === undefined ? null : current));
         });
     refreshCreatorSession();
     window.addEventListener("creator-session-changed", refreshCreatorSession);
+    window.addEventListener("social-bid-recover", refreshCreatorSession);
     return () => {
       active = false;
       window.removeEventListener("creator-session-changed", refreshCreatorSession);
+      window.removeEventListener("social-bid-recover", refreshCreatorSession);
     };
   }, [locationHref]);
 
@@ -297,6 +308,82 @@ function SiteHeader() {
       </div>
     </header>
   );
+}
+
+/**
+ * Browser timers and realtime connections are suspended during sleep. Recover
+ * only after a meaningful hidden period (or when connectivity returns), then
+ * let the existing route loaders and page listeners revalidate their own
+ * authoritative data. The custom event avoids duplicate global listeners.
+ */
+function AppWakeRecovery() {
+  const router = useRouter();
+
+  useEffect(() => {
+    let hiddenAt = document.hidden ? Date.now() : null;
+    let recovering = false;
+
+    const recover = (reason: "visible" | "focus" | "online", hiddenForMs?: number) => {
+      if (recovering || !navigator.onLine) return;
+      recovering = true;
+      recoveryLog("started", { reason, hiddenForMs });
+
+      void (async () => {
+        try {
+          await recoverSupabaseSession();
+          recoveryLog("auth_checked", { reason });
+          window.dispatchEvent(new Event("social-bid-recover"));
+          await router.invalidate();
+          recoveryLog("completed", { reason });
+        } catch (error) {
+          // Retain normal error boundaries for real failures. A later online,
+          // focus, or visibility event can safely make another bounded attempt.
+          recoveryLog("failed", {
+            reason,
+            message: error instanceof Error ? error.message : "unknown",
+          });
+        } finally {
+          recovering = false;
+        }
+      })();
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        hiddenAt = Date.now();
+        recoveryLog("hidden");
+        return;
+      }
+      const hiddenForMs = hiddenAt ? Date.now() - hiddenAt : 0;
+      hiddenAt = null;
+      recoveryLog("visible", { hiddenForMs });
+      if (hiddenForMs >= WAKE_RECOVERY_THRESHOLD_MS) recover("visible", hiddenForMs);
+    };
+
+    const onFocus = () => {
+      // Some browsers restore a suspended tab with focus before delivering a
+      // visibility event. Treat it as a recovery opportunity only if we know
+      // the tab was hidden long enough to be stale.
+      const hiddenForMs = hiddenAt ? Date.now() - hiddenAt : 0;
+      if (hiddenForMs >= WAKE_RECOVERY_THRESHOLD_MS) {
+        hiddenAt = null;
+        recover("focus", hiddenForMs);
+      }
+    };
+
+    const onOnline = () => recover("online");
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("online", onOnline);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("online", onOnline);
+    };
+  }, [router]);
+
+  return null;
 }
 
 function SiteFooter() {
@@ -341,6 +428,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <div className="flex min-h-dvh flex-col">
+        <AppWakeRecovery />
         <SiteHeader />
         <main className="flex-1">
           <Outlet />
