@@ -105,9 +105,14 @@ export async function releaseDuePayouts(limit = 25): Promise<ReleaseSummary> {
     } catch (e) {
       summary.failed += 1;
       summary.details.push({ payoutId: payout.id, result: `failed: ${String(e)}` });
+      // A release exception can be transient (for example, a temporary Stripe
+      // or network failure). Keep the payout eligible for the next hourly run
+      // instead of moving it to the terminal `failed` state. Stripe transfer
+      // idempotency is keyed by payout id, so retrying cannot pay twice even if
+      // Stripe accepted a transfer just before this attempt lost its response.
       await db
         .from("payouts")
-        .update({ status: "failed", last_error: String(e) })
+        .update({ status: "blocked", payout_status: "blocked", last_error: String(e) })
         .eq("id", payout.id);
     }
   }
