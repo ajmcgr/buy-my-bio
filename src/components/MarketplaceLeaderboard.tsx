@@ -301,10 +301,10 @@ function AddYourProfile() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 id="add-heading" className="text-xl font-semibold">
-            Add your profile
+            Add your profile. Get sponsored.
           </h2>
           <p className="mt-1 max-w-xl text-sm text-muted-foreground">
-            Connect X to add your profile and let anyone sponsor it on Social Bid.
+            Connect X in seconds. Anyone can sponsor you. You keep 80%.
           </p>
         </div>
         <form
@@ -325,7 +325,7 @@ function AddYourProfile() {
             />
           </div>
           <button type="submit" className="btn-ink btn-ink-hover shrink-0 px-5 py-3 text-sm">
-            Connect X
+            Add my profile
           </button>
         </form>
       </div>
