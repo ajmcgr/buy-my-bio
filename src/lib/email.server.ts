@@ -2,7 +2,7 @@ import { SPONSOR_PREFIX } from "./placement";
 import { baseUrl } from "./db.server";
 import { isDeliverableEmail } from "./validate";
 
-const FROM = process.env["RESEND_FROM"] || "Social Bid <noreply@socialbid.co>";
+const FROM = "Social Bid <alex@socialbid.co>";
 const LOGO_URL = `${baseUrl()}/social-bid-logo.png`;
 
 type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean; replyTo?: string };
@@ -140,7 +140,7 @@ export async function sendContactEmail(o: {
     ["Subject", subject],
   ] as Array<[string, string]>;
   return send(
-    "alex@alexmacgregor.com",
+    "alex@socialbid.co",
     `Social Bid contact: ${subject}`,
     shell(
       `${h1("New contact enquiry")}${facts(
