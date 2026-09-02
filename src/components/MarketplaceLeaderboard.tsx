@@ -175,7 +175,7 @@ function SponsorDetails({ row }: { row: MarketplaceRow }) {
         <ArrowUpRight className="size-3.5 shrink-0" />
       </a>
       {sponsor.bio_message ? (
-        <p className="mt-1 line-clamp-2 text-xs leading-snug text-muted-foreground">
+        <p className="mt-1 line-clamp-2 text-sm leading-snug text-muted-foreground">
           {sponsor.bio_message}
         </p>
       ) : null}
