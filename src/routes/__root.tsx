@@ -276,7 +276,7 @@ function SiteHeader() {
     };
   }, [locationHref]);
 
-  const creatorCta = creatorSession ? "Profile" : "Add your profile";
+  const creatorCta = creatorSession ? "My Profile" : "Add your profile";
 
   return (
     <header>
