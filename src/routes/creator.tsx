@@ -402,6 +402,8 @@ function errorCopy(code: string): string {
       return "That handle is already listed. Contact us if it's yours.";
     case "x_auth_failed":
       return "X sign-in failed. Please try again.";
+    case "creator_identity_failed":
+      return "We couldn't finish connecting your X account. Please try again.";
     default:
       return "Something went wrong. Please try again.";
   }

@@ -107,16 +107,57 @@ export const Route = createFileRoute("/api/public/x-callback")({
         // creator-only server checks never need browser-supplied handles/tokens.
         if (!existing?.user_id && creatorId) {
           const email = `x-${xUser.id}@creator.socialbid.invalid`;
-          const { data: user, error } = await db.auth.admin.createUser({
+          const { data: createdUser, error: createUserError } = await db.auth.admin.createUser({
             email,
             email_confirm: true,
             user_metadata: { x_user_id: xUser.id, creator_id: creatorId },
           });
-          if (error || !user.user) {
-            console.error("creator identity binding failed", error);
+          let userId = createdUser.user?.id ?? null;
+
+          // Supabase Admin has no direct email lookup. Only after a duplicate
+          // creation response do we page through the server-only user list to
+          // recover this one deterministic internal identity from a prior,
+          // partially completed callback.
+          const duplicateUser =
+            createUserError?.code === "email_exists" ||
+            createUserError?.code === "user_already_exists" ||
+            /already\s+(?:exists|registered)|email.*exists/i.test(createUserError?.message ?? "");
+          if (!userId && duplicateUser) {
+            try {
+              let page = 1;
+              for (;;) {
+                const { data: users, error: listUsersError } = await db.auth.admin.listUsers({
+                  page,
+                  perPage: 1000,
+                });
+                if (listUsersError) throw listUsersError;
+                const matchingUser = users.users.find(
+                  (candidate) => candidate.email?.toLowerCase() === email,
+                );
+                if (matchingUser) {
+                  userId = matchingUser.id;
+                  break;
+                }
+                if (users.nextPage === null) break;
+                page = users.nextPage;
+              }
+            } catch (error) {
+              console.error("creator identity recovery lookup failed", error);
+            }
+          }
+
+          if (!userId) {
+            console.error("creator identity binding failed", createUserError);
             return fail("creator_identity_failed");
           }
-          await db.from("creators").update({ user_id: user.user.id }).eq("id", creatorId);
+          const { error: bindingError } = await db
+            .from("creators")
+            .update({ user_id: userId })
+            .eq("id", creatorId);
+          if (bindingError) {
+            console.error("creator identity binding write failed", bindingError);
+            return fail("creator_identity_failed");
+          }
         }
 
         // Website-only sponsorships: connecting X verifies identity, which is
