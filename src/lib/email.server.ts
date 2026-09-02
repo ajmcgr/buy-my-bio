@@ -3,7 +3,10 @@ import { baseUrl } from "./db.server";
 import { isDeliverableEmail } from "./validate";
 
 const FROM = "Social Bid <alex@socialbid.co>";
-const LOGO_URL = `${baseUrl()}/social-bid-logo.png`;
+// Use the actual PNG artwork with its white canvas. The similarly named
+// `social-bid-logo.png` is a transparent WebP file, which some email clients
+// composite against a dark surface.
+const LOGO_URL = `${baseUrl()}/socialbid-logo.png`;
 
 type SendOptions = { idempotencyKey?: string; throwOnFailure?: boolean; replyTo?: string };
 export type EmailSendResult = { sent: true; providerId: string | null };
@@ -71,8 +74,8 @@ function shell(
 ) {
   return `<div style="background:#f6f7f9;padding:40px 16px;font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Helvetica,Arial,sans-serif">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e6e8eb;border-radius:4px">
-    <tr><td align="center" style="padding:36px 32px;border-bottom:1px solid #e6e8eb">
-      <img src="${LOGO_URL}" alt="Social Bid" width="180" style="display:block;width:180px;max-width:100%;height:auto;border:0;outline:none;text-decoration:none" />
+    <tr><td align="center" bgcolor="#ffffff" style="background:#ffffff;padding:36px 32px;border-bottom:1px solid #e6e8eb">
+      <img src="${LOGO_URL}" alt="Social Bid" width="180" height="67" style="display:block;width:180px;height:67px;max-width:100%;border:0;outline:none;text-decoration:none" />
     </td></tr>
     <tr><td style="padding:40px 40px 44px;color:#1c1f23;font-size:17px;line-height:1.6">
       ${body}
