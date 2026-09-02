@@ -175,10 +175,13 @@ function SponsorDetails({ row }: { row: MarketplaceRow }) {
         <ArrowUpRight className="size-3.5 shrink-0" />
       </a>
       {sponsor.bio_message ? (
-        <p className="mt-1 truncate text-xs leading-snug text-muted-foreground">
+        <p className="mt-1 line-clamp-2 text-xs leading-snug text-muted-foreground">
           {sponsor.bio_message}
         </p>
       ) : null}
+      <div className="mt-1 font-mono text-xs text-muted-foreground">
+        {row.sponsorClickCount.toLocaleString()} {row.sponsorClickCount === 1 ? "click" : "clicks"}
+      </div>
     </div>
   );
 }
@@ -216,7 +219,7 @@ function LeaderboardRow({
   const displayRank = position + 1;
   return (
     <article
-      className={`grid gap-4 border-x-2 border-b-2 border-border p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_0.8fr_0.6fr_auto] sm:items-center sm:gap-5 sm:px-5 ${
+      className={`grid gap-4 border-x-2 border-b-2 border-border p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_minmax(0,1.15fr)_auto] sm:items-center sm:gap-5 sm:px-5 ${
         isMostValuableLeader ? "bg-[#d4af37]" : "bg-card"
       }`}
     >
@@ -241,12 +244,6 @@ function LeaderboardRow({
         ) : null}
       </div>
       {row.owner ? <SponsorDetails row={row} /> : <div aria-hidden="true" />}
-      <div>
-        <div className="label-xs">Sponsor clicks</div>
-        <div className="mt-0.5 text-xl font-extrabold">
-          {row.sponsorClickCount.toLocaleString()}
-        </div>
-      </div>
       <TakeoverButton row={row} />
     </article>
   );
