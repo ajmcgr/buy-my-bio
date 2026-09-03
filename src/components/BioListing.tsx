@@ -4,6 +4,7 @@ import type { ListingView } from "@/lib/listing.functions";
 import { trackEvent } from "@/lib/listing.functions";
 import { BuyDialog } from "./BuyDialog";
 import { XIcon } from "./XIcon";
+import { CreatorAvatar } from "./CreatorAvatar";
 import { Share2, Trophy } from "lucide-react";
 
 function ProfileCard({ view }: { view: ListingView }) {
@@ -11,9 +12,7 @@ function ProfileCard({ view }: { view: ListingView }) {
   return (
     <div className="panel p-5 sm:p-6">
       <div className="flex items-start gap-4">
-        <div className="flex size-14 shrink-0 items-center justify-center border-2 border-border bg-accent text-xl font-extrabold">
-          {c.display_name.slice(0, 1)}
-        </div>
+        <CreatorAvatar creator={c} sizeClass="size-14" fallbackTextClass="text-xl" />
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-lg leading-tight font-extrabold">{c.display_name}</span>

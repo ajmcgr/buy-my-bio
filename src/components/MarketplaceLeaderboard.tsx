@@ -14,6 +14,7 @@ import { getSupabase } from "@/integrations/supabase/browser";
 
 import { BuyDialog } from "./BuyDialog";
 import { XIcon } from "./XIcon";
+import { CreatorAvatar } from "./CreatorAvatar";
 
 const sorts: Array<{ value: MarketplaceSort; label: string }> = [
   { value: "trending", label: "Trending" },
@@ -102,19 +103,11 @@ function CreatorIdentity({ row, large = false }: { row: MarketplaceRow; large?: 
   const creatorUrl = row.creator.x_profile_url ?? row.creator.social_profile_url;
   return (
     <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-      {row.creator.profile_image_url ? (
-        <img
-          src={row.creator.profile_image_url}
-          alt=""
-          className={`${large ? "size-16 sm:size-20" : "size-12"} shrink-0 border-2 border-border object-cover`}
-        />
-      ) : (
-        <div
-          className={`${large ? "size-16 text-2xl sm:size-20" : "size-12 text-lg"} flex shrink-0 items-center justify-center border-2 border-border bg-accent font-extrabold`}
-        >
-          {row.creator.display_name.slice(0, 1)}
-        </div>
-      )}
+      <CreatorAvatar
+        creator={row.creator}
+        sizeClass={large ? "size-16 sm:size-20" : "size-12"}
+        fallbackTextClass={large ? "text-2xl" : "text-lg"}
+      />
       <div className="min-w-0">
         <Link
           to="/u/$username"
