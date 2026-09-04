@@ -213,7 +213,7 @@ function LeaderboardRow({
   return (
     <article
       className={`grid gap-4 border-x-2 border-b-2 border-border p-4 sm:grid-cols-[3rem_minmax(0,1.4fr)_0.75fr_minmax(0,1.15fr)_auto] sm:items-center sm:gap-5 sm:px-5 ${
-        isMostValuableLeader ? "bg-[#d4af37]" : "bg-card"
+        "bg-card"
       }`}
     >
       <div
