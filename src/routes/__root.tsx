@@ -419,11 +419,9 @@ function SiteFooter() {
           >
             Jonathan
           </a>
-          .
+          . <span className="text-muted-foreground/80">Social Bid is not affiliated with or endorsed by X.</span>
         </span>
-        <span className="max-w-2xl text-muted-foreground/80">
-          Social Bid is not affiliated with or endorsed by X.
-        </span>
+
       </div>
     </footer>
   );
