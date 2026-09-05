@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Menu, Moon, Sun } from "lucide-react";
+import { XIcon } from "../components/XIcon";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
