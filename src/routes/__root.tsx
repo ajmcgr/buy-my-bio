@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Menu, Moon, Sun } from "lucide-react";
+import { XIcon } from "../components/XIcon";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -390,6 +391,15 @@ function SiteFooter() {
   return (
     <footer className="mt-24">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-5 py-6 text-center text-xs text-muted-foreground">
+        <a
+          href="https://x.com/socialbidco"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 font-medium text-foreground hover:opacity-70"
+        >
+          <XIcon className="size-3.5" />
+          Follow us on X
+        </a>
         <span>
           Built with 🫶🏻 by{" "}
           <a
